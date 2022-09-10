@@ -1,0 +1,196 @@
+{% load greaterthan %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ project_name }}</title>
+    <link rel="stylesheet" type="text/css" href="ol/ol.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/classic/theme-crisp/resources/theme-crisp-all.css"/>
+</head>
+
+<body>
+<div id="map" class="map"></div>
+<div id='description'>
+    <p>
+        {{ project_notes }}
+    </p>
+    <ul>
+        {% for flight in flights %}
+            <li>{{ flight.name }} ({{ flight.date }})</li>
+        {% endfor %}
+    </ul>
+    {% if not is_demo %}
+        <button onclick="top.window.location.href='{{ upload_shapefiles_path }}'">Agregar vector</button>
+        <button onclick="top.window.location.href='{{ upload_geotiff_path }}'">Agregar GeoTIFF</button>
+        {% if is_multispectral %}
+            <div class="dropdown">
+
+                <button class="dropbtn">Agregar índice</button>
+                <div class="dropdown-content">
+                    <a href="#" onclick="addIndex('ndvi')">NDVI</a>
+                    <a href="#" onclick="addIndex('ndre')">NDRE</a>
+                    {#            <a href="#" onclick="addIndex('evi')">EVI</a>#}
+                    <a href="#" onclick="top.window.location.href='{{ upload_new_index_path }}'">Otro...</a>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <a id="geojson-download" download="map.png"></a>
+</div>
+
+<style>
+    .measure-point {
+        top: 265px;
+        left: .5em;
+    }
+
+    .measure-length {
+        top: 298px;
+        left: .5em;
+    }
+
+    .measure-area {
+        top: 330px;
+        left: .5em;
+    }
+
+    .save-meas {
+        top: 362px;
+        left: .5em;
+    }
+
+    .clear-meas {
+        top: 394px;
+        left: .5em;
+    }
+
+    .remove-annotations {
+        top: 362px;
+        left: .5em;
+    }
+
+    .legend {
+        top: .5em;
+        right: .5em;
+    }
+
+    .slider-style {
+        width: 214px;
+        padding-top: 6px;
+    }
+
+    .gx-popup {
+        position: absolute;
+        background-color: transparent;
+        padding: 0 0 15px 0;
+        bottom: 0;
+        left: -50px;
+    {#background-image: url(../../resources/images/anchor.png);#} background-repeat: no-repeat;
+        background-position: 34px 100%;
+    }
+
+    .gx-popup p {
+        padding: 5px 5px 0 5px;
+        border-radius: 7px;
+        background-color: rgba(255, 255, 255, 0.85);
+        border: 3px solid white;
+        margin: 0;
+        text-align: center;
+    }
+
+    /* The container <div> - needed to position the dropdown content */
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    /* Dropdown Content (Hidden by Default) */
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        bottom: 100%;
+        min-width: 100%;
+        z-index: 1000;
+    }
+
+    /* Links inside the dropdown */
+    .dropdown-content a {
+        color: black;
+        background-color: white;
+        padding: 4px 10px;
+        text-decoration: none;
+        display: block;
+    }
+
+    /* Change color of dropdown links on hover */
+    .dropdown-content a:hover {
+        background-color: #ddd;
+    }
+
+    /* Show the dropdown menu on hover */
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .tooltip {
+        position: relative;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        color: white;
+        padding: 4px 8px;
+        opacity: 0.7;
+        white-space: nowrap;
+    }
+
+    .tooltip-measure {
+        opacity: 1;
+        font-weight: bold;
+    }
+
+    .tooltip-static {
+        background-color: #ffcc33;
+        color: black;
+        border: 1px solid white;
+    }
+
+    .tooltip-measure:before,
+    .tooltip-static:before {
+        border-top: 6px solid rgba(0, 0, 0, 0.5);
+        border-right: 6px solid transparent;
+        border-left: 6px solid transparent;
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        margin-left: -7px;
+        left: 50%;
+    }
+
+    .tooltip-static:before {
+        border-top-color: #ffcc33;
+    }
+</style>
+
+<script src="ol/ol.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/ext-all.js"></script>
+<script>
+    Ext.Loader.setConfig({
+        enabled: true,
+        paths: {
+            'GeoExt': 'geoext/src'
+        }
+    });
+
+    const project_name = "{{ project_name }}";
+    const uuid = "{{ uuid }}";
+    const project_path = "{{ project_geoserver_path }}";
+    const moreThanOneFlight = {{ flights|length|gt:1|yesno:"true,false" }};
+    const isMultispectral = {{ is_multispectral|yesno:"true,false" }};
+    const isDemo = {{ is_demo|yesno:"true,false" }};
+</script>
+<script src="panel.js"></script>
+</body>
+</html>
