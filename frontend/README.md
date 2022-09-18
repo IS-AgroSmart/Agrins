@@ -1,4 +1,6 @@
 # frontend
+nodejs v14.20.0
+npm 6.14.17
 
 ## Project setup
 ```
