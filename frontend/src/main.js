@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import BootstrapVue from 'bootstrap-vue'
+import BootstrapVueIcons from 'bootstrap-vue'
+import IconsPlugin from 'bootstrap-vue'
 import ReactiveStorage from "vue-reactive-localstorage";
 import VueClipboard from 'vue-clipboard2';
 import VueChatScroll from 'vue-chat-scroll';
@@ -45,6 +47,8 @@ import DeletedProjects from "./components/DeletedProjects"
 
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
+Vue.use(BootstrapVueIcons);
+Vue.use(IconsPlugin);
 Vue.use(ReactiveStorage, {
   "token": "",
   "isAdmin": false, 

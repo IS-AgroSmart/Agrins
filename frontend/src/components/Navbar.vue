@@ -1,9 +1,10 @@
 <template>
     <div>
-        <b-navbar toggleable="lg" type="dark" variant="info">
-            <b-navbar-brand to="/">AgroSmart</b-navbar-brand>
-    
-            <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+        <b-navbar toggleable="lg" fixed="top" sticky style="margin-top: 0;margin-bottom: 0; padding-top: 0;padding-bottom: 0; background-color:#ffffff;" >
+            <b-navbar-brand to="/" style="margin-left:3%;">
+                <img height="75" width="250" src="../assets/logo.png" class="d-inline-block align-top" alt="Agrins">                
+            </b-navbar-brand>    
+            <b-navbar-toggle sticky target="nav-collapse"></b-navbar-toggle>
     
             <b-collapse id="nav-collapse" is-nav>
                 <b-navbar-nav v-if="isLoggedIn">
@@ -26,7 +27,25 @@
                     </b-nav-item-dropdown>
                     </div>
                     <div v-else>
-                        <b-nav-item to="/login" data-cy="navbar-login">Iniciar sesión</b-nav-item>
+                        <b-navbar-nav>                            
+                            <b-nav-item class="d-flex align-items-end" >Inicio</b-nav-item>
+                            <b-nav-item class="d-flex align-items-end" >Servicios</b-nav-item>
+                            <b-nav-item class="d-flex align-items-end" >¿Quienes Somos?</b-nav-item>
+                            <b-nav-item class="d-flex align-items-end" >Contacto</b-nav-item>
+                            <b-nav-item>
+                                <b-icon variant="info" icon="whatsapp"></b-icon> 
+                            </b-nav-item> 
+                            <b-nav-item>
+                                <b-icon variant="info" icon="twitter"></b-icon>
+                            </b-nav-item> 
+                            <b-nav-item>
+                                <b-icon variant="info" icon="facebook"></b-icon> 
+                            </b-nav-item>                            
+                            <b-nav-item to="signup" class="d-flex align-items-top" >Registrarse</b-nav-item>                        
+                            <b-nav-item class="d-flex align-items-start" to="/login" style="padding: 3px;" data-cy="navbar-login">
+                                <b-button  class="d-flex align-items-start" pill variant="info" style="padding-top:0%; padding-bottom:0%">Iniciar Sesión</b-button>
+                            </b-nav-item>
+                        </b-navbar-nav>
                     </div>
     
                 </b-navbar-nav>

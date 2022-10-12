@@ -2,22 +2,37 @@
     <div>
         <div class="custom-jumbotron">
             <b-container class="text-white">
-                <b-img class="bg" fluid alt="ortomosaico" src="/field.jpg" />
+                <b-img class="bg" fluid alt="ortomosaico" src="/field.png" />
                 <b-row align-content="center">
                     <b-col md="8" lg="7" order-md="1">
-                        <h1 >AgroSmart</h1>
-                        <p class="lead">Procesamiento de imágenes de drones</p>
-                        <p>Genere mapas, nubes de puntos y modelos de elevación a partir de imágenes aéreas.</p>
+                        <h2 >Agricultura 4.0</h2>
+                        <p>Con el uso de las técnicas de teledetección para el análisis de imágenes aéreas se busca comprender mejor los sistemas de producción agrícola, a través del monitoreo y análisis en tiempo real de los factores que influyen en el rendimiento de los cultivos.</p>
                     </b-col>
     
                 </b-row>
-                <b-button variant="primary" to="flights" v-if="loggedIn">Mi cuenta</b-button>
-                <b-button variant="primary" to="signup" v-else>Crear cuenta</b-button>
+                <b-button pill variant="info" to="flights" v-if="loggedIn">Mi cuenta</b-button>
+                <b-button pill variant="info" to="signup" v-else>¡QUIERO SABER MÁS!</b-button>
+                
             </b-container>
         </div>
     
         <div class="bg-white">
             <b-container class="pb-5">
+                <div align-h="center" >
+                <b-row align-h="left" class="py-5">
+                    <h2>Desafíos actuales en el cultivo de maíz</h2>
+                </b-row>
+                <b-row class="text-left">
+                    <b-col>
+                        <p>La creciente demanda de alimentos de una población en aumento  plantea desafíos para los gobiernos  en términos de soberanía  alimentaria; sin embargo desde el punto de vista de los productores los desafíos estan relacionados con la baja competitividad de la región, los altos costos de producción y la baja productividad.</p>
+                    </b-col> 
+                    <b-col md aclass="text-right" >
+                        <div>
+                            <b-img width="200" height="200" src="/orthomosaic.png" rounded="circle" thumbnail/>
+                        </div>                        
+                    </b-col>  
+                </b-row>
+                </div>
                 <b-row align-h="center" class="py-5">
                     <h1>Características</h1>
                 </b-row>
@@ -122,7 +137,7 @@
 <style scoped>
 .custom-jumbotron {
     padding: 4rem 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2 rem;
     background-color: #e9ecef00;
     border-radius: .3rem;
 }
