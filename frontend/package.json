@@ -13,6 +13,7 @@
   "dependencies": {
     "@inkline/inkline": "^1.18.0",
     "axios": "^0.19.0",
+    "bootstrap-icons-vue": "^1.8.1",
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.6.5",
     "jquery": "^3.5.1",
@@ -54,7 +55,8 @@
     "vue-jest": "^3.0.6",
     "vue-template-compiler": "^2.6.10",
     "webpack-bundle-analyzer": "^3.8.0",
-    "webpack-cdn-plugin": "^3.3.1"
+    "webpack-cdn-plugin": "^3.3.1",
+    "@vue/compiler-dom": "^3.2.40"
   },
   "eslintConfig": {
     "root": true,

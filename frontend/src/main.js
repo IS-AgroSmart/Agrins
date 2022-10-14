@@ -1,8 +1,9 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import BootstrapVue from 'bootstrap-vue'
-import BootstrapVueIcons from 'bootstrap-vue'
-import IconsPlugin from 'bootstrap-vue'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import BootstrapVue from 'bootstrap-vue';
+import BootstrapVueIcons from 'bootstrap-vue';
+import 'bootstrap-vue/dist/bootstrap-vue-icons.min.css';
+import IconsPlugin from 'bootstrap-vue';
 import ReactiveStorage from "vue-reactive-localstorage";
 import VueClipboard from 'vue-clipboard2';
 import VueChatScroll from 'vue-chat-scroll';

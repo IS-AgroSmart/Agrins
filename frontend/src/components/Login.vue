@@ -1,5 +1,5 @@
-<template>
-    <div class=" pt-3" style="padding-left:15px; padding-right:15px;">
+<template>    
+    <div class=" pt-3" style="padding-left:15px; padding-right:15px;">        
         <b-alert v-if="error" show variant="danger" data-cy="alert">
             Error! Usuario o contraseña incorrectos
         </b-alert>

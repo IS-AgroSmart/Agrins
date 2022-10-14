@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-navbar toggleable="lg" fixed="top" sticky style="margin-top: 0;margin-bottom: 0; padding-top: 0;padding-bottom: 0; background-color:#ffffff;" >
+        <b-navbar toggleable="lg" placement="sticky-top" style="margin-top: 0;margin-bottom: 0; padding-top: 0;padding-bottom: 0; background-color:#ffffff;" >
             <b-navbar-brand to="/" style="margin-left:3%;">
                 <img height="75" width="250" src="../assets/logo.png" class="d-inline-block align-top" alt="Agrins">                
             </b-navbar-brand>    
@@ -28,18 +28,18 @@
                     </div>
                     <div v-else>
                         <b-navbar-nav>                            
-                            <b-nav-item class="d-flex align-items-end" >Inicio</b-nav-item>
+                            <b-nav-item href="desafios" @click="scrollIntoView" class="d-flex align-items-end" >Inicio</b-nav-item>
                             <b-nav-item class="d-flex align-items-end" >Servicios</b-nav-item>
                             <b-nav-item class="d-flex align-items-end" >¿Quienes Somos?</b-nav-item>
                             <b-nav-item class="d-flex align-items-end" >Contacto</b-nav-item>
-                            <b-nav-item>
-                                <b-icon variant="info" icon="whatsapp"></b-icon> 
+                            <b-nav-item style="padding-top:0%; margin-top:0%">
+                                <b-icon-whatsapp variant="info"/>
                             </b-nav-item> 
                             <b-nav-item>
-                                <b-icon variant="info" icon="twitter"></b-icon>
+                                <b-icon-twitter variant="info"/>
                             </b-nav-item> 
                             <b-nav-item>
-                                <b-icon variant="info" icon="facebook"></b-icon> 
+                                <b-icon-facebook variant="info"/>
                             </b-nav-item>                            
                             <b-nav-item to="signup" class="d-flex align-items-top" >Registrarse</b-nav-item>                        
                             <b-nav-item class="d-flex align-items-start" to="/login" style="padding: 3px;" data-cy="navbar-login">
@@ -55,7 +55,14 @@
 </template>
 
 <script>
+import { BIconFacebook } from 'bootstrap-vue';
+import { BIconTwitter } from 'bootstrap-vue';
+
 export default {
+    components: {
+        BIconFacebook,
+        BIconTwitter,
+    },
     data: function() {
         return {
 
