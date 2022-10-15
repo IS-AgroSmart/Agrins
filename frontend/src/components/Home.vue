@@ -1,8 +1,8 @@
 <template>
     <div>        
-        <div class="custom-jumbotron" style="height: 80vh;">
+        <div id="inicio" class="custom-jumbotron" style="padding-bottom: 0; background-image:url('/field.png');">
             <b-container class="text-white">
-                <b-img class="bg" fluid alt="Agricultura 4.0" src="/field.png" />
+                <!-- <b-img class="bg" fluid alt="ortomosaico" src="/field.jpg" />-->
                 <b-row align-content="center">
                     <b-col style="padding-top: 15%;" md="8" lg="7" order-md="1">
                         <h1 >Agricultura 4.0</h1>
@@ -15,11 +15,11 @@
                 
             </b-container>
             <b-row style="padding-left:0%; padding-top: 5%;" align-content="left">
-                    <b-img style="padding-left:0%" height="70" width="500" left src="/serv.png" fluid alt="Fluid image"></b-img>    
+                    <b-img style="object-fit: contain; background-size: cover; max-width: 100%; padding-left:0%; padding-right:5%;" height="70" width="500" left src="/serv.png" fluid alt="Fluid image"></b-img>    
             </b-row>
         </div>
     
-        <div class="bg-white">
+        <div id="desafios" class="bg-white">
             <b-container class="pb-5">
                 <div id="desafios" align-h="center" >
                     <b-row align-h="left" class="py-5">
@@ -36,100 +36,123 @@
                         </b-col>                     
                     </b-row>
                 </div>
-
-
-                <div align-h="center" >
-                    <b-row align-h="center" class="py-5">
-                        <h1>Servicios</h1>
+            </b-container>
+        </div>
+        
+        <div id="servicios" style="background-color:#cad0d0">
+            <b-container>
+                <b-row align-h="center" class="py-5">
+                        <h2><b>Servicios</b></h2>
                     </b-row>
                     <b-row class="text-center">
                         <b-col md>
                             <div class="mb-2">
-                                <b-img width="300" height="300" src="/pc.png" thumbnail/>
+                                <img width="300" height="200" src="/pc.png" thumbnail/>
                             </div>
                             <div>
-                                <h5>SIG WEB</h5>
+                                <h5><b>SIG WEB</b></h5>
                                 <p>Disponemos de una solución web para la gestión de la cartografía de los cultivos.</p>
                             </div>
                         </b-col>
                         <b-col md>
                             <div class="mb-2">
-                                <b-img width="150" height="150" src="/layer.png" thumbnail/>
+                                <img width="150" height="150" src="/layer.png" thumbnail/>
                             </div>
                             <div>
-                                <h5>Proyectos</h5>
+                                <h5><b>Proyectos</b></h5>
                                 <p>En la plataforma web, se podrá crear modificar y compartir cartografía.</p>
                         </div>
                     </b-col>
                     <b-col md>
                         <div class="mb-2">
-                            <b-img width="160" height="150" src="/indice.png" thumbnail/>
+                            <img width="160" height="150" src="/indice.png" thumbnail/>
                         </div>
                         <div>
-                            <h5>Índices de vegetación</h5>
+                            <h5><b>Índices de vegetación</b></h5>
                             <p>A partir de las imágenes aéreas se pueden estimar índices de vegetación como el Índice de Vegetación de Diferencia Normalizada (NDVI), para el diagnóstico en los cultivos.</p>
                         </div>
                     </b-col>
                 </b-row>
+
+            </b-container></div>
+
+            <div class="text-black" style="padding-bottom: 0; background-image:url('/fieldS.png'); background-repeat: no-repeat; height: 100%; width:100%; background-size: cover;">
+                <b-row >
+                    <b-col></b-col>
+                    <b-col cols="10">
+                        <b-row align-h="center" class="py-5">
+                            <h2><b>Ventajas de la Agricultura 4.0</b></h2>
+                        </b-row>
+                        <b-row align-h="center" class="py-4" >
+                            <ul>
+                                <li style="color:white"><h6>Aumento de la productividad en los cultivos, mediante la implementación de tecnologías.</h6></li>
+                                <li style="color:white"><h6>Reducción de los costos de producción mediante el uso eficiente de recursos.</h6></li>
+                                <li style="color:white"><h6>Minimiza las labores de control en campo.</h6></li>
+                                <li style="color:white"><h6>Mayor precisión en el manejo de los campos de producción.</h6></li>
+                            </ul>
+                        </b-row>
+
+                    </b-col>
+                    <b-col></b-col>
+                </b-row>
                 
-                <b-row align-h="center" class="py-5">
-                    <h1>Precios</h1>
-                </b-row>
-                <b-row class="text-center">
-                    <b-col>
-                        <b-card header="Demo" header-tag="h4" title-tag="title">
-                            <b-card-body>
-                                <b-card-title title-tag="h1">
-                                    $0<small class="text-muted">/mes</small>
-                                </b-card-title>
-                                <ul class="list-unstyled">
-                                    <li>Acceso a vuelos y proyectos demo</li>
-                                    <li>Sin límite de tiempo</li>
-                                </ul>
-                                <b-button variant="outline-primary" to="signup" v-if="!loggedIn">Crear cuenta</b-button>
-                            </b-card-body>
-                        </b-card>
-                    </b-col>
-                    <b-col>
-                        <b-card header="Básico" header-tag="h4" title-tag="title">
-                            <b-card-body>
-                                <b-card-title title-tag="h1">
-                                    $65<small class="text-muted">/mes</small>
-                                </b-card-title>
-                                <ul class="list-unstyled">
-                                    <li>3000 imágenes mensuales</li>
-                                    <li>Vuelos y proyectos ilimitados</li>
-                                    <li>45 GB de almacenamiento</li>
-                                </ul>
-                                <b-button variant="primary" to="login" v-if="!loggedIn">Iniciar sesión</b-button>
-                                <b-button variant="primary" to="flights" v-else>Mis vuelos</b-button>
-                            </b-card-body>
-                        </b-card>
-                    </b-col>
-                </b-row>
+            
             </div>
-            </b-container>
+
+                <div id="quienes" class="bg-white" style="padding-bottom:2%">
+                    <b-container>                        
+                        <b-row class="text-center">
+                            <b-col></b-col>
+                            <b-col cols="10">
+                                <b-row align-h="center" class="py-5">
+                                    <h2><b>¿Quienes Somos?</b></h2>
+                                </b-row>
+                                <b-row align-h="center" class="py-1">
+                                    <p>Agrins está formado por investigadores de 3 universidades públicas del Ecuador: ESPOL de Guayaquil, UTM de Portoviejo y Universidad de Cuenca, especializados en el campo de la agricultura, computación y en el uso de técnicas y herramientas tecnológicas para el monitoreo y diagnóstico de los cultivos.</p>
+                                </b-row>
+
+                            </b-col>
+                            <b-col></b-col>
+                        </b-row>
+                    
+                </b-container>
+                </div>
+                <div>
+                    <Contacto id="contacto"></Contacto>
+                </div>
+
+
         </div>
-    </div>
 </template>
 
 <style scoped>
-
+.custom-jumbotron {
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding-top: 10%;
+    margin-bottom: 2rem;
+    background-color: #e9ecef00;
+    object-fit: contain
+}
 .bg {
     position: fixed;
     right: 0;
-    top: 0;
+    top:100px;
     left: 0;
-    z-index: -1;
+    z-index: 1; 
 }
 </style>
 
 <script>
+import Contacto from "./Contacto.vue";
 export default {
     computed: {
         loggedIn() {
-            return this.$isLoggedIn()
+            return this.$isLoggedIn();
         }
     },
+    components: { Contacto },
+    
+    
 }
 </script>
