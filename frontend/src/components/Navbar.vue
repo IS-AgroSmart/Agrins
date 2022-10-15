@@ -28,10 +28,10 @@
                     </div>
                     <div v-else>
                         <b-navbar-nav >                            
-                            <b-nav-item class="d-flex align-items-end" @click="scroll('inicio')" text>Inicio</b-nav-item>
-                            <b-nav-item class="d-flex align-items-end" @click="scroll('servicios')" text>Servicios</b-nav-item>
-                            <b-nav-item class="d-flex align-items-end" @click="scroll('quienes')" text>¿Quienes Somos?</b-nav-item>
-                            <b-nav-item class="d-flex align-items-end" @click="scroll('contacto')" text>Contacto </b-nav-item>
+                            <b-nav-item v-if="!hide" class="d-flex align-items-end" to="/" @click="scroll('inicio')" text>Inicio</b-nav-item>
+                            <b-nav-item v-if="!hide" class="d-flex align-items-end" to="/" @click="scroll('servicios')" text>Servicios</b-nav-item>
+                            <b-nav-item v-if="!hide" class="d-flex align-items-end" to="/" @click="scroll('quienes')" text>¿Quienes Somos?</b-nav-item>
+                            <b-nav-item v-if="!hide" class="d-flex align-items-end" to="/" @click="scroll('contacto')" text>Contacto </b-nav-item>
                             <b-nav-item style="padding-top:0%; margin-top:0%">
                                 <b-icon-whatsapp variant="info"/>
                             </b-nav-item> 
@@ -40,10 +40,10 @@
                             </b-nav-item> 
                             <b-nav-item>
                                 <b-icon-facebook variant="info"/>
-                            </b-nav-item>                            
-                            <b-nav-item to="signup" class="d-flex align-items-top" >Registrarse</b-nav-item>                        
-                            <b-nav-item class="d-flex align-items-start" to="/login" style="padding: 3px;" data-cy="navbar-login">
-                                <b-button  class="d-flex align-items-start" pill variant="info" style="padding-top:0%; padding-bottom:0%">Iniciar Sesión</b-button>
+                            </b-nav-item >  
+                                <b-nav-item  v-if="!hide" to="signup" class="d-flex align-items-top" >Registrarse</b-nav-item>                        
+                            <b-nav-item v-if="!hide" class="d-flex align-items-start"  style="padding: 3px;" data-cy="navbar-login">
+                                <b-button class="d-flex align-items-start" to="/login"  pill variant="info" style="padding-top:0%; padding-bottom:0%">Iniciar Sesión</b-button>
                             </b-nav-item>
                         </b-navbar-nav>
                     </div>
@@ -58,11 +58,12 @@
 import { BIconFacebook } from 'bootstrap-vue';
 import { BIconTwitter } from 'bootstrap-vue';
 
+
 export default {
     components: {
-        BIconFacebook,
-        BIconTwitter,
-    },
+    BIconFacebook,
+    BIconTwitter,
+},
     data: function() {
         return {
 
@@ -71,6 +72,7 @@ export default {
     computed: {
         isLoggedIn() { return this.storage.token != ""; },
         isAdmin() { return this.storage.loggedInUser != null && this.storage.loggedInUser.type == "ADMIN"; },
+        hide () { return this.$route.path === '/login' || this.$route.path === '/signup' || this.$route.path ==='/restorePassword'; }
     },
     methods: {
       scroll(id) {  
@@ -78,7 +80,7 @@ export default {
         behavior: "smooth"
       });
     }
-    }
+    },    
 }
 </script>
 <style scoped>

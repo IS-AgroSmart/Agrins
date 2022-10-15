@@ -1,6 +1,6 @@
 <template>
     <div>        
-        <div id="inicio" class="custom-jumbotron" style="padding-bottom: 0; background-image:url('/field.png');">
+        <div id="inicio" class="custom-jumbotron">
             <b-container class="text-white">
                 <!-- <b-img class="bg" fluid alt="ortomosaico" src="/field.jpg" />-->
                 <b-row align-content="center">
@@ -11,7 +11,7 @@
                     
                 </b-row>
                 <b-button pill variant="info" to="flights" v-if="loggedIn">Mi cuenta</b-button>
-                <b-button pill variant="info" to="signup" v-else>¡QUIERO SABER MÁS!</b-button>
+                <b-button pill variant="info" @click="scroll('desafios')" v-else>¡QUIERO SABER MÁS!</b-button>
                 
             </b-container>
             <b-row style="padding-left:0%; padding-top: 5%;" align-content="left">
@@ -21,7 +21,7 @@
     
         <div id="desafios" class="bg-white">
             <b-container class="pb-5">
-                <div id="desafios" align-h="center" >
+                <div align-h="center" >
                     <b-row align-h="left" class="py-5">
                                 <h2>Desafíos actuales en el cultivo de maíz</h2>
                             </b-row>
@@ -76,7 +76,7 @@
 
             </b-container></div>
 
-            <div class="text-black" style="padding-bottom: 0; background-image:url('/fieldS.png'); background-repeat: no-repeat; height: 100%; width:100%; background-size: cover;">
+            <div class="text-black" style="padding-bottom: 0; background-image:url('fieldS.png'); background-repeat: no-repeat; height: 100%; width:100%; background-size: cover;">
                 <b-row >
                     <b-col></b-col>
                     <b-col cols="10">
@@ -127,12 +127,19 @@
 
 <style scoped>
 .custom-jumbotron {
-    background-repeat: no-repeat;
-    background-size: cover;
+    background: url('/field6.jpg') no-repeat center center fixed;
+    -webkit-background-size: 100% 100%;
+    -moz-background-size: 100% 100%;
+    -o-background-size: 100% 100%;
+    background-size: 100% 100%;  
+    height: 100%;
+    width: 100%;
     padding-top: 10%;
     margin-bottom: 2rem;
     background-color: #e9ecef00;
-    object-fit: contain
+    object-fit: contain;
+    padding-bottom: 0; 
+    
 }
 .bg {
     position: fixed;
@@ -152,7 +159,13 @@ export default {
         }
     },
     components: { Contacto },
-    
+    methods: {
+      scroll(id) {  
+      document.getElementById(id).scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+    }
     
 }
 </script>
