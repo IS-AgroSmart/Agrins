@@ -87,7 +87,7 @@ export default {
                         this.error = err;
                     } else {
                         this.storage.loggedInUser = user;
-                        this.$router.back();
+                        this.$router.replace('/projects');
                     }
                 })
                 .catch(error => this.error = error);

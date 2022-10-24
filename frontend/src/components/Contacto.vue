@@ -1,5 +1,5 @@
 <template>
-    <div style="background-color:#f7f7f7;" >
+    <div class="bg-white" >
         <b-container>
             <b-row align-h="center" class="py-5">
                 <h2><b>Contáctanos</b></h2>

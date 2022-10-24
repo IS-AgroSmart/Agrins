@@ -19,9 +19,9 @@
             </b-row>
         </div>
     
-        <div id="desafios" class="bg-white">
+        <div id="desafios" class="shadow-sm p-3 mb-5 bg-white rounded">
             <b-container class="pb-5">
-                <div align-h="center" >
+                <div align-h="center"  >
                     <b-row align-h="left" class="py-5">
                                 <h2>Desafíos actuales en el cultivo de maíz</h2>
                             </b-row>
@@ -99,7 +99,7 @@
             
             </div>
 
-                <div id="quienes" class="bg-white" style="padding-bottom:2%">
+                <div id="quienes" class="shadow-lg p-3 mb-5 bg-white rounded" style="padding-bottom:2%">
                     <b-container>                        
                         <b-row class="text-center">
                             <b-col></b-col>
@@ -117,7 +117,7 @@
                     
                 </b-container>
                 </div>
-                <div>
+                <div class="bg-white">
                     <Contacto id="contacto"></Contacto>
                 </div>
 
