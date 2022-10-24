@@ -121,13 +121,18 @@ WSGI_APPLICATION = 'IngSoft1.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config("DB_NAME"),
-        'USER': config("DB_USER"),
-        'PASSWORD': config("DB_PASSWORD"),
-        'HOST': config("DB_HOST"),
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+    
+    # 'default': {
+    #    'ENGINE': 'django.db.backends.mysql',
+    #    'NAME': config("DB_NAME"),
+    #    'USER': config("DB_USER"),
+    #    'PASSWORD': config("DB_PASSWORD"),
+    #    'HOST': config("DB_HOST"),
+    #    'PORT': '3306',
+    #}
 }
 if 'test' in sys.argv or 'test_coverage' in sys.argv or True:  # Covers regular testing and django-coverage
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
@@ -180,5 +185,5 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', cast=str)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-NODEODM_SERVER_URL = config('NODEODM_SERVER_URL', cast=str)
-NODEODM_SERVER_TOKEN = config('NODEODM_SERVER_TOKEN', default="dummy", cast=str)
+#NODEODM_SERVER_URL = config('NODEODM_SERVER_URL', cast=str)
+#NODEODM_SERVER_TOKEN = config('NODEODM_SERVER_TOKEN', default="dummy", cast=str)

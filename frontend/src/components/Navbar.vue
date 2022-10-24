@@ -2,7 +2,7 @@
     <div>
         <b-navbar toggleable="lg" placement="sticky-top" class="nav-main">
             <b-navbar-brand to="/" style="margin-left:3%;">
-                <img height="75" width="250" src="../assets/logoB.png" class="d-inline-block align-top" alt="Agrins">                
+                <img height="60" width="200" src="../assets/logoB.png" class="d-inline-block align-top" alt="Agrins">                
             </b-navbar-brand>    
             <b-navbar-toggle sticky target="nav-collapse"></b-navbar-toggle>
     
@@ -33,7 +33,7 @@
                             <b-nav-item v-if="!hide" class="d-flex align-items-end" to="/" @click="scroll('quienes')" text>¿Quienes Somos?</b-nav-item>
                             <b-nav-item v-if="!hide" class="d-flex align-items-end" to="/" @click="scroll('contacto')" text>Contacto </b-nav-item>
                             <b-nav-item style="padding-top:0%; margin-top:0%">
-                                <b-icon-whatsapp variant="info"/>
+                                
                             </b-nav-item> 
                             <b-nav-item>
                                 <b-icon-twitter variant="info"/>

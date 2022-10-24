@@ -23,21 +23,21 @@
                 </b-col>                
                 <b-col md >
                     <div style="text-align: left;">                                                               
-                        <b-form-group id="input-group-1" label="Nombre y Apellido:*" label-for="input-1">
-                            <b-form-input id="input-1" v-model="form.name" placeholder="Nombre y Apellido" type="text" required></b-form-input>
+                        <b-form-group size="sm" id="input-group-1" label="Nombre y Apellido:*" label-for="input-1">
+                            <b-form-input size="sm" id="input-1" v-model="form.name" placeholder="Nombre y Apellido" type="text" required></b-form-input>
                         </b-form-group>
                         <b-form-group id="input-group-2" label="Email:*" label-for="input-2">
-                            <b-form-input id="input-2" v-model="form.email" type="email" placeholder="Email" required></b-form-input>
+                            <b-form-input size="sm" id="input-2" v-model="form.email" type="email" placeholder="Email" required></b-form-input>
                         </b-form-group>  
-                        <b-form-group id="input-group-3" label="Teléfono:*" label-for="input-3">
-                            <b-form-input id="input-3" v-model="form.telefono" type="tel" placeholder="Teléfono" required></b-form-input>
+                        <b-form-group  id="input-group-3" label="Teléfono:*" label-for="input-3">
+                            <b-form-input  size="sm" id="input-3" v-model="form.telefono" type="tel" placeholder="Teléfono" required></b-form-input>
                         </b-form-group>                          
                     </div>
                 </b-col >
                 <b-col md left>
                     <div style="text-align: left;">
                         <b-form-group id="input-group-4" label="Mensaje:*" label-for="input-4">
-                            <b-form-textarea id="textarea" v-model="mensaje" placeholder="Mensaje..." rows="8" max-rows="16" required></b-form-textarea>
+                            <b-form-textarea size="sm" id="textarea" v-model="mensaje" placeholder="Mensaje..." rows="8" max-rows="16" required></b-form-textarea>
                         </b-form-group> 
                         
                     </div>
@@ -66,6 +66,7 @@ import { BIconFacebook } from 'bootstrap-vue';
 import { BIconEnvelope } from  'bootstrap-vue';
 import { BIconTelephone } from  'bootstrap-vue';
 
+
 export default {
     components: {
         BIconFacebook,
@@ -85,7 +86,9 @@ export default {
       }
     },
     methods: {
-      onSubmit() {}
+      onSubmit() {
+        
+      }
     }
 }
 </script>

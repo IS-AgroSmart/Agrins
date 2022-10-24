@@ -1,0 +1,882 @@
+[
+ {
+   "value": " Arajuno",
+   "text": " Arajuno"
+ },
+ {
+   "value": " Biblian",
+   "text": " Biblian"
+ },
+ {
+   "value": " Bolivar",
+   "text": " Bolivar"
+ },
+ {
+   "value": " Caluma ",
+   "text": " Caluma "
+ },
+ {
+   "value": " Carlos Julio Arosemena Tola",
+   "text": " Carlos Julio Arosemena Tola"
+ },
+ {
+   "value": " Centinela Del Condor",
+   "text": " Centinela Del Condor"
+ },
+ {
+   "value": " Cevallos",
+   "text": " Cevallos"
+ },
+ {
+   "value": " Chillanes",
+   "text": " Chillanes"
+ },
+ {
+   "value": " Chimbo",
+   "text": " Chimbo"
+ },
+ {
+   "value": " Chinchipe",
+   "text": " Chinchipe"
+ },
+ {
+   "value": " Colta",
+   "text": " Colta"
+ },
+ {
+   "value": " Deleg",
+   "text": " Deleg"
+ },
+ {
+   "value": " Echeandia",
+   "text": " Echeandia"
+ },
+ {
+   "value": " El Empalme",
+   "text": " El Empalme"
+ },
+ {
+   "value": " El Pan",
+   "text": " El Pan"
+ },
+ {
+   "value": " El Pangui",
+   "text": " El Pangui"
+ },
+ {
+   "value": " Esmeraldas",
+   "text": " Esmeraldas"
+ },
+ {
+   "value": " Espejo",
+   "text": " Espejo"
+ },
+ {
+   "value": " Espindola",
+   "text": " Espindola"
+ },
+ {
+   "value": " Flavio Alfaro",
+   "text": " Flavio Alfaro"
+ },
+ {
+   "value": " Gonzalo Pizarro",
+   "text": " Gonzalo Pizarro"
+ },
+ {
+   "value": " Gonzanama",
+   "text": " Gonzanama"
+ },
+ {
+   "value": " Guachapala",
+   "text": " Guachapala"
+ },
+ {
+   "value": " Gualaquiza",
+   "text": " Gualaquiza"
+ },
+ {
+   "value": " Guaranda",
+   "text": " Guaranda"
+ },
+ {
+   "value": " Guayaquil",
+   "text": " Guayaquil"
+ },
+ {
+   "value": " Huamboya",
+   "text": " Huamboya"
+ },
+ {
+   "value": " Ibarra",
+   "text": " Ibarra"
+ },
+ {
+   "value": " Isabela",
+   "text": " Isabela"
+ },
+ {
+   "value": " Jama",
+   "text": " Jama"
+ },
+ {
+   "value": " Jaramijo",
+   "text": " Jaramijo"
+ },
+ {
+   "value": " Jipijapa",
+   "text": " Jipijapa"
+ },
+ {
+   "value": " La Joya De Los Sachas",
+   "text": " La Joya De Los Sachas"
+ },
+ {
+   "value": " La Libertad",
+   "text": " La Libertad"
+ },
+ {
+   "value": " La Troncal",
+   "text": " La Troncal"
+ },
+ {
+   "value": " Lago Agrio",
+   "text": " Lago Agrio"
+ },
+ {
+   "value": " Las Naves",
+   "text": " Las Naves"
+ },
+ {
+   "value": " Loja",
+   "text": " Loja"
+ },
+ {
+   "value": " Loreto",
+   "text": " Loreto"
+ },
+ {
+   "value": " Manta",
+   "text": " Manta"
+ },
+ {
+   "value": " Mejia",
+   "text": " Mejia"
+ },
+ {
+   "value": " Milagro",
+   "text": " Milagro"
+ },
+ {
+   "value": " Mira",
+   "text": " Mira"
+ },
+ {
+   "value": " Mocache",
+   "text": " Mocache"
+ },
+ {
+   "value": " Mocha",
+   "text": " Mocha"
+ },
+ {
+   "value": " Montalvo",
+   "text": " Montalvo"
+ },
+ {
+   "value": " Montecristi   ",
+   "text": " Montecristi   "
+ },
+ {
+   "value": " Nabon",
+   "text": " Nabon"
+ },
+ {
+   "value": " Nangaritza",
+   "text": " Nangaritza"
+ },
+ {
+   "value": " Oña",
+   "text": " Oña"
+ },
+ {
+   "value": " Patate",
+   "text": " Patate"
+ },
+ {
+   "value": " Pedernales",
+   "text": " Pedernales"
+ },
+ {
+   "value": " Pedro Moncayo",
+   "text": " Pedro Moncayo"
+ },
+ {
+   "value": " Pedro Vicente Maldonado",
+   "text": " Pedro Vicente Maldonado"
+ },
+ {
+   "value": " Penipe",
+   "text": " Penipe"
+ },
+ {
+   "value": " Pichincha",
+   "text": " Pichincha"
+ },
+ {
+   "value": " Pindal",
+   "text": " Pindal"
+ },
+ {
+   "value": " Playas",
+   "text": " Playas"
+ },
+ {
+   "value": " Pucara",
+   "text": " Pucara"
+ },
+ {
+   "value": " Pujili",
+   "text": " Pujili"
+ },
+ {
+   "value": " Putumayo",
+   "text": " Putumayo"
+ },
+ {
+   "value": " Puyango",
+   "text": " Puyango"
+ },
+ {
+   "value": " Quero",
+   "text": " Quero"
+ },
+ {
+   "value": " Salcedo",
+   "text": " Salcedo"
+ },
+ {
+   "value": " San Cristobal",
+   "text": " San Cristobal"
+ },
+ {
+   "value": " San Fernando",
+   "text": " San Fernando"
+ },
+ {
+   "value": " San Miguel De Los Bancos",
+   "text": " San Miguel De Los Bancos"
+ },
+ {
+   "value": " San Pedro De Huaca",
+   "text": " San Pedro De Huaca"
+ },
+ {
+   "value": " Santa Clara",
+   "text": " Santa Clara"
+ },
+ {
+   "value": " Santa Cruz",
+   "text": " Santa Cruz"
+ },
+ {
+   "value": " Santa Elena",
+   "text": " Santa Elena"
+ },
+ {
+   "value": " Santa Isabel",
+   "text": " Santa Isabel"
+ },
+ {
+   "value": " Santa Lucia",
+   "text": " Santa Lucia"
+ },
+ {
+   "value": " Sevilla De Oro",
+   "text": " Sevilla De Oro"
+ },
+ {
+   "value": " Sigsig",
+   "text": " Sigsig"
+ },
+ {
+   "value": " Sucre",
+   "text": " Sucre"
+ },
+ {
+   "value": " Sucumbios",
+   "text": " Sucumbios"
+ },
+ {
+   "value": " Tosagua",
+   "text": " Tosagua"
+ },
+ {
+   "value": " Tulcan",
+   "text": " Tulcan"
+ },
+ {
+   "value": " Yacuambi",
+   "text": " Yacuambi"
+ },
+ {
+   "value": " Yantzaza (Yanzatza)",
+   "text": " Yantzaza (Yanzatza)"
+ },
+ {
+   "value": "24 De Mayo",
+   "text": "24 De Mayo"
+ },
+ {
+   "value": "Aguarico",
+   "text": "Aguarico"
+ },
+ {
+   "value": "Alausi",
+   "text": "Alausi"
+ },
+ {
+   "value": "Alfredo Baquerizo Moreno (Jujan)",
+   "text": "Alfredo Baquerizo Moreno (Jujan)"
+ },
+ {
+   "value": "Ambato",
+   "text": "Ambato"
+ },
+ {
+   "value": "Antonio Ante",
+   "text": "Antonio Ante"
+ },
+ {
+   "value": "Archidona",
+   "text": "Archidona"
+ },
+ {
+   "value": "Arenillas",
+   "text": "Arenillas"
+ },
+ {
+   "value": "Atacames",
+   "text": "Atacames"
+ },
+ {
+   "value": "Atahualpa",
+   "text": "Atahualpa"
+ },
+ {
+   "value": "Azogues",
+   "text": "Azogues"
+ },
+ {
+   "value": "Baba",
+   "text": "Baba"
+ },
+ {
+   "value": "Babahoyo",
+   "text": "Babahoyo"
+ },
+ {
+   "value": "Balao",
+   "text": "Balao"
+ },
+ {
+   "value": "Balsas",
+   "text": "Balsas"
+ },
+ {
+   "value": "Balzar",
+   "text": "Balzar"
+ },
+ {
+   "value": "Baños De Agua Santa",
+   "text": "Baños De Agua Santa"
+ },
+ {
+   "value": "Bolivar",
+   "text": "Bolivar"
+ },
+ {
+   "value": "Buena Fe",
+   "text": "Buena Fe"
+ },
+ {
+   "value": "Calvas",
+   "text": "Calvas"
+ },
+ {
+   "value": "Camilo Ponce Enriquez",
+   "text": "Camilo Ponce Enriquez"
+ },
+ {
+   "value": "Canton Tiwintza",
+   "text": "Canton Tiwintza"
+ },
+ {
+   "value": "Cañar",
+   "text": "Cañar"
+ },
+ {
+   "value": "Cascales",
+   "text": "Cascales"
+ },
+ {
+   "value": "Catamayo",
+   "text": "Catamayo"
+ },
+ {
+   "value": "Cayambe",
+   "text": "Cayambe"
+ },
+ {
+   "value": "Celica",
+   "text": "Celica"
+ },
+ {
+   "value": "Chaguarpamba",
+   "text": "Chaguarpamba"
+ },
+ {
+   "value": "Chambo",
+   "text": "Chambo"
+ },
+ {
+   "value": "Chilla",
+   "text": "Chilla"
+ },
+ {
+   "value": "Chone",
+   "text": "Chone"
+ },
+ {
+   "value": "Chordeleg",
+   "text": "Chordeleg"
+ },
+ {
+   "value": "Chunchi",
+   "text": "Chunchi"
+ },
+ {
+   "value": "Colimes",
+   "text": "Colimes"
+ },
+ {
+   "value": "Coronel Marcelino Maridueña",
+   "text": "Coronel Marcelino Maridueña"
+ },
+ {
+   "value": "Cotacachi",
+   "text": "Cotacachi"
+ },
+ {
+   "value": "Cuenca",
+   "text": "Cuenca"
+ },
+ {
+   "value": "Cumanda",
+   "text": "Cumanda"
+ },
+ {
+   "value": "Cuyabeno",
+   "text": "Cuyabeno"
+ },
+ {
+   "value": "Daule",
+   "text": "Daule"
+ },
+ {
+   "value": "Duran",
+   "text": "Duran"
+ },
+ {
+   "value": "El Carmen",
+   "text": "El Carmen"
+ },
+ {
+   "value": "El Chaco",
+   "text": "El Chaco"
+ },
+ {
+   "value": "El Guabo",
+   "text": "El Guabo"
+ },
+ {
+   "value": "El Tambo ",
+   "text": "El Tambo "
+ },
+ {
+   "value": "El Triunfo",
+   "text": "El Triunfo"
+ },
+ {
+   "value": "Eloy Alfaro",
+   "text": "Eloy Alfaro"
+ },
+ {
+   "value": "General Antonio Elizalde ",
+   "text": "General Antonio Elizalde "
+ },
+ {
+   "value": "Giron",
+   "text": "Giron"
+ },
+ {
+   "value": "Gualaceo",
+   "text": "Gualaceo"
+ },
+ {
+   "value": "Guamote",
+   "text": "Guamote"
+ },
+ {
+   "value": "Guano",
+   "text": "Guano"
+ },
+ {
+   "value": "Huaquillas",
+   "text": "Huaquillas"
+ },
+ {
+   "value": "Isidro Ayora ",
+   "text": "Isidro Ayora "
+ },
+ {
+   "value": "Junin",
+   "text": "Junin"
+ },
+ {
+   "value": "La Concordia",
+   "text": "La Concordia"
+ },
+ {
+   "value": "La Mana",
+   "text": "La Mana"
+ },
+ {
+   "value": "Las Lajas",
+   "text": "Las Lajas"
+ },
+ {
+   "value": "Latacunga",
+   "text": "Latacunga"
+ },
+ {
+   "value": "Limon Indanza",
+   "text": "Limon Indanza"
+ },
+ {
+   "value": "Logroño ",
+   "text": "Logroño "
+ },
+ {
+   "value": "Lomas De Sargentillo",
+   "text": "Lomas De Sargentillo"
+ },
+ {
+   "value": "Macara",
+   "text": "Macara"
+ },
+ {
+   "value": "Machala",
+   "text": "Machala"
+ },
+ {
+   "value": "Marcabeli",
+   "text": "Marcabeli"
+ },
+ {
+   "value": "Mera",
+   "text": "Mera"
+ },
+ {
+   "value": "Montufar",
+   "text": "Montufar"
+ },
+ {
+   "value": "Morona",
+   "text": "Morona"
+ },
+ {
+   "value": "Muisne",
+   "text": "Muisne"
+ },
+ {
+   "value": "Naranjal",
+   "text": "Naranjal"
+ },
+ {
+   "value": "Naranjito",
+   "text": "Naranjito"
+ },
+ {
+   "value": "Nobol",
+   "text": "Nobol"
+ },
+ {
+   "value": "Olmedo",
+   "text": "Olmedo"
+ },
+ {
+   "value": "Orellana",
+   "text": "Orellana"
+ },
+ {
+   "value": "Otavalo",
+   "text": "Otavalo"
+ },
+ {
+   "value": "Pablo Sexto",
+   "text": "Pablo Sexto"
+ },
+ {
+   "value": "Pajan",
+   "text": "Pajan"
+ },
+ {
+   "value": "Palanda",
+   "text": "Palanda"
+ },
+ {
+   "value": "Palenque",
+   "text": "Palenque"
+ },
+ {
+   "value": "Palestina",
+   "text": "Palestina"
+ },
+ {
+   "value": "Pallatanga",
+   "text": "Pallatanga"
+ },
+ {
+   "value": "Palora",
+   "text": "Palora"
+ },
+ {
+   "value": "Paltas",
+   "text": "Paltas"
+ },
+ {
+   "value": "Pangua",
+   "text": "Pangua"
+ },
+ {
+   "value": "Paquisha ",
+   "text": "Paquisha "
+ },
+ {
+   "value": "Pasaje",
+   "text": "Pasaje"
+ },
+ {
+   "value": "Pastaza",
+   "text": "Pastaza"
+ },
+ {
+   "value": "Paute",
+   "text": "Paute"
+ },
+ {
+   "value": "Pedro Carbo",
+   "text": "Pedro Carbo"
+ },
+ {
+   "value": "Pimampiro",
+   "text": "Pimampiro"
+ },
+ {
+   "value": "Piñas",
+   "text": "Piñas"
+ },
+ {
+   "value": "Portovelo",
+   "text": "Portovelo"
+ },
+ {
+   "value": "Portoviejo",
+   "text": "Portoviejo"
+ },
+ {
+   "value": "Puebloviejo",
+   "text": "Puebloviejo"
+ },
+ {
+   "value": "Puerto Lopez",
+   "text": "Puerto Lopez"
+ },
+ {
+   "value": "Puerto Quito",
+   "text": "Puerto Quito"
+ },
+ {
+   "value": "Quevedo",
+   "text": "Quevedo"
+ },
+ {
+   "value": "Quijos",
+   "text": "Quijos"
+ },
+ {
+   "value": "Quilanga",
+   "text": "Quilanga"
+ },
+ {
+   "value": "Quininde",
+   "text": "Quininde"
+ },
+ {
+   "value": "Quinsaloma",
+   "text": "Quinsaloma"
+ },
+ {
+   "value": "Quito",
+   "text": "Quito"
+ },
+ {
+   "value": "Riobamba",
+   "text": "Riobamba"
+ },
+ {
+   "value": "Rioverde",
+   "text": "Rioverde"
+ },
+ {
+   "value": "Rocafuerte",
+   "text": "Rocafuerte"
+ },
+ {
+   "value": "Rumiñahui",
+   "text": "Rumiñahui"
+ },
+ {
+   "value": "Salinas",
+   "text": "Salinas"
+ },
+ {
+   "value": "Salitre (Urbina Jado)",
+   "text": "Salitre (Urbina Jado)"
+ },
+ {
+   "value": "Samborondon",
+   "text": "Samborondon"
+ },
+ {
+   "value": "San Jacinto De Yaguachi",
+   "text": "San Jacinto De Yaguachi"
+ },
+ {
+   "value": "San Juan Bosco ",
+   "text": "San Juan Bosco "
+ },
+ {
+   "value": "San Lorenzo",
+   "text": "San Lorenzo"
+ },
+ {
+   "value": "San Miguel",
+   "text": "San Miguel"
+ },
+ {
+   "value": "San Miguel De Urcuqui",
+   "text": "San Miguel De Urcuqui"
+ },
+ {
+   "value": "San Pedro De Pelileo",
+   "text": "San Pedro De Pelileo"
+ },
+ {
+   "value": "San Vicente",
+   "text": "San Vicente"
+ },
+ {
+   "value": "Santa Ana",
+   "text": "Santa Ana"
+ },
+ {
+   "value": "Santa Rosa",
+   "text": "Santa Rosa"
+ },
+ {
+   "value": "Santiago",
+   "text": "Santiago"
+ },
+ {
+   "value": "Santiago De Pillaro",
+   "text": "Santiago De Pillaro"
+ },
+ {
+   "value": "Santo Domingo",
+   "text": "Santo Domingo"
+ },
+ {
+   "value": "Saquisili",
+   "text": "Saquisili"
+ },
+ {
+   "value": "Saraguro",
+   "text": "Saraguro"
+ },
+ {
+   "value": "Shushufindi",
+   "text": "Shushufindi"
+ },
+ {
+   "value": "Sigchos",
+   "text": "Sigchos"
+ },
+ {
+   "value": "Simon Bolivar",
+   "text": "Simon Bolivar"
+ },
+ {
+   "value": "Sozoranga",
+   "text": "Sozoranga"
+ },
+ {
+   "value": "Sucua",
+   "text": "Sucua"
+ },
+ {
+   "value": "Suscal",
+   "text": "Suscal"
+ },
+ {
+   "value": "Taisha ",
+   "text": "Taisha "
+ },
+ {
+   "value": "Tena",
+   "text": "Tena"
+ },
+ {
+   "value": "Tisaleo",
+   "text": "Tisaleo"
+ },
+ {
+   "value": "Urdaneta",
+   "text": "Urdaneta"
+ },
+ {
+   "value": "Valencia",
+   "text": "Valencia"
+ },
+ {
+   "value": "Ventanas",
+   "text": "Ventanas"
+ },
+ {
+   "value": "Vinces",
+   "text": "Vinces"
+ },
+ {
+   "value": "Zamora",
+   "text": "Zamora"
+ },
+ {
+   "value": "Zapotillo",
+   "text": "Zapotillo"
+ },
+ {
+   "value": "Zaruma",
+   "text": "Zaruma"
+ }
+]

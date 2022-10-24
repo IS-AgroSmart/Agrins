@@ -1,101 +1,209 @@
 <template>
-    <div class=" pt-3" style="padding-left:15px; padding-right:15px;">
-        <b-alert v-if="error" show variant="danger">
-            <p>Error en la creación de cuenta</p>
-            <span style="white-space: pre;">{{ error }}</span>
-        </b-alert>
-        <b-form @submit="onSubmit">
-            <b-form-group id="input-group-1" label="Usuario:" label-for="input-1">
-                <b-form-input id="input-1" v-model="form.username" :state="usernameState" type="text" required placeholder="Nombre de usuario. Usado para iniciar sesión."></b-form-input>
-                <b-form-invalid-feedback id="input-live-feedback">
-                    El nombre de usuario no puede contener espacios.
-                </b-form-invalid-feedback>
-            </b-form-group>
-    
-            <b-form-group id="input-group-2" label="Nombres:" label-for="input-2">
-                <b-form-input id="input-2" type="text" v-model="form.first_name" :state="firstNameState" required placeholder="Nombres y Apellidos"></b-form-input>
-                <b-form-invalid-feedback id="input-live-feedback">
-                    El nombre y apellido no puede superar los 150 caracteres
-                </b-form-invalid-feedback>
-            </b-form-group>
-    
-            <b-form-group id="input-group-2" label="Contraseña:" label-for="input-3">
-                <b-form-input id="input-3" type="password" v-model="form.password" :state="passwordState" required placeholder="Contraseña"></b-form-input>
-                <b-form-invalid-feedback id="input-live-feedback">
-                    Escriba una contraseña de al menos 8 caracteres
-                </b-form-invalid-feedback>
-            </b-form-group>
-    
-            <b-form-group id="input-group-2" label="E-mail:" label-for="input-4">
-                <b-form-input id="input-4" type="email" v-model="form.email" required placeholder="E-mail para enviar notificaciones"></b-form-input>
-            </b-form-group>
-    
-            <b-form-group id="input-group-2" label="Organización:" label-for="input-5">
-                <b-form-input id="input-5" type="text" v-model="form.organization" :state="organizationState" required placeholder="Nombre Organización"></b-form-input>
-                <b-form-invalid-feedback id="input-live-feedback">
-                    Escriba el nombre de su Organización en menos de 20 caracteres
-                </b-form-invalid-feedback>
-            </b-form-group>
-    
-            <b-container>
-                <b-row align-h="center">
-                    <b-col cols="5" class="text-center">
-                        <b-button type="submit" variant="primary" :disabled="!everythingValid">Crear cuenta</b-button>
-                    </b-col>
-                    <b-col cols="5" class="text-center">
-                        <b-button @click="goBack" variant="secondary">Cancelar</b-button>
-                    </b-col>
-                </b-row>
-            </b-container>
-        </b-form>
+    <div class="custom-jumbotron">        
+            <b-container style=" padding-top:100px; ">                
+                <b-card class="text-center" style="max-width: 80em;" title="Registro">
+                    <p>Bienvenido, ingrese la información solicitada</p>
+                    <div class="text-left" >
+                        <b-alert v-if="error" show variant="danger">
+                            <p>Error en la creación de cuenta</p>
+                            <span style="white-space: pre;">{{ error }}</span>
+                        </b-alert>
+                        <b-form @submit="onSubmit">                          
+                                <b-row >
+                                    <b-col>
+                                        <b-form-group size="sm" id="input-group-1" label="Nombre:*" label-for="input-1">
+                                            <b-form-input size="sm"  id="input-1" type="text" v-model="form.name" :state="nameState" required placeholder="Nombre"></b-form-input>
+                                            <b-form-invalid-feedback id="input-live-feedback">
+                                                El nombre no puede superar los 150 caracteres.
+                                            </b-form-invalid-feedback>
+                                        </b-form-group>
+                                    </b-col>
+                                    <b-col>
+                                        <b-form-group size="sm"  id="input-group-2" label="Apellidos:*" label-for="input-2">
+                                            <b-form-input size="sm"  id="input-2" type="text" v-model="form.lastname" :state="lastnameState" required placeholder="Apellidos"></b-form-input>
+                                            <b-form-invalid-feedback id="input-live-feedback2">
+                                                Los apellidos no puede superar los 150 caracteres.
+                                            </b-form-invalid-feedback>
+                                        </b-form-group>
+                                        
+                                    </b-col>
+                                </b-row>                            
+                                <b-row >
+                                    <b-col>
+                                        <b-form-group id="input-group-3" label="Email:*" label-for="input-3">
+                                            <b-form-input size="sm"  id="input-3" type="email" v-model="form.email" required placeholder="Email"></b-form-input>
+                                        </b-form-group>
+                                    </b-col>
+                                    <b-col>
+                                        <b-form-group id="input-group-4" label="Teléfono:*" label-for="input-4">
+                                            <b-form-input size="sm" id="input-4" type="tel" v-model="form.phone" :state="phoneState" required placeholder="Teléfono"></b-form-input>
+                                        </b-form-group>
+                                    </b-col>
+                                </b-row>                            
+                                <b-row >
+                                    <b-col>
+                                        <b-form-group id="input-group-5" label="Contraseña:*" label-for="input-5">
+                                            <b-input-group>
+                                                <b-form-input  id="input-5" v-if="showPassword" type="text" size="sm" :state="passwordState" v-model="form.password" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                                                <b-form-input  id="input-5" v-if="!showPassword" type="password" size="sm" :state="passwordState" v-model="form.password" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                                                <b-form-invalid-feedback id="input-live-feedback3">
+                                                    Escriba una contraseña de al menos 8 caracteres
+                                                </b-form-invalid-feedback>
+                                                <b-input-group-append>
+                                                    <b-button size="sm" variant="secondary" @click="showPassword = !showPassword">
+                                                        <b-icon-eye-fill v-show="showPassword" />
+                                                        <b-icon-eye-slash-fill v-show="!showPassword" />                                        
+                                                    </b-button>                                
+                                                </b-input-group-append>
+                                            </b-input-group>
+                                        </b-form-group>
+                                    </b-col>
+                                    <b-col>
+                                        <b-form-group id="input-group-6" label="Confirmar Contraseña:*" label-for="input-6">
+                                            <b-input-group>
+                                                <b-form-input  id="input-6" v-if="showPassword1" type="text" size="sm" :state="confirmpasswordState" v-model="form.confirmpassword" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                                                <b-form-input  id="input-6" v-if="!showPassword1" type="password" size="sm" :state="confirmpasswordState" v-model="form.confirmpassword" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                                                <b-form-invalid-feedback id="input-live-feedback4">
+                                                    La contaseña debe ser igual
+                                                </b-form-invalid-feedback>
+                                                <b-input-group-append>
+                                                    <b-button size="sm" variant="secondary" @click="showPassword1 = !showPassword1">
+                                                        <b-icon-eye-fill v-show="showPassword1" />
+                                                        <b-icon-eye-slash-fill v-show="!showPassword1" />                                        
+                                                    </b-button>                                
+                                                </b-input-group-append>
+                                            </b-input-group>
+                                        </b-form-group>
+
+                                    </b-col>
+                                </b-row>
+                                <b-row>
+                                    <b-col>
+                                        <b-form-group id="input-group-7" label="Profesión:*" label-for="input-7">
+                                            <b-form-select size="sm" id="input-7" required v-model="form.profession" :options="optionsProf"></b-form-select>
+                                        </b-form-group>
+                                    </b-col>
+                                    <b-col>
+                                        <b-form-group id="input-group-8" label="Institución:*" label-for="input-8">
+                                            <b-form-select size="sm" id="input-8" required v-model="form.institution" :options="optionsInst"></b-form-select>
+                                        </b-form-group>
+                                    </b-col>
+                                    <b-col>
+                                        <b-form-group id="input-group-9" label="Ciudad:*" label-for="input-9">
+                                            <b-form-select size="sm" id="input-9" required v-model="form.city" :options="ciudadesjson"></b-form-select>
+                                        </b-form-group>
+                                    </b-col>
+                                </b-row>                            
+                                <b-row >  
+                                    <b-col class="text-center">
+                                        <b-form-checkbox required v-model="acept" value="true" unchecked-value="false" >Acepto los <b-link variant="info" v-b-modal.modal-scrollable>términos y condiciones</b-link></b-form-checkbox>                                    
+                                                <b-modal id="modal-scrollable" ok-only scrollable title="Términos y Condiciones">
+                                                <p class="my-4" v-for="i in 20" :key="i">
+                                                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis
+                                                in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+                                                </p>
+                                            </b-modal>
+                                    </b-col>                                  
+                                </b-row>                    
+                                <b-row style="padding-top: 2% ;">
+                                    <b-col class="text-center">
+                                        <b-button @click="goBack" style="padding-top:0%; padding-bottom:0%" pill variant="danger">Cancelar</b-button>
+                                    </b-col>
+                                    <b-col class="text-center">
+                                        <b-button pill variant="info" style="padding-top:0%; padding-bottom:0%" type="submit" :disabled="!everythingValid">Guardar</b-button>
+                                    </b-col>                                    
+                                </b-row>  
+                    
+                        </b-form>
+                    </div>
+                </b-card>
+            
+            </b-container>        
     </div>
 </template>
 
 <script>
 import axios from "axios";
+import ciudad from "../assets/ciudades.json";
+import { BIconEyeFill } from 'bootstrap-vue';
+import { BIconEyeSlashFill } from 'bootstrap-vue';
+
 export default {
+    components:{
+        BIconEyeFill,
+        BIconEyeSlashFill,
+    },
     data() {
         return {
             form: {
-                username: '',
+                name: '',
+                lastname:'',
                 password: '',
+                confirmpassword: '',
                 email: '',
-                first_name: '',
-                organization: '',
+                phone: '',                
+                profession: '',
+                institution: '',
+                city:''
             },
-            error: false
+            error: false,
+            optionsProf: [
+                { value: 'Agricultor', text: 'Agricultor' },
+                { value: 'Director', text: 'Director' },
+                { value: 'Investigador', text: 'Investigador' },           
+                { value: 'Profesional', text: 'Profesional'},
+                { value: 'Otro', text: 'Otro'},
+            ],
+            optionsInst:[
+                { value: 'Publico', text: 'Público' },
+                { value: 'Privado', text: 'Privado' },
+                { value: 'Otro', text: 'Otro' },
+            ],
+            ciudadesjson: ciudad,
+            showPassword: false,
+            showPassword1: false,
+            acept: false,
         }
     },
     computed: {
-        usernameState() {
-            if (this.form.username.length == 0) return null;
-            return this.form.username.indexOf(" ") == -1;
+        nameState() {
+            if (this.form.name.length == 0) return null;
+            return this.form.name.length <= 150;
         },
-        firstNameState() {
-            if (this.form.first_name.length == 0) return null;
-            return this.form.first_name.length <= 150;
+        lastnameState() {
+            if (this.form.lastname.length == 0) return null;
+            return this.form.lastname.length <= 150;
         },
         passwordState() {
             if (this.form.password.length == 0) return null;
             return this.form.password.length >= 8;
         },
-        organizationState() {
-            if (this.form.organization.length == 0) return null;
-            return this.form.organization.length <= 20;
+        phoneState() {
+            if (this.form.phone.length == 0) return null;
+            return this.form.phone.length >= 8;
+        },
+        confirmpasswordState() {
+            if (this.form.confirmpassword.length == 0 ) return null;
+            return this.form.password == this.form.confirmpassword;
         },
         everythingValid() {
-            return this.usernameState && this.firstNameState && this.passwordState && this.organizationState;
+            return this.phoneState && this.acept && this.nameState && this.lastnameState && this.passwordState && this.confirmpasswordState;
         },
     },
     methods: {
         onSubmit(evt) {
             evt.preventDefault();
             axios.post("api/users/", {
-                    "username": this.form.username,
+                    "username": this.form.email,
                     "password": this.form.password,
                     "email": this.form.email,
-                    "first_name": this.form.first_name,
-                    "organization": this.form.organization,
+                    "phone": this.form.phone,
+                    "first_name": this.form.name,
+                    "last_name" : this.form.last_name,
+                    "profession" : this.form.profession,
+                    "organization": this.form.institution,
+                    "city" : this.form.city,
+
                 })
                 .then(response => {
                     if (response.status == 201)
@@ -122,3 +230,17 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.custom-jumbotron {
+    background: url('/registro.jpg') no-repeat center center fixed;
+  -webkit-background-size: 100% 100%;
+  -moz-background-size: 100% 100%;
+  -o-background-size: 100% 100%;
+  background-size: 100% 100%;
+  height: 100%;
+  width: 100%;
+  
+}
+
+</style>

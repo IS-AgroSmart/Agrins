@@ -23,7 +23,7 @@
             <b-alert v-if="noProjects" variant="info" show>Aún no ha creado ningún proyecto</b-alert>
         </b-skeleton-wrapper>
         
-        <add-new-project/>
+        <add-new-project style="padding-top: 105px;"/>
     </div>
 </template>
 

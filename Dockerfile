@@ -11,8 +11,8 @@ RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
 WORKDIR /app
 
-ENV VIRTUAL_ENV /env
-ENV PATH /env/bin:$PATH
+ENV VIRTUAL_ENV /venv
+ENV PATH /venv/bin:$PATH
 
 EXPOSE 8000
 

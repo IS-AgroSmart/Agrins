@@ -65,7 +65,7 @@ class BaseProject(models.Model):
 
 class UserProject(DiskSpaceTrackerMixin, BaseProject):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE, related_name="user_projects")
-    flights = models.ManyToManyField("Flight", related_name="user_projects")
+    #flights = models.ManyToManyField("Flight", null=True, related_name="user_projects", default=None)
     must_create_workspace = models.BooleanField(default=True)
     is_demo = models.BooleanField(default=False)
 

@@ -1,4 +1,4 @@
-<template>
+    <template>
     <div class="custom-jumbotron">
         <div >
             <b-container style="padding-top:100px; display:flex; justify-content: flex-end;">
@@ -10,17 +10,26 @@
                         </b-alert>
                         <b-form @submit="onSubmit">
                             <b-form-group id="input-group-1" label="Email:" label-for="input-1">
-                                <b-form-input id="input-1" v-model="form.username" type="email" required placeholder="Email" data-cy="username"></b-form-input>
+                                <b-form-input size="sm" id="input-1" v-model="form.username" type="email" required placeholder="Email" data-cy="username"></b-form-input>
                             </b-form-group>
                     
                             <b-form-group id="input-group-2" label="Contraseña:" label-for="input-2">
-                                <b-form-input id="input-2" type="password" v-model="form.password" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                                <b-input-group>
+                                    <b-form-input  v-if="showPassword" type="text" size="sm" id="input-2" v-model="form.password" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                                    <b-form-input  v-if="!showPassword" type="password" size="sm" id="input-2" v-model="form.password" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                                    <b-input-group-append>
+                                        <b-button size="sm" variant="secondary" @click="showPassword = !showPassword">
+                                            <b-icon-eye-fill v-show="showPassword" />
+                                            <b-icon-eye-slash-fill v-show="!showPassword" />                                        
+                                        </b-button>                                
+                                    </b-input-group-append>
+                                </b-input-group>
                             </b-form-group>
 
                             <b-form-group id="input-group-3" >
                                 <b-row>
                                     <b-col><b-form-checkbox value="me">Recordarme</b-form-checkbox></b-col>
-                                    <b-col class="text-right"><b-link to="restorePassword" >Olvidó su contraseña?</b-link></b-col>
+                                    <b-col size="sm" class="text-right"><b-link size="sm" to="restorePassword" >Olvidó su contraseña?</b-link></b-col>
                                 </b-row>
                             </b-form-group>
                             
@@ -43,15 +52,24 @@
 <script>
 
 import axios from "axios";
-import { getUserInfo } from "../api/users"
+import { getUserInfo } from "../api/users";
+import { BIconEyeFill } from 'bootstrap-vue';
+import { BIconEyeSlashFill } from 'bootstrap-vue';
+
 export default {
+
+    components:{
+        BIconEyeFill,
+        BIconEyeSlashFill,
+    },
     data() {
         return {
             form: {
                 username: '',
                 password: '',
             },
-            error: false
+            error: false,
+            showPassword: false,
         }
     },
     methods: {
