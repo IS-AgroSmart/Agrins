@@ -1,7 +1,7 @@
 <template>
     <div>
         <b-navbar id="NavMainTop" toggleable="lg" placement="sticky-top" class="border-bottom">
-            <b-navbar-brand v-if="isLoggedIn" style="margin-left:3%;margin-top: 0%;margin-bottom: 0%;">
+            <b-navbar-brand v-if="isLoggedIn" style="margin-left:3%;margin-top: 0%;padding-bottom: 0%;">
                 <img height="60" width="200" src="../assets/logoB.png" class="d-inline-block align-top" alt="Agrins">                
             </b-navbar-brand>
             <b-navbar-brand v-if="!isLoggedIn" to="/" style="margin-left:3%; margin-top: 0%; margin-bottom: 0%;">
@@ -12,15 +12,15 @@
             <b-collapse id="nav-collapse" is-nav>
                 <div v-if="isLoggedIn" class="ml-auto" style="padding-top:25px ; ">
                     <b-navbar-nav>
-                        <b-nav-item to="/admin" data-cy="navbar-dashboard"><p class="text-info">Dashboard</p></b-nav-item>
+                        <b-nav-item to="/dashboard" data-cy="navbar-dashboard"><p class="text-info">Dashboard</p></b-nav-item>
                         <b-nav-item to="/projects"><p class="text-info">Proyectos</p></b-nav-item>
-                        <b-nav-item v-if="isAdmin" data-cy="navbar-grupos"><p class="text-info">Grupos</p></b-nav-item>
-                        <b-nav-item v-if="isAdmin" data-cy="navbar-usuarios" ><p class="text-info">Usuarios</p></b-nav-item>
-                        <b-nav-item to="/admin">Administracións</b-nav-item>
+                        <!--<b-nav-item v-if="isAdmin" data-cy="navbar-grupos"><p class="text-info">Grupos</p></b-nav-item>-->
+                        <b-nav-item v-if="isAdmin" to="/users" data-cy="navbar-usuarios" ><p class="text-info">Usuarios</p></b-nav-item>
+                        <!-- <b-nav-item to="/admin">Administracións</b-nav-item>-->
                         <b-nav-item to="/profile"><p class="text-info">Perfil</p></b-nav-item>
                     </b-navbar-nav>
                 </div>
-                <div v-else class="ml-auto" style="padding-top:25px margin-bottom:0%; color: blue;">
+                <div v-else class="ml-auto" style="padding-top:25px; padding-bottom:0%; color: blue;">
                     <b-navbar-nav tabs>
                             <b-nav-item v-if="!hide" to="/" @click="scroll('inicio')" text><p class="text-info">Inicio</p></b-nav-item>
                             <b-nav-item v-if="!hide" to="/" @click="scroll('servicios')" text ><p class="text-info">Servicios</p></b-nav-item>
@@ -30,7 +30,7 @@
                 </div>
                 <!-- Right aligned nav items -->
                 <b-navbar-nav class="ml-auto" style="margin-right: 4%;">
-                    <div v-if="isLoggedIn" style="padding-bottom:20px;">
+                    <div v-if="isLoggedIn" style="padding-bottom:25px;">
                         <b-navbar-nav > 
                             <b-nav-item v-if="isAdmin">
                                 <b-icon-chat-dots-fill variant="info"/>
@@ -42,7 +42,7 @@
                             </b-nav-item>
                         </b-navbar-nav>
                     </div>
-                    <div v-else style="padding-bottom:20px ; ">
+                    <div v-else style="padding-bottom:25px ; ">
                         <b-navbar-nav> 
                             <b-nav-item>
                                 <b-icon-twitter variant="info"/>

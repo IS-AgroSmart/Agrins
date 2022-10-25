@@ -45,6 +45,8 @@ import userRequestActive from './components/UserRequestActive'
 import userDeleted from "./components/UserDeleted"
 import blockCriteria from "./components/BlockCriteria"
 import DeletedProjects from "./components/DeletedProjects"
+import Dashboard from "./components/Dashboard"
+import Users from "./components/Users"
 
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
@@ -85,6 +87,8 @@ const router = new VueRouter({
     { path: '/projects/:uuid/upload/geotiff', name: "uploadGeotiff", component: UploadGeotiff },
     { path: '/projects/:uuid/upload/index', name: "createIndex", component: CreateIndex },
     { path: '/projects/new', name: 'newProject', component: NewProject },
+    { path: '/dashboard', name: 'dasboard', component: Dashboard },
+    { path: '/users', name: 'users', component: Users },
     { path: '/login', component: Login },
     { path: '/logout', component: Logout },
     { path: '/signup', name: 'signUp', component: SignUp },

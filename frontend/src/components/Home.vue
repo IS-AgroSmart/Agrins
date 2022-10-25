@@ -10,7 +10,7 @@
                     </b-col>
                     
                 </b-row>
-                <b-button pill variant="info" to="flights" v-if="loggedIn">Mi cuenta</b-button>
+                <b-button pill variant="info" to="projects" v-if="loggedIn">Mi cuenta</b-button>
                 <b-button pill variant="info" @click="scroll('desafios')" v-else>¡QUIERO SABER MÁS!</b-button>
                 
             </b-container>

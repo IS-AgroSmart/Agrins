@@ -199,7 +199,7 @@ export default {
                     "email": this.form.email,
                     "phone": this.form.phone,
                     "first_name": this.form.name,
-                    "last_name" : this.form.last_name,
+                    "last_name" : this.form.lastname,
                     "profession" : this.form.profession,
                     "organization": this.form.institution,
                     "city" : this.form.city,

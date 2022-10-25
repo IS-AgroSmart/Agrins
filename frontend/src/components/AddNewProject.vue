@@ -1,18 +1,15 @@
 <template>
-    <div class="my-4">
-        <b-card title="" class="mb-2">
-            <div class="text-center">
-                <b-button v-if="canCreateProjects" :to="{name: 'newProject'}" variant="primary">Crear proyecto</b-button>
+    <div >
+                <b-button size="sm" v-if="canCreateProjects" :to="{name: 'newProject'}" variant="info"><b-icon-plus scale="1.2"/>  Crear proyecto</b-button>
                 <b-card-text v-else>
                     <small class="text-muted">No puede crear proyectos. {{ unableReason }}</small>
-                </b-card-text>
-            </div>
-        </b-card>
+                </b-card-text>            
     </div>
 </template>
 
 <script>
 // import forceLogin from './mixins/force_login'
+import {BIconPlus} from 'bootstrap-vue';
 
 export default {
     computed: {
@@ -29,6 +26,9 @@ export default {
             return "";
         }
     },
+    components: {
+        BIconPlus
+    }
     // mixins: [forceLogin] // forceLogin not required, this will only be instantiated from page components
 }
 </script>

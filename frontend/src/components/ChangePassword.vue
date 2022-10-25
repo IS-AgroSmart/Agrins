@@ -4,28 +4,49 @@
             Error al cambiar contraseña: las contraseñas no coindicen o no se cumplen las condiciones requeridas
         </b-alert>
         <b-form @submit="onSubmit">
-            <b-form-group id="input-group-1" label="Nueva Contraseña:" label-for="input-1">
-                <b-form-input id="input-1" v-model="form.password" :state="passwordState" type="password" required placeholder="Escriba su nueva contraseña"></b-form-input>
-                <b-form-invalid-feedback id="input-live-feedback">
-                    Escriba una contraseña de al menos 8 caracteres
-                </b-form-invalid-feedback>
-            </b-form-group>
-    
-            <b-form-group id="input-group-2" label="Repetir Contraseña Nueva:" label-for="input-2">
-                <b-form-input id="input-2" v-model="form.repeatedPassword" :state="passwordRepeatedState" type="password" required placeholder="Confirme su nueva contraseña"></b-form-input>
-                <b-form-invalid-feedback id="input-live-feedback">
-                    Las contraseñas no coinciden
-                </b-form-invalid-feedback>
-            </b-form-group>
+                <b-form-group id="input-group-5" label="Nueva Contraseña:" size="sm" label-for="input-5">
+                <b-input-group>
+                    <b-form-input  id="input-5" v-if="showPassword" type="text" size="sm" :state="passwordState" v-model="form.password" required placeholder="Nueva Contraseña" data-cy="password"></b-form-input>
+                    <b-form-input  id="input-5" v-if="!showPassword" type="password" size="sm" :state="passwordState" v-model="form.password" required placeholder="Nueva Contraseña" data-cy="password"></b-form-input>
+                        <b-form-invalid-feedback id="input-live-feedback3">
+                            Escriba una contraseña de al menos 8 caracteres
+                        </b-form-invalid-feedback>
+                        <b-input-group-append>
+                            <b-button size="sm" variant="secondary" @click="showPassword = !showPassword">
+                                <b-icon-eye-fill v-show="showPassword" />
+                                <b-icon-eye-slash-fill v-show="!showPassword" />                                        
+                            </b-button>                                
+                        </b-input-group-append>
+                    </b-input-group>
+                </b-form-group>
+
+
+                <b-form-group id="input-group-6" label="Repetir Contraseña Nueva:" label-for="input-6">
+                    <b-input-group>
+                        <b-form-input  id="input-6" v-if="showPassword1" type="text" size="sm" :state="confirmpasswordState" v-model="form.confirmpassword" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                            <b-form-input  id="input-6" v-if="!showPassword1" type="password" size="sm" :state="passwordRepeatedState" v-model="form.repeatedPassword" required placeholder="Contraseña" data-cy="password"></b-form-input>
+                            <b-form-invalid-feedback id="input-live-feedback4">
+                                Las contraseñas no coinciden
+                            </b-form-invalid-feedback>
+                            <b-input-group-append>
+                                <b-button size="sm" variant="secondary" @click="showPassword1 = !showPassword1">
+                                    <b-icon-eye-fill v-show="showPassword1" />
+                                    <b-icon-eye-slash-fill v-show="!showPassword1" />                                        
+                                </b-button>                                
+                            </b-input-group-append>
+                        </b-input-group>
+                </b-form-group>
+
     
             <b-container>
-                <b-row align-h="center">
+                <b-row align-h="center" style="padding-bottom: 3%;">
                     <b-col cols="5" class="text-center">
-                        <b-button type="submit" variant="primary">Aceptar</b-button>
+                        <b-button style="padding-top:0%; padding-bottom:0%" @click="goToProfile" pill variant="danger">Cancelar</b-button>
                     </b-col>
                     <b-col cols="5" class="text-center">
-                        <b-button @click="goToProfile" variant="secondary">Cancelar</b-button>
+                        <b-button style="padding-top:0%; padding-bottom:0%" type="submit" pill variant="info">Aceptar</b-button>
                     </b-col>
+                    
                 </b-row>
             </b-container>
         </b-form>
@@ -34,8 +55,14 @@
 
 <script>
 import axios from "axios";
+import { BIconEyeFill } from 'bootstrap-vue';
+import { BIconEyeSlashFill } from 'bootstrap-vue';
 
 export default {
+    components:{
+        BIconEyeFill,
+        BIconEyeSlashFill,
+    },
     data() {
         return {
             form: {
@@ -44,6 +71,8 @@ export default {
             },
             error: false,
             errorConfirmation: false,
+            showPassword: false,
+            showPassword1: false,
         }
     },
     computed: {
@@ -70,7 +99,8 @@ export default {
             }
         },
         goToProfile() {
-            this.$router.replace({ path: '/profile' });
+            this.form.password = '';
+            this.form.repeatedPassword = '';
         },
         errorToLines(body) {
             var err = "";

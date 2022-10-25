@@ -1,7 +1,12 @@
 <template>
-    <div class="pt-3 px-3">
-        <h1>Mis Proyectos</h1>
-    
+     <div  style="height:100%; padding-top: 90px; background-color: #fafafa;">        
+        <div style="margin-left: 5%;border-radius: 10px;margin-right: 5%;  ">
+            <div class="d-flex bd-highlight mb-3 border-bottom">
+                <div class="p-2 bd-highlight"><h5>Proyectos</h5>  </div>
+                
+                <div class="ml-auto p-2 bd-highlight"><add-new-project /></div>
+            </div>            
+            
         <b-skeleton-wrapper :loading="loading">
             <template #loading>
                 <b-row>
@@ -23,8 +28,8 @@
             <b-alert v-if="noProjects" variant="info" show>Aún no ha creado ningún proyecto</b-alert>
         </b-skeleton-wrapper>
         
-        <add-new-project style="padding-top: 105px;"/>
-    </div>
+        
+    </div></div>
 </template>
 
 <script>

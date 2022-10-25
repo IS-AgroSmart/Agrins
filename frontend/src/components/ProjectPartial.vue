@@ -1,5 +1,28 @@
 <template>
     <div class="col-md-4">
+        <b-card
+            :title="projectName"
+            img-src="/corn.jpg"
+            img-alt="Image"
+            img-top
+            tag="article"
+            style="max-width: 20rem; max-height: 20rem;"
+            class="mb-2"
+        >
+            <!--<b-card-text>
+                <p class="white-space: pre-wrap;">{{ project.description }}</p>
+            </b-card-text>-->
+            <template #footer>
+                <small class="text-muted">Última actualización hace 3 mins ago</small>
+            </template>
+
+            
+        </b-card>
+
+
+
+        <!--
+
         <b-card :title="projectName" class="my-3">
     
             <b-card-text>
@@ -13,7 +36,7 @@
                 <b-button @click="finalDeleteProject" variant="danger" class="mx-1 my-1">Eliminar</b-button>
                 <b-button @click="restoreProject" variant="success" class="mx-1 my-1">Restaurar</b-button>
             </div>
-        </b-card>
+        </b-card>-->
     </div>
 </template>
 
