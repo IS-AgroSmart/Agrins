@@ -10,6 +10,10 @@ class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
     organization = serializers.CharField()
     first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    phone = serializers.CharField()
+    city = serializers.CharField()
+    profession = serializers.CharField()
     used_space = serializers.ReadOnlyField()
     maximum_space = serializers.ReadOnlyField()
     remaining_images = serializers.ReadOnlyField()
@@ -24,7 +28,11 @@ class UserSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             organization=validated_data['organization'],
-            first_name=validated_data['first_name']
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            phone=validated_data['phone'],
+            profession=validated_data['profession'],
+            city=validated_data['city'],
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -39,8 +47,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["pk", 'username', 'email', 'is_staff', 'password', 'type', 'organization', 'first_name',
-                  'used_space', 'maximum_space', 'remaining_images']
+        fields = ["pk", 'username', 'email', 'is_staff', 'password', 'type', 'organization', 'first_name','last_name',
+                  'used_space','phone','city','profession', 'maximum_space', 'remaining_images']
 
 
 class FlightSerializer(serializers.ModelSerializer):
@@ -66,13 +74,13 @@ class UserProjectSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
         default=serializers.CurrentUserDefault())
-    flights = serializers.PrimaryKeyRelatedField(many=True,
-                                                 queryset=Flight.objects.all())
+    #flights = serializers.PrimaryKeyRelatedField(many=True,
+#                                                 queryset=Flight.objects.all())
     artifacts = serializers.PrimaryKeyRelatedField(many=True,
                                                    queryset=Artifact.objects.all())
 
     def create(self, validated_data):
-        flights = validated_data.pop("flights")
+        #flights = validated_data.pop("flights")
         artifacts = validated_data.pop("artifacts")
         proj = UserProject.objects.create(**validated_data)
         proj.flights.set(flights)
@@ -84,7 +92,7 @@ class UserProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProject
-        fields = ['uuid', 'user', 'flights', 'artifacts', "name", "description", "is_demo", "deleted"]
+        fields = ['uuid', 'user', 'artifacts', "name", "description", "is_demo", "deleted"]
 
 
 class BlockCriteriaSerializer(serializers.ModelSerializer):

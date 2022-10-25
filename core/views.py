@@ -180,8 +180,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.user = None
         for user in User.objects.all():
             user.demo_projects.add(project)
-        for flight in project.flights.all():
-            flight.make_demo()
+        #for flight in project.flights.all():
+        #    flight.make_demo()
         project.save()
         prev_user.update_disk_space()
         return Response({})
@@ -194,8 +194,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.is_demo = False
         project.user = request.user
         project.demo_users.clear()
-        for flight in project.flights.all():
-            flight.unmake_demo(request.user)
+        #for flight in project.flights.all():
+        #    flight.unmake_demo(request.user)
         project.save()
         request.user.update_disk_space()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -229,8 +229,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         return super(UserProjectViewSet, self).create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        all_flights = [Flight.objects.get(
-            uuid=uuid) for uuid in self.request.POST.getlist("flights")]
+        #all_flights = [Flight.objects.get(
+        #    uuid=uuid) for uuid in self.request.POST.getlist("flights")]
         target_user = self._get_effective_user(self.request)
         serializer.save(user=target_user, flights=[f for f in all_flights if f.user == target_user])
 

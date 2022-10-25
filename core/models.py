@@ -38,9 +38,12 @@ class UserType(Enum):
 
 class User(DiskRelationTrackerMixin, AbstractUser):
     organization = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    profession = models.CharField(max_length=20, blank=True)
+    city = models.CharField(max_length=50, blank=True)
     type = models.CharField(max_length=20,
                             choices=[(tag.name, tag.value) for tag in UserType],
-                            default=UserType.DEMO_USER.name)
+                            default=UserType.ACTIVE.name)
     demo_flights = models.ManyToManyField('Flight', related_name='demo_users')
     demo_projects = models.ManyToManyField('UserProject', related_name='demo_users')
 
