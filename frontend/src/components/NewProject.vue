@@ -1,5 +1,6 @@
 <template>
-    <div class=" pt-3" style="padding-left:15px; padding-right:15px;">
+     <div  style="height:100%; padding-top: 90px; background-color: #fafafa;">        
+        <div style="margin-left: 5%;border-radius: 10px;margin-right: 5%;  ">
         <b-alert v-if="error" variant="danger" show>{{error}}</b-alert>
         <b-form @submit="onSubmit">
             <b-form-group id="input-group-1" label="Nombre:" label-for="input-1">
@@ -8,17 +9,11 @@
             <b-form-group id="input-group-2" label="Descripción:" label-for="input-2">
                 <b-form-textarea id="input-2" v-model="form.description" placeholder="Describa el proyecto" rows="4" required></b-form-textarea>
             </b-form-group>
-            <b-form-group id="input-group-3" label="Vuelos:" label-for="input-3">
-                <div :class="{ 'invalid': !sameCamera }">
-                    <multiselect id="input-3" v-model="form.flights" :options="flights" label="name" :custom-label="flightLabel" track-by="uuid" value-field="uuid" placeholder="Escoja al menos un vuelo" multiple :state="sameCamera"></multiselect>
-                    <small class="form-text text-danger" v-if="!sameCamera">Todos los vuelos de un mismo proyecto deben haber usado la misma cámara</small>
-                    <small class="form-text text-muted">Seleccione uno o varios vuelos con Ctrl.</small>
-                </div>
-            </b-form-group>
+            
     
-            <b-button type="submit" variant="primary" :disabled="!anyFlights || !sameCamera">Submit</b-button>
+            <b-button type="submit" variant="primary" >Submit</b-button>
         </b-form>
-    </div>
+    </div></div>
 </template>
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css">
@@ -59,9 +54,7 @@ export default {
             fd.set("name", this.form.name);
             fd.set("description", this.form.description);
             // HACK: DRF needs this for ManyToMany, otherwise it gets nervous
-            for (var flight of this.form.flights) {
-                fd.append("flights", flight.uuid);
-            }
+            
             axios
                 .post("api/projects/", fd, {
                     headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
@@ -87,12 +80,7 @@ export default {
         }
     },
     created() {
-        axios
-            .get("api/flights", {
-                headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
-            })
-            .then(response => (this.flights = response.data.filter(this._isCandidate)))
-            .catch(error => (this.error = error));
+        
     }
 };
 </script>

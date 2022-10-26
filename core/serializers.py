@@ -83,7 +83,7 @@ class UserProjectSerializer(serializers.ModelSerializer):
         #flights = validated_data.pop("flights")
         artifacts = validated_data.pop("artifacts")
         proj = UserProject.objects.create(**validated_data)
-        proj.flights.set(flights)
+        #proj.flights.set(flights)
         proj.artifacts.set(artifacts)
         proj._create_geoserver_proj_workspace()
         proj.update_disk_space()

@@ -82,9 +82,8 @@ class FlightViewSet(viewsets.ModelViewSet):
             user = User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
         else:
             user = self.request.user
-        serializer = self.get_serializer(
-            Flight.objects.filter(user=user, deleted=True), many=True)
-        return Response(serializer.data)
+        #serializer = self.get_serializer(Flight.objects.filter(user=user, deleted=True), many=True)
+        return None# Response(serializer.data)
 
     @action(detail=True, methods=["post"])
     def make_demo(self, request, pk=None):
@@ -232,7 +231,7 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         #all_flights = [Flight.objects.get(
         #    uuid=uuid) for uuid in self.request.POST.getlist("flights")]
         target_user = self._get_effective_user(self.request)
-        serializer.save(user=target_user, flights=[f for f in all_flights if f.user == target_user])
+        serializer.save(user=target_user)#, flights=[f for f in all_flights if f.user == target_user])
 
     def perform_destroy(self, instance: UserProject):
         if instance.is_demo:
@@ -556,10 +555,11 @@ def mapper(request, uuid):
                    "upload_shapefiles_path": "/#/projects/" + str(project.uuid) + "/upload/shapefile",
                    "upload_geotiff_path": "/#/projects/" + str(project.uuid) + "/upload/geotiff",
                    "upload_new_index_path": "/#/projects/" + str(project.uuid) + "/upload/index",
-                   "is_multispectral": project.all_flights_multispectral(),
+                   #"is_multispectral": project.all_flights_multispectral(),
                    "is_demo": project.is_demo,
                    "uuid": project.uuid,
-                   "flights": project.flights.all().order_by("date")})
+                   #"flights": project.flights.all().order_by("date")
+                   })
 
 
 def mapper_bbox(request, uuid):

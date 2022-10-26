@@ -1,5 +1,5 @@
 <template>
-    <div class=" pt-3" style="padding-left:15px; padding-right:15px;">
+    <div class=" pt-3" style="margin-top: 150px; padding-left:15px; padding-right:15px;">
         <b-alert variant="danger" show v-if="uploadError">{{ uploadError }}</b-alert>
     
         <b-form @submit="onSubmit">

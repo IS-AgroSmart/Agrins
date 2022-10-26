@@ -22,7 +22,7 @@ export default {
             if (this.targetUser.used_space >= this.targetUser.maximum_space)
                 return "Su almacenamiento está lleno.";
             else if (!(["ACTIVE", "ADMIN"].includes(this.targetUser.type)))
-                return "Póngase en contacto con AgroSmart para activar su cuenta.";
+                return "Póngase en contacto con Agrins para activar su cuenta.";
             return "";
         }
     },

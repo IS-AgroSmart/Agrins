@@ -1,41 +1,5 @@
 <template>
-    <div class="col-md-4">
-        <b-card :title="projectName" img-src="./card_proj.png" img-alt="Image" img-top tag="article" style="max-width: 20rem; max-height: 20rem;">
-            <b-card-text>
-                <p class="white-space: pre-wrap;">{{ project.description }}</p>
-            </b-card-text>
-            <div v-if="!deleted">
-                <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" variant="primary" class="mx-1 my-1">Ver mapa</b-button>
-                <b-button @click="deleteProject" :value="deleted" variant="danger" class="mx-1 my-1">Eliminar</b-button>
-            </div>
-            <div v-else>
-                <b-button @click="finalDeleteProject" variant="danger" class="mx-1 my-1">Eliminar</b-button>
-                <b-button @click="restoreProject" variant="success" class="mx-1 my-1">Restaurar</b-button>
-            </div>
-            <template #footer>
-                <small class="text-muted">Última actualización hace 3 mins ago</small>
-            </template>            
-        </b-card>
-    </div>
 
-
-        <!--
-
-        <b-card :title="projectName" class="my-3">
-    
-            <b-card-text>
-                <p class="white-space: pre-wrap;">{{ project.description }}</p>
-            </b-card-text>
-            <div v-if="!deleted">
-                <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" variant="primary" class="mx-1 my-1">Ver mapa</b-button>
-                <b-button @click="deleteProject" :value="deleted" variant="danger" class="mx-1 my-1">Eliminar</b-button>
-            </div>
-            <div v-else>
-                <b-button @click="finalDeleteProject" variant="danger" class="mx-1 my-1">Eliminar</b-button>
-                <b-button @click="restoreProject" variant="success" class="mx-1 my-1">Restaurar</b-button>
-            </div>
-        </b-card>-->
-    
 </template>
 
 <script>
@@ -45,7 +9,7 @@ import axios from 'axios';
 export default {
     data() {
         return {
-            
+
         };
     },
     computed: {

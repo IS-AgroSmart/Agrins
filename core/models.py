@@ -80,11 +80,11 @@ class UserProject(DiskSpaceTrackerMixin, BaseProject):
     def get_disk_path(self):
         return "/projects/" + str(self.uuid)
 
-    def all_flights_multispectral(self):
-        return all(flight.camera == Camera.REDEDGE.name for flight in self.flights.all())
+    #def all_flights_multispectral(self):
+    #    return all(flight.camera == Camera.REDEDGE.name for flight in self.flights.all())
 
     def _create_geoserver_proj_workspace(self):
-        requests.post("http://container-geoserver:8080/geoserver/rest/workspaces",
+        requests.post("shttp://container-geoserver:8080/geoserver/ret/workspaces",
                       headers={"Content-Type": "application/json"},
                       data='{"workspace": {"name": "' + self._get_geoserver_ws_name() + '"}}',
                       auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
