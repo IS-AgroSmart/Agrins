@@ -47,6 +47,7 @@ import blockCriteria from "./components/BlockCriteria"
 import DeletedProjects from "./components/DeletedProjects"
 import Dashboard from "./components/Dashboard"
 import Users from "./components/Users"
+import ProjectDetail from "./components/ProjectDetail"
 
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
@@ -89,6 +90,7 @@ const router = new VueRouter({
     { path: '/projects/new', name: 'newProject', component: NewProject },
     { path: '/dashboard', name: 'dasboard', component: Dashboard },
     { path: '/users', name: 'users', component: Users },
+    { path: '/projectDetail', name: 'projectDetail', component: ProjectDetail, props: true},
     { path: '/login', component: Login },
     { path: '/logout', component: Logout },
     { path: '/signup', name: 'signUp', component: SignUp },

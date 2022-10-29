@@ -30,7 +30,7 @@ router.register(r'projects', UserProjectViewSet, basename="projects")
 router.register(r'artifacts', ArtifactViewSet, basename="artifacts")
 router.register(r'block_criteria', BlockCriteriaViewSet, basename="block_criteria")
 
-urlpatterns = [
+urlpatterns = [   
     path('admin/', admin.site.urls),
     url(r'api/', include(router.urls)),
     path(r'nodeodm/', include("nodeodm_proxy.urls")),

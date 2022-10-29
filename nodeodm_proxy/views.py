@@ -36,10 +36,10 @@ def task_info(request, uuid):
             "imagesCount": flight.num_images
         }
         return JsonResponse(data)
-    else:  # hit the NodeODM API
+    '''else:  # hit the NodeODM API
         response = api.get_info(settings.NODEODM_SERVER_URL, uuid, settings.NODEODM_SERVER_TOKEN)
         return HttpResponse(content=response.content, status=response.status_code)
-
+'''
 
 def task_output(request, uuid):
     user = Token.objects.get(key=request.headers["Authorization"][6:]).user
@@ -50,11 +50,11 @@ def task_output(request, uuid):
 
     if flight.state in _NODEODM_STATUS_CODES:  # Flight has ended, return hardcoded value
         return HttpResponse(b"Vuelo completo")
-    else:  # hit the NodeODM API
+    '''else:  # hit the NodeODM API
         response = requests.get(
             f"{settings.NODEODM_SERVER_URL}/task/{uuid}/output?token={settings.NODEODM_SERVER_TOKEN}")
         return HttpResponse(content=response.content, status=response.status_code)
-
+'''
 
 @csrf_exempt
 def cancel_task(request):
@@ -65,7 +65,8 @@ def cancel_task(request):
 
     if not (user.type == UserType.ADMIN.name or flight.user == user):
         return HttpResponse(status=403)
-
+'''
     response = requests.post(f"{settings.NODEODM_SERVER_URL}/task/cancel?token={settings.NODEODM_SERVER_TOKEN}",
                              data={"uuid": uuid})
     return HttpResponse(status=response.status_code)
+'''

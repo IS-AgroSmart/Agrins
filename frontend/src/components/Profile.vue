@@ -83,8 +83,8 @@ export default {
     this.form.lastname = this.storage.loggedInUser.last_name;
     this.form.phone = this.storage.loggedInUser.phone;
     this.form.institution = this.storage.loggedInUser.organization;
-    this.profesion = this.storage.loggedInUser.profesion;
-    this.city = this.storage.loggedInUser.city;
+    this.form.profesion = this.storage.loggedInUser.profession;
+    this.form.city = this.storage.loggedInUser.city;
   }
 }
 </script>

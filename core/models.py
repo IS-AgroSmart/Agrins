@@ -22,6 +22,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from PIL import Image, ImageOps
 from weasyprint import HTML
+from datetime import date
 
 from django.conf import settings
 from core.parser import FormulaParser
@@ -41,12 +42,9 @@ class User(DiskRelationTrackerMixin, AbstractUser):
     phone = models.CharField(max_length=15, blank=True)
     profession = models.CharField(max_length=20, blank=True)
     city = models.CharField(max_length=50, blank=True)
-    type = models.CharField(max_length=20,
-                            choices=[(tag.name, tag.value) for tag in UserType],
-                            default=UserType.ACTIVE.name)
+    type = models.CharField(max_length=20,choices=[(tag.name, tag.value) for tag in UserType],default=UserType.ACTIVE.name)
     demo_flights = models.ManyToManyField('Flight', related_name='demo_users')
-    demo_projects = models.ManyToManyField('UserProject', related_name='demo_users')
-
+    demo_projects = models.ManyToManyField('UserProject', related_name='demo_users')    
     used_space = models.PositiveIntegerField(default=0)
     maximum_space = models.PositiveIntegerField(default=45 * 1024 * 1024)
     remaining_images = models.PositiveIntegerField(default=0)
@@ -68,7 +66,7 @@ class BaseProject(models.Model):
 
 class UserProject(DiskSpaceTrackerMixin, BaseProject):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE, related_name="user_projects")
-    #flights = models.ManyToManyField("Flight", null=True, related_name="user_projects", default=None)
+    flights = models.ManyToManyField("Flight", related_name="user_projects")
     must_create_workspace = models.BooleanField(default=True)
     is_demo = models.BooleanField(default=False)
 
@@ -84,10 +82,10 @@ class UserProject(DiskSpaceTrackerMixin, BaseProject):
     #    return all(flight.camera == Camera.REDEDGE.name for flight in self.flights.all())
 
     def _create_geoserver_proj_workspace(self):
-        requests.post("shttp://container-geoserver:8080/geoserver/ret/workspaces",
+        requests.post(settings.GEOSERVER_LOCAL_LOCATION+"ret/workspaces",
                       headers={"Content-Type": "application/json"},
                       data='{"workspace": {"name": "' + self._get_geoserver_ws_name() + '"}}',
-                      auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+                      auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
 
         self._create_mainortho_datastore()
         # For multispectral: repeat for any bands apart from RGB
@@ -113,12 +111,12 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
             f.write("regex=[0-9]{8},format=yyyyMMdd")
         # For multispectral: slice multispectral bands, save on /projects/uuid/nir and /projects/uuid/rededge
         # Create datastore and ImageMosaic
-        GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
+        GEOSERVER_BASE_URL = settings.GEOSERVER_LOCAL_LOCATION+"rest/workspaces/"
         requests.put(
             GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/mainortho/external.imagemosaic",
             headers={"Content-Type": "text/plain"},
             data="file:///media/USB/" + str(self.uuid) + "/mainortho/",
-            auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
         # Enable time dimension
         requests.put(
             GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/mainortho/coverages/mainortho.json",
@@ -127,7 +125,7 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
                  '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
                  '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
                  '"OutputTransparentColor", "#000000" ] } ] } }} ',
-            auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
 
     def _create_index_datastore(self, index):
         index_folder = self.get_disk_path() + "/" + index
@@ -148,7 +146,7 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
         with open(index_folder + "/timeregex.properties", "w") as f:
             f.write("regex=[0-9]{8},format=yyyyMMdd")
 
-        GEOSERVER_API_ENTRYPOINT = "http://container-geoserver:8080/geoserver/rest/"
+        GEOSERVER_API_ENTRYPOINT = "http://localhost:8080/geoserver/rest/"
         GEOSERVER_BASE_URL = GEOSERVER_API_ENTRYPOINT + "workspaces/"
         requests.put(
             GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/" + index + "/external.imagemosaic",
@@ -190,16 +188,14 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
     uuid = models.UUIDField(primary_key=True, default=u.uuid4, editable=False)
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     is_demo = models.BooleanField(default=False)
-    name = models.CharField(max_length=50)
-    date = models.DateField()
-    camera = models.CharField(max_length=10, choices=[(tag.name, tag.value) for tag in Camera])
-    annotations = models.TextField()
+    name = models.CharField(max_length=50, default='Flight-provider')
+    date = models.DateField(default=date.today)
+    camera = models.CharField(max_length=10, choices=[(tag.name, tag.value) for tag in Camera],default='RGB')
+    annotations = models.TextField(default='Anotations')
     deleted = models.BooleanField(default=False)
-    state = models.CharField(max_length=10,
-                             choices=[(tag.name, tag.value) for tag in FlightState],
-                             default=FlightState.WAITING.name)
+    state = models.CharField(max_length=10, choices=[(tag.name, tag.value) for tag in FlightState],default=FlightState.COMPLETE.name)
     processing_time = models.PositiveIntegerField(default=0)
-    num_images = models.PositiveIntegerField(default=0)
+    num_images = models.PositiveIntegerField(default=5)
 
     used_space = models.PositiveIntegerField(default=0)
 
@@ -208,14 +204,14 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
             models.UniqueConstraint(fields=['name', 'user'], name='unique name on same user')
         ]
 
-    def get_nodeodm_info(self):
-        if self.state != FlightState.PROCESSING.name:
-            return {}
+    #def get_nodeodm_info(self):
+    #    if self.state != FlightState.PROCESSING.name:
+    #        return {}
 
-        data = requests.get(
-            f"{settings.NODEODM_SERVER_URL}/task/{str(self.uuid)}/info?token={settings.NODEODM_SERVER_TOKEN}").json()
-        return {"processingTime": data.get("processingTime", 0), "progress": data.get("progress", 0),
-                "numImages": data.get("imagesCount", 0)}
+    #    data = requests.get(
+    #        f"{settings.NODEODM_SERVER_URL}/task/{str(self.uuid)}/info?token={settings.NODEODM_SERVER_TOKEN}").json()
+    #    return {"processingTime": data.get("processingTime", 0), "progress": data.get("progress", 0),
+    #            "numImages": data.get("imagesCount", 0)}
 
     def get_disk_path(self):
         return "/flights/" + str(self.uuid)
@@ -243,7 +239,7 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
     def _get_geoserver_ws_name(self):
         return "flight_" + str(self.uuid)
 
-    def download_and_decompress_results(self):
+    '''def download_and_decompress_results(self):
         try:
             os.mkdir(self.get_disk_path())
         except FileExistsError:
@@ -260,7 +256,7 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
         with ZipFile(zip_local_name, 'r') as zip:
             zip.extractall(path=self.get_disk_path())
         os.remove(zip_local_name)
-
+'''
     @staticmethod
     def tiff_to_png(tiff: str, png: str):
         assert tiff.endswith(".tif"), f"Input file {tiff} must be a TIFF file!"
@@ -374,20 +370,20 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
             os.system(command)  # Create raster, save it to <index>.tif on folder <flight_uuid>/odm_orthophoto
 
     def create_geoserver_workspace_and_upload_geotiff(self):
-        requests.post("http://container-geoserver:8080/geoserver/rest/workspaces",
+        requests.post("http://localhost:8080/geoserver/rest/workspaces",
                       headers={"Content-Type": "application/json"},
                       data='{"workspace": {"name": "' + self._get_geoserver_ws_name() + '"}}',
                       auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
         using_micasense = self.camera == Camera.REDEDGE.name
         geotiff_name = "odm_orthophoto.tif" if not using_micasense else "rgb.tif"
         requests.put(
-            "http://container-geoserver:8080/geoserver/rest/workspaces/" + self._get_geoserver_ws_name() + "/coveragestores/ortho/external.geotiff",
+            "http://localhost:8080/geoserver/rest/workspaces/" + self._get_geoserver_ws_name() + "/coveragestores/ortho/external.geotiff",
             headers={"Content-Type": "text/plain"},
             data="file:///media/input/" + str(self.uuid) + "/odm_orthophoto/" + geotiff_name,
             auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
         if using_micasense:  # Change name to odm_orthomosaic and configure transparent color on black
             requests.put(
-                "http://container-geoserver:8080/geoserver/rest/workspaces/" + self._get_geoserver_ws_name() + "/coveragestores/ortho/coverages/rgb.json",
+                "http://localhost:8080/geoserver/rest/workspaces/" + self._get_geoserver_ws_name() + "/coveragestores/ortho/coverages/rgb.json",
                 headers={"Content-Type": "application/json"},
                 data='{"coverage": {"name": "odm_orthophoto", "title": "odm_orthophoto", "enabled": true, ' +
                      '"parameters": { "entry": [ { "string": [ "InputTransparentColor", "#000000" ] }, ' +
@@ -425,7 +421,7 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
         self.save()
         return True
 
-
+'''
 def create_nodeodm_task(sender, instance: Flight, created, **kwargs):
     if created:
         requests.post(f'{settings.NODEODM_SERVER_URL}/task/new/init?token={settings.NODEODM_SERVER_TOKEN}',
@@ -445,11 +441,11 @@ def delete_nodeodm_task(sender, instance: Flight, **kwargs):
     requests.post(f"{settings.NODEODM_SERVER_URL}/task/remove?token={settings.NODEODM_SERVER_TOKEN}",
                   headers={'Content-Type': "application/x-www-form-urlencoded"},
                   data="uuid=" + str(instance.uuid), )
-
+'''
 
 def delete_geoserver_workspace(sender, instance: Union[Flight, UserProject], **kwargs):
     querystring = {"recurse": "true"}
-    requests.delete("http://container-geoserver:8080/geoserver/rest/workspaces/" + instance._get_geoserver_ws_name(),
+    requests.delete("http://localhost:8080/geoserver/rest/workspaces/" + instance._get_geoserver_ws_name(),
                     params=querystring,
                     auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
 
@@ -467,8 +463,8 @@ def delete_thumbnail(sender, instance: Flight, **kwargs):
         os.remove(instance.get_thumbnail_path())
 
 
-post_save.connect(create_nodeodm_task, sender=Flight)
-post_delete.connect(delete_nodeodm_task, sender=Flight)
+#post_save.connect(create_nodeodm_task, sender=Flight)
+#post_delete.connect(delete_nodeodm_task, sender=Flight)
 post_delete.connect(delete_thumbnail, sender=Flight)
 post_delete.connect(delete_geoserver_workspace, sender=Flight)
 post_delete.connect(delete_geoserver_workspace, sender=UserProject)

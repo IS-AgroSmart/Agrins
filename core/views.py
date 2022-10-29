@@ -38,6 +38,7 @@ from core.notificator import send_notification_by_user
 from push_notifications.models import APNSDevice, GCMDevice
 
 from django_rest_passwordreset.signals import reset_password_token_created
+from .utils.token import  TokenGenerator
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -71,7 +72,6 @@ class UserViewSet(viewsets.ModelViewSet):
                 instance.is_active = False
                 instance.save()
 
-
 class FlightViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = FlightSerializer
@@ -82,8 +82,8 @@ class FlightViewSet(viewsets.ModelViewSet):
             user = User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
         else:
             user = self.request.user
-        #serializer = self.get_serializer(Flight.objects.filter(user=user, deleted=True), many=True)
-        return None# Response(serializer.data)
+        serializer = self.get_serializer(Flight.objects.filter(user=user, deleted=True), many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=["post"])
     def make_demo(self, request, pk=None):
@@ -179,8 +179,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.user = None
         for user in User.objects.all():
             user.demo_projects.add(project)
-        #for flight in project.flights.all():
-        #    flight.make_demo()
+        for flight in project.flights.all():
+            flight.make_demo()
         project.save()
         prev_user.update_disk_space()
         return Response({})
@@ -193,8 +193,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.is_demo = False
         project.user = request.user
         project.demo_users.clear()
-        #for flight in project.flights.all():
-        #    flight.unmake_demo(request.user)
+        for flight in project.flights.all():
+            flight.unmake_demo(request.user)
         project.save()
         request.user.update_disk_space()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -228,8 +228,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         return super(UserProjectViewSet, self).create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        #all_flights = [Flight.objects.get(
-        #    uuid=uuid) for uuid in self.request.POST.getlist("flights")]
+        all_flights = [Flight.objects.get(
+            uuid=uuid) for uuid in self.request.POST.getlist("flights")]
         target_user = self._get_effective_user(self.request)
         serializer.save(user=target_user)#, flights=[f for f in all_flights if f.user == target_user])
 
@@ -269,7 +269,7 @@ def upload_images(request, uuid):
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
         filenames.append(tmp_file)
         files.append(('images', open(tmp_file, "rb")))
-    # upload files to NodeODM server
+    '''# upload files to NodeODM server
     r = requests.post(
         f"{settings.NODEODM_SERVER_URL}/task/new/upload/{str(flight.uuid)}?token={settings.NODEODM_SERVER_TOKEN}",
         files=files)
@@ -282,9 +282,9 @@ def upload_images(request, uuid):
     r = requests.post(
         f"{settings.NODEODM_SERVER_URL}/task/new/commit/{str(flight.uuid)}?token={settings.NODEODM_SERVER_TOKEN}")
     if r.status_code != 200:
-        return HttpResponse(status=500)
+        return HttpResponse(status=500)'''
 
-    flight.state = FlightState.PROCESSING.name
+    flight.state = FlightState.COMPLETE.name
     flight.save()  # change Flight state to PROCESSING
 
     return HttpResponse()
@@ -423,7 +423,7 @@ def upload_vectorfile(request, uuid):
         with cd(project.get_disk_path() + "/" + file_name):
             os.system('ogr2ogr -f "ESRI Shapefile" "{0}.shp" "{0}.kml"'.format(file_name))
 
-    GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
+    GEOSERVER_BASE_URL = "http://localhost:8080/geoserver/rest/workspaces/"
 
     requests.put(
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/datastores/" +
@@ -466,7 +466,7 @@ def upload_geotiff(request, uuid):
         for chunk in file.chunks():
             f.write(chunk)
 
-    GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
+    GEOSERVER_BASE_URL = "http://localhost:8080/geoserver/rest/workspaces/"
 
     requests.put(
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/coveragestores/" +
@@ -498,7 +498,7 @@ def preview_flight_url(request, uuid):
     flight = get_object_or_404(Flight, uuid=uuid)
 
     ans = requests.get(
-        "http://container-geoserver:8080/geoserver/rest/workspaces/" + flight._get_geoserver_ws_name() +
+        "http://localhost:8080/geoserver/rest/workspaces/" + flight._get_geoserver_ws_name() +
         "/coveragestores/ortho/coverages/odm_orthophoto.json",
         auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD)).json()
     bbox = ans["coverage"]["nativeBoundingBox"]
@@ -555,10 +555,10 @@ def mapper(request, uuid):
                    "upload_shapefiles_path": "/#/projects/" + str(project.uuid) + "/upload/shapefile",
                    "upload_geotiff_path": "/#/projects/" + str(project.uuid) + "/upload/geotiff",
                    "upload_new_index_path": "/#/projects/" + str(project.uuid) + "/upload/index",
-                   #"is_multispectral": project.all_flights_multispectral(),
+                   "is_multispectral": project.all_flights_multispectral(),
                    "is_demo": project.is_demo,
                    "uuid": project.uuid,
-                   #"flights": project.flights.all().order_by("date")
+                   "flights": project.flights.all().order_by("date")
                    })
 
 
@@ -566,7 +566,7 @@ def mapper_bbox(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
 
     ans = requests.get(
-        "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
+        "http://localhost:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
         "/coveragestores/mainortho/coverages/mainortho.json",
         auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD)).json()
 
@@ -622,9 +622,9 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'current_user': reset_password_token.user,
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,
-        # 'reset_password_url': "http://localhost/#/restorePassword/reset?token={}".format(reset_password_token.key)
-        'reset_password_url': "http://flysensorec.com/#/restorePassword/reset?token={}".format(
-            reset_password_token.key)
+        'reset_password_url': "http://localhost/#/restorePassword/reset?token={}".format(reset_password_token.key)
+        #'reset_password_url': "http://flysensorec.com/#/restorePassword/reset?token={}".format(
+        #    reset_password_token.key)
     }
 
     # render email text
@@ -635,7 +635,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 
     msg = EmailMultiAlternatives(
         # title:
-        "AgroSmart - Recuperación de contraseña",
+        "Agrins - Recuperación de contraseña",
         # message:
         email_plaintext_message,
         # from:

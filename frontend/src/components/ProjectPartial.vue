@@ -1,23 +1,21 @@
 <template>
     <div class="col-md-4">
-        <b-card :title="projectName" img-src="./card_proj.png" img-alt="Image" img-top tag="article" style="max-width: 20rem; max-height: 20rem;">
-            <b-card-text>
-                <p class="white-space: pre-wrap;">{{ project.description }}</p>
-            </b-card-text>
-            <div v-if="!deleted">
-                <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" variant="primary" class="mx-1 my-1">Ver mapa</b-button>
-                <b-button @click="deleteProject" :value="deleted" variant="danger" class="mx-1 my-1">Eliminar</b-button>
-            </div>
-            <div v-else>
-                <b-button @click="finalDeleteProject" variant="danger" class="mx-1 my-1">Eliminar</b-button>
-                <b-button @click="restoreProject" variant="success" class="mx-1 my-1">Restaurar</b-button>
-            </div>
-            <template #footer>
-                <small class="text-muted">Última actualización hace 3 mins ago</small>
+        <b-card @click="viewProject()" :title="projectName" :sub-title="descriptionProject" img-src="./card_proj.png" img-alt="Image" img-top tag="article" style="max-width: 19rem; max-height: 17rem;">
+         <template #footer class="flex-sm-fill">
+            <b-row >
+                <small style="fontSize:12px" class="text-muted">Última actualización hace 3 min.</small>
+            </b-row>
+            <b-row class="float-right">
+                    <b-badge v-if="project.is_demo" squared variant="warning">DEMO</b-badge>                    
+                    <b-badge v-if="isAdmin" variant="success" squared>PROPIETARIO</b-badge>
+                    <b-badge v-if="!project.is_demo && !isAdmin" variant="success" squared>PROPIETARIO</b-badge>
+            </b-row>
             </template>            
         </b-card>
     </div>
 
+
+    
 
         <!--
 
@@ -39,8 +37,7 @@
 </template>
 
 <script>
-// import forceLogin from './mixins/force_login';
-import axios from 'axios';
+
 
 export default {
     data() {
@@ -53,68 +50,17 @@ export default {
             return "/mapper/" + this.project.uuid;
         },
         projectName() {
-            return this.project.name + (this.project.is_demo ? " (DEMO)" : "");
-        }
+            return this.project.name;
+        },
+        descriptionProject(){
+            return this.project.description.substring(0, 60) +"...";
+        },
+        isAdmin() { return this.storage.loggedInUser != null && this.storage.loggedInUser.type == "ADMIN"; },
     },
     methods: {
-        finalDeleteProject() {
-            this.$bvModal.msgBoxConfirm('Este proyecto NO podrá ser recuperado.', {
-                    title: '¿Realmente desea eliminar el proyecto?',
-                    okVariant: 'danger',
-                    okTitle: 'Sí',
-                    cancelTitle: 'No',
-                    // hideHeaderClose: false
-                })
-                .then(value => {
-                    if (value)
-                        axios.delete("api/projects/" + this.project.uuid, {
-                            headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
-                        }).then(() => this.$emit("delete-confirmed"))
-                        .catch(() => {
-                            this.$bvToast.toast('Error al eliminar el proyecto', {
-                                title: "Error",
-                                autoHideDelay: 3000,
-                                variant: "danger",
-                            });
-                        });
-                });
-        },
-        restoreProject() {
-            axios.patch("api/projects/" + this.project.uuid + "/", { deleted: false }, {
-                    headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
-                }).then(() => this.$emit("restore-confirmed"))
-                .catch(() => {
-                    this.$bvToast.toast('Error al restaurar el proyecto', {
-                        title: "Error",
-                        autoHideDelay: 3000,
-                        variant: "danger",
-                    });
-                });
-        },
-        deleteProject() {
-            this.$bvModal.msgBoxConfirm(this.project.is_demo ?
-                    'Este proyecto no podrá ser recuperado.' :
-                    'Este proyecto podrá ser recuperado durante 30 días.', {
-                        title: '¿Realmente desea eliminar el proyecto?',
-                        okVariant: 'danger',
-                        okTitle: 'Sí',
-                        cancelTitle: 'No',
-                        // hideHeaderClose: false
-                    })
-                .then(value => {
-                    if (value)
-                        axios.delete("api/projects/" + this.project.uuid, {
-                            headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
-                        }).then(() => this.$router.replace(this.project.is_demo ? "/projects" : "/projects/deleted"))
-                        .catch(() => {
-                            this.$bvToast.toast('Error al eliminar el proyecto', {
-                                title: "Error",
-                                autoHideDelay: 3000,
-                                variant: "danger",
-                            });
-                        });
-                });
-        },
+        viewProject(){
+            this.$router.push({ name: 'projectDetail', params: { project: this.project , deleted: this.deleted }})
+        },        
     },
     props: {
         project: { type: Object },

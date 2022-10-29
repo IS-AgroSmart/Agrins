@@ -3,6 +3,8 @@ from rest_framework.validators import UniqueValidator
 from core.utils.block_verifier import user_verifier
 
 from core.models import *
+from django.core.mail import EmailMessage
+from .utils.token import  TokenGenerator
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -35,7 +37,9 @@ class UserSerializer(serializers.ModelSerializer):
             city=validated_data['city'],
         )
         user.set_password(validated_data['password'])
+        user.is_active = True
         user.save()
+       
 
         # when user is created, link him to all existing demo flights & projects
         for demo_flight in Flight.objects.filter(is_demo=True).all():
@@ -52,7 +56,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class FlightSerializer(serializers.ModelSerializer):
-    nodeodm_info = serializers.SerializerMethodField()
+    #nodeodm_info = serializers.SerializerMethodField()
 
     @staticmethod
     def get_nodeodm_info(flight):
@@ -60,8 +64,7 @@ class FlightSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Flight
-        fields = ["uuid", "name", "user", "date", "camera", "annotations", "state", "nodeodm_info", "processing_time",
-                  "is_demo", "deleted"]
+        fields = ["uuid", "name", "user", "date", "is_demo", "deleted"]
 
 
 class ArtifactSerializer(serializers.ModelSerializer):
@@ -71,19 +74,15 @@ class ArtifactSerializer(serializers.ModelSerializer):
 
 
 class UserProjectSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        default=serializers.CurrentUserDefault())
-    #flights = serializers.PrimaryKeyRelatedField(many=True,
-#                                                 queryset=Flight.objects.all())
-    artifacts = serializers.PrimaryKeyRelatedField(many=True,
-                                                   queryset=Artifact.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())
+    flights = serializers.PrimaryKeyRelatedField(many=True,queryset=Flight.objects.all())
+    artifacts = serializers.PrimaryKeyRelatedField(many=True,queryset=Artifact.objects.all())
 
     def create(self, validated_data):
-        #flights = validated_data.pop("flights")
+        flights = validated_data.pop("flights")
         artifacts = validated_data.pop("artifacts")
         proj = UserProject.objects.create(**validated_data)
-        #proj.flights.set(flights)
+        proj.flights.set(flights)
         proj.artifacts.set(artifacts)
         proj._create_geoserver_proj_workspace()
         proj.update_disk_space()
@@ -92,7 +91,7 @@ class UserProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProject
-        fields = ['uuid', 'user', 'artifacts', "name", "description", "is_demo", "deleted"]
+        fields = ['uuid', 'user', 'flights', 'artifacts', "name", "description", "is_demo", "deleted"]
 
 
 class BlockCriteriaSerializer(serializers.ModelSerializer):

@@ -24,11 +24,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECURITY WARNING: don't run with debug turned on in production!
 
-SECRET_KEY = config('SECRET_KEY')
-GEOSERVER_PASSWORD = config('GEOSERVER_PASSWORD')
-DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+SECRET_KEY = config('SECRET_KEY')
+
+DEBUG = config('DEBUG', cast=bool)
+ALLOWED_HOSTS = ['*']
+
+
+#Geoserver data
+GEOSERVER_PUBLIC_LOCATION = config('GEOSERVER_PUBLIC_LOCATION', cast=str)
+GEOSERVER_LOCATION = config('GEOSERVER_LOCATION', cast=str)
+GEOSERVER_LOCAL_LOCATION = config('GEOSERVER_LOCAL_LOCATION', cast=str)
+GEOSERVER_USER = config('GEOSERVER_USER', cast=str) 
+GEOSERVER_PASSWORD = config('GEOSERVER_PASSWORD',cast=str)
 
 LOGGING = {
     'version': 1,
@@ -53,8 +61,8 @@ LOGGING = {
     },
 }
 
-AUTH_USER_MODEL = 'core.User'
-SITE_URL = "http://127.0.0.1:8000"
+AUTH_USER_MODEL = config('AUTH_USER_MODEL', cast=str)
+SITE_URL = config('SITE_URL', cast=str)
 
 # Application definition
 
@@ -172,17 +180,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = 'staticfiles'
+STATIC_URL = config('STATIC_URL', cast=str)
+STATIC_ROOT = config('STATIC_ROOT', cast=str)
 # STATICFILES_DIRS = (os.path.join(BASE_DIR, "staticfiles"),)
 
+
 #Send Emails
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 EMAIL_HOST = config('EMAIL_HOST', cast=str)
-EMAIL_PORT = 587
+EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str)
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', cast=str)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = config('EMAIL_BACKEND',cast=str)
+
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 #NODEODM_SERVER_URL = config('NODEODM_SERVER_URL', cast=str)
