@@ -15,17 +15,17 @@
         </div>
         <div style="height: 100%; margin-left: 5%;border-radius: 10px;margin-right: 5%;  ">
             <b-card no-body>
-                <b-tabs card vertical>
+                <b-tabs size="sm" content-class="mt-3" justified>
                 <b-tab style="height: 100%;background-color:;" title="Proyecto" active>
                     <div>
                         <div class="d-flex bd-highlight">
-                            <div >                                                               
-                                <b-img src="./card_proj.png" fluid alt="Fluid image"></b-img>                             
+                            <div class="text-center">                                                               
+                                <b-img  src="./card_proj.png" fluid alt="Fluid image"></b-img>                             
                                
-                                <div class="mt-3">
+                                <div class="text-center">
                                     <b-button-group size="sm">
                                     <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" class="mx-1 my-1" variant="success">Ver Mapa</b-button>
-                                    <b-button  @click="deleteProject" :value="deleted" variant="danger" class="mx-1 my-1" >Eliminar</b-button>
+                                    <b-button v-if="!project.is_demo" @click="finalDeleteProject" variant="danger" class="mx-1 my-1" >Eliminar</b-button>
                                     </b-button-group>
                                 </div>
                                 <h5>
@@ -36,8 +36,13 @@
                         </div>
                     </div>
                 </b-tab>
-                <b-tab disabled style="background-color:white;" title="Recursos"><b-card-text>Tab contents 2</b-card-text></b-tab>
-                <b-tab disabled style="background-color:white;" title="Configuración"><b-card-text>Tab contents 3</b-card-text></b-tab>
+                <b-tab style="background-color:white;" title="Recursos"><b-card-text>
+                    <div style="padding-left: 3%; padding-top:3%">
+                    <p>Link documentos: <b-link href="">Proyecto.pdf</b-link></p>
+                    <p>Capas: </p>
+                    <p><b-link href=""> Orthomosaico.tif</b-link></p></div>
+                </b-card-text></b-tab>
+                <b-tab style="background-color:white;" title="Configuración"><b-card-text>Configuración del proyecto</b-card-text></b-tab>
                 </b-tabs>
             </b-card>
         </div>
@@ -57,7 +62,7 @@ export default {
         };
     },
     computed: {
-        mapper_url() {
+        mapper_url() {            
             return "/mapper/" + this.project.uuid;
         },
         projectName() {
@@ -79,6 +84,7 @@ export default {
                         axios.delete("api/projects/" + this.project.uuid, {
                             headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
                         }).then(() => this.$emit("delete-confirmed"))
+                        .then(() => this.$router.push("/projects"))
                         .catch(() => {
                             this.$bvToast.toast('Error al eliminar el proyecto', {
                                 title: "Error",
@@ -88,42 +94,7 @@ export default {
                         });
                 });
         },
-        restoreProject() {
-            axios.patch("api/projects/" + this.project.uuid + "/", { deleted: false }, {
-                    headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
-                }).then(() => this.$emit("restore-confirmed"))
-                .catch(() => {
-                    this.$bvToast.toast('Error al restaurar el proyecto', {
-                        title: "Error",
-                        autoHideDelay: 3000,
-                        variant: "danger",
-                    });
-                });
-        },
-        deleteProject() {
-            this.$bvModal.msgBoxConfirm(this.project.is_demo ?
-                    'Este proyecto no podrá ser recuperado.' :
-                    'Este proyecto podrá ser recuperado durante 30 días.', {
-                        title: '¿Realmente desea eliminar el proyecto?',
-                        okVariant: 'danger',
-                        okTitle: 'Sí',
-                        cancelTitle: 'No',
-                        // hideHeaderClose: false
-                    })
-                .then(value => {
-                    if (value)
-                        axios.delete("api/projects/" + this.project.uuid, {
-                            headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
-                        }).then(() => this.$router.replace(this.project.is_demo ? "/projects" : "/projects/deleted"))
-                        .catch(() => {
-                            this.$bvToast.toast('Error al eliminar el proyecto', {
-                                title: "Error",
-                                autoHideDelay: 3000,
-                                variant: "danger",
-                            });
-                        });
-                });
-        },
+        
     },
     props: {
         project: { type: Object },

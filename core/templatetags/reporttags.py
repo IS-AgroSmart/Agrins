@@ -1,11 +1,11 @@
 # https://stackoverflow.com/a/1427964
 from django import template
 
-from core.models import Camera, FlightState
+#from core.models import Camera, FlightState
 
 register = template.Library()
 
-
+'''
 @register.filter
 def cameraname(cam):
     if cam == Camera.REDEDGE.name:
@@ -27,7 +27,7 @@ def statename(state):
     else:
         return "Estado no reconocido: <" + state + ">"
 
-
+'''
 @register.filter
 def millistostring(millis):
     secs = millis // 1000

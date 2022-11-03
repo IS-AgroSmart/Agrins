@@ -43,7 +43,7 @@ class User(DiskRelationTrackerMixin, AbstractUser):
     profession = models.CharField(max_length=20, blank=True)
     city = models.CharField(max_length=50, blank=True)
     type = models.CharField(max_length=20,choices=[(tag.name, tag.value) for tag in UserType],default=UserType.ACTIVE.name)
-    demo_flights = models.ManyToManyField('Flight', related_name='demo_users')
+    #demo_flights = models.ManyToManyField('Flight', related_name='demo_users')
     demo_projects = models.ManyToManyField('UserProject', related_name='demo_users')    
     used_space = models.PositiveIntegerField(default=0)
     maximum_space = models.PositiveIntegerField(default=45 * 1024 * 1024)
@@ -51,14 +51,14 @@ class User(DiskRelationTrackerMixin, AbstractUser):
     image_month_quota = models.PositiveIntegerField(default=3000)
 
     def get_disk_related_models(self):
-        return list(self.flight_set.filter(is_demo=False)) + list(self.user_projects.filter(is_demo=False))
+        return list(self.user_projects.filter(is_demo=False))
 
 
 class BaseProject(models.Model):
     uuid = models.UUIDField(primary_key=True, default=u.uuid4, editable=False)
     name = models.CharField(max_length=50)
     description = models.TextField()
-    deleted = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=True)
 
     class Meta:
         abstract = True
@@ -66,7 +66,7 @@ class BaseProject(models.Model):
 
 class UserProject(DiskSpaceTrackerMixin, BaseProject):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE, related_name="user_projects")
-    flights = models.ManyToManyField("Flight", related_name="user_projects")
+    #flights = models.ManyToManyField("Flight", related_name="user_projects")
     must_create_workspace = models.BooleanField(default=True)
     is_demo = models.BooleanField(default=False)
 
@@ -82,7 +82,7 @@ class UserProject(DiskSpaceTrackerMixin, BaseProject):
     #    return all(flight.camera == Camera.REDEDGE.name for flight in self.flights.all())
 
     def _create_geoserver_proj_workspace(self):
-        requests.post(settings.GEOSERVER_LOCAL_LOCATION+"ret/workspaces",
+        requests.post("http://container-geoserver:8080/geoserver/rest/workspaces",
                       headers={"Content-Type": "application/json"},
                       data='{"workspace": {"name": "' + self._get_geoserver_ws_name() + '"}}',
                       auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
@@ -94,15 +94,15 @@ class UserProject(DiskSpaceTrackerMixin, BaseProject):
         os.makedirs(self.get_disk_path() + "/mainortho")
         # For multispectral: slice GeoTIFF bands 0:2, save on /projects/uuid/mainortho
         # Otherwise: just copy GeoTIFFs to /projects/uuid/mainortho
-        for flight in self.flights.all():
+        #for flight in self.flights.all():
             # Copy all TIFFs to project folder, rename them
-            ortho_name = "rgb.tif" if flight.camera == Camera.REDEDGE.name else "odm_orthophoto.tif"
-            shutil.copy(flight.get_disk_path() + "/odm_orthophoto/" + ortho_name,
-                        self.get_disk_path() + "/mainortho")
-            os.rename(self.get_disk_path() + "/mainortho/" + ortho_name,
-                      self.get_disk_path() + "/mainortho/" + "ortho_{:04d}{:02d}{:02d}.tif".format(flight.date.year,
-                                                                                                   flight.date.month,
-                                                                                                   flight.date.day))
+        #    ortho_name = "rgb.tif" if flight.camera == Camera.REDEDGE.name else "odm_orthophoto.tif"
+        #    shutil.copy(flight.get_disk_path() + "/odm_orthophoto/" + ortho_name,
+        #                self.get_disk_path() + "/mainortho")
+        #    os.rename(self.get_disk_path() + "/mainortho/" + ortho_name,
+        #              self.get_disk_path() + "/mainortho/" + "ortho_{:04d}{:02d}{:02d}.tif".format(flight.date.year,
+        #                                                                                           flight.date.month,
+        #                                                                                           flight.date.day))
         with open(self.get_disk_path() + "/mainortho/indexer.properties", "w") as f:
             f.write("""TimeAttribute=ingestion
 Schema=*the_geom:Polygon,location:String,ingestion:java.util.Date
@@ -111,9 +111,9 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
             f.write("regex=[0-9]{8},format=yyyyMMdd")
         # For multispectral: slice multispectral bands, save on /projects/uuid/nir and /projects/uuid/rededge
         # Create datastore and ImageMosaic
-        GEOSERVER_BASE_URL = settings.GEOSERVER_LOCAL_LOCATION+"rest/workspaces/"
+        GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
         requests.put(
-            GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/mainortho/external.imagemosaic",
+            GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/mainortho/external.geotiff",
             headers={"Content-Type": "text/plain"},
             data="file:///media/USB/" + str(self.uuid) + "/mainortho/",
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
@@ -130,15 +130,15 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
     def _create_index_datastore(self, index):
         index_folder = self.get_disk_path() + "/" + index
         os.makedirs(index_folder)
-        for flight in self.flights.all():
+        #for flight in self.flights.all():
             # Copy all TIFFs to project folder, rename them
-            ortho_name = index + ".tif"
-            shutil.copy(flight.get_disk_path() + "/odm_orthophoto/" + ortho_name,
-                        index_folder)
-            os.rename(index_folder + "/" + ortho_name,
-                      index_folder + "/" + "ortho_{:04d}{:02d}{:02d}.tif".format(flight.date.year,
-                                                                                 flight.date.month,
-                                                                                 flight.date.day))
+        #    ortho_name = index + ".tif"
+        #    shutil.copy(flight.get_disk_path() + "/odm_orthophoto/" + ortho_name,
+        #                index_folder)
+        #    os.rename(index_folder + "/" + ortho_name,
+        #              index_folder + "/" + "ortho_{:04d}{:02d}{:02d}.tif".format(flight.date.year,
+        #                                                                         flight.date.month,
+        #                                                                         flight.date.day))
         with open(index_folder + "/indexer.properties", "w") as f:
             f.write("""TimeAttribute=ingestion
         Schema=*the_geom:Polygon,location:String,ingestion:java.util.Date
@@ -146,13 +146,13 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
         with open(index_folder + "/timeregex.properties", "w") as f:
             f.write("regex=[0-9]{8},format=yyyyMMdd")
 
-        GEOSERVER_API_ENTRYPOINT = "http://localhost:8080/geoserver/rest/"
+        GEOSERVER_API_ENTRYPOINT = "http://container-geoserver:8080/geoserver/rest/"
         GEOSERVER_BASE_URL = GEOSERVER_API_ENTRYPOINT + "workspaces/"
         requests.put(
             GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/" + index + "/external.imagemosaic",
             headers={"Content-Type": "text/plain"},
             data="file:///media/USB/" + str(self.uuid) + "/" + index + "/",
-            auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
         # Enable time dimension
         requests.put(
             GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/" + index + "/coverages/" + index + ".json",
@@ -161,29 +161,28 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
                  '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
                  '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
                  '"OutputTransparentColor", "#000000" ] } ] } }} ',
-            auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
         # Enable gradient (is on a different URL because... reasons???)
         requests.put(
             GEOSERVER_API_ENTRYPOINT + "layers/" + self._get_geoserver_ws_name() + ":" + index + ".json",
             headers={"Content-Type": "application/json"},
             data='{"layer": {"defaultStyle": {"name": "gradient"}}}',
-            auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
 
 
-class Camera(Enum):
-    REDEDGE = "Micasense RedEdge"
-    RGB = "RGB"
+#class Camera(Enum):
+#    REDEDGE = "Micasense RedEdge"
+#    RGB = "RGB"
 
+#class FlightState(Enum):
+#    WAITING = "Waiting for images"
+#    PROCESSING = "Processing"
+#    COMPLETE = "Complete"
+#    PAUSED = "Paused"
+#    CANCELED = "Canceled"
+#    ERROR = "Error"
 
-class FlightState(Enum):
-    WAITING = "Waiting for images"
-    PROCESSING = "Processing"
-    COMPLETE = "Complete"
-    PAUSED = "Paused"
-    CANCELED = "Canceled"
-    ERROR = "Error"
-
-
+'''
 class Flight(DiskSpaceTrackerMixin, models.Model):
     uuid = models.UUIDField(primary_key=True, default=u.uuid4, editable=False)
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
@@ -239,7 +238,7 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
     def _get_geoserver_ws_name(self):
         return "flight_" + str(self.uuid)
 
-    '''def download_and_decompress_results(self):
+    def download_and_decompress_results(self):
         try:
             os.mkdir(self.get_disk_path())
         except FileExistsError:
@@ -256,7 +255,7 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
         with ZipFile(zip_local_name, 'r') as zip:
             zip.extractall(path=self.get_disk_path())
         os.remove(zip_local_name)
-'''
+
     @staticmethod
     def tiff_to_png(tiff: str, png: str):
         assert tiff.endswith(".tif"), f"Input file {tiff} must be a TIFF file!"
@@ -373,14 +372,14 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
         requests.post("http://localhost:8080/geoserver/rest/workspaces",
                       headers={"Content-Type": "application/json"},
                       data='{"workspace": {"name": "' + self._get_geoserver_ws_name() + '"}}',
-                      auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+                      auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
         using_micasense = self.camera == Camera.REDEDGE.name
         geotiff_name = "odm_orthophoto.tif" if not using_micasense else "rgb.tif"
         requests.put(
             "http://localhost:8080/geoserver/rest/workspaces/" + self._get_geoserver_ws_name() + "/coveragestores/ortho/external.geotiff",
             headers={"Content-Type": "text/plain"},
             data="file:///media/input/" + str(self.uuid) + "/odm_orthophoto/" + geotiff_name,
-            auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
         if using_micasense:  # Change name to odm_orthomosaic and configure transparent color on black
             requests.put(
                 "http://localhost:8080/geoserver/rest/workspaces/" + self._get_geoserver_ws_name() + "/coveragestores/ortho/coverages/rgb.json",
@@ -388,7 +387,7 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
                 data='{"coverage": {"name": "odm_orthophoto", "title": "odm_orthophoto", "enabled": true, ' +
                      '"parameters": { "entry": [ { "string": [ "InputTransparentColor", "#000000" ] }, ' +
                      '{ "string": [ "SUGGESTED_TILE_SIZE", "512,512" ] } ] }}} ',
-                auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+                auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
 
     def create_report(self, context):
         report = render_to_string('reports/report.html', {"flight": self, "extras": context})
@@ -422,6 +421,7 @@ class Flight(DiskSpaceTrackerMixin, models.Model):
         return True
 
 '''
+'''
 def create_nodeodm_task(sender, instance: Flight, created, **kwargs):
     if created:
         requests.post(f'{settings.NODEODM_SERVER_URL}/task/new/init?token={settings.NODEODM_SERVER_TOKEN}',
@@ -443,14 +443,14 @@ def delete_nodeodm_task(sender, instance: Flight, **kwargs):
                   data="uuid=" + str(instance.uuid), )
 '''
 
-def delete_geoserver_workspace(sender, instance: Union[Flight, UserProject], **kwargs):
+def delete_geoserver_workspace(sender, instance: UserProject, **kwargs):
     querystring = {"recurse": "true"}
-    requests.delete("http://localhost:8080/geoserver/rest/workspaces/" + instance._get_geoserver_ws_name(),
+    requests.delete("http://container-geoserver:8080/geoserver/rest/workspaces/" + instance._get_geoserver_ws_name(),
                     params=querystring,
-                    auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+                    auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
 
 
-def delete_on_disk(sender, instance: Union[Flight, UserProject], **kwargs):
+def delete_on_disk(sender, instance: UserProject, **kwargs):
     try:
         shutil.rmtree(instance.get_disk_path())
     except FileNotFoundError:
@@ -458,17 +458,17 @@ def delete_on_disk(sender, instance: Union[Flight, UserProject], **kwargs):
     instance.user.update_disk_space()
 
 
-def delete_thumbnail(sender, instance: Flight, **kwargs):
-    if os.path.exists(instance.get_thumbnail_path()):
-        os.remove(instance.get_thumbnail_path())
+#def delete_thumbnail(sender, instance: Flight, **kwargs):
+#    if os.path.exists(instance.get_thumbnail_path()):
+#        os.remove(instance.get_thumbnail_path())
 
 
 #post_save.connect(create_nodeodm_task, sender=Flight)
 #post_delete.connect(delete_nodeodm_task, sender=Flight)
-post_delete.connect(delete_thumbnail, sender=Flight)
-post_delete.connect(delete_geoserver_workspace, sender=Flight)
+#post_delete.connect(delete_thumbnail, sender=Flight)
+#post_delete.connect(delete_geoserver_workspace, sender=Flight)
 post_delete.connect(delete_geoserver_workspace, sender=UserProject)
-post_delete.connect(delete_on_disk, sender=Flight)
+#post_delete.connect(delete_on_disk, sender=Flight)
 post_delete.connect(delete_on_disk, sender=UserProject)
 
 

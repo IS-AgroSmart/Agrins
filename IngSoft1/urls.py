@@ -22,10 +22,9 @@ from rest_framework.authtoken.views import obtain_auth_token
 from django.conf.urls import url, include
 
 from core.views import *
-
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename="users")
-router.register(r'flights', FlightViewSet, basename="flights")
+#router.register(r'flights', FlightViewSet, basename="flights")
 router.register(r'projects', UserProjectViewSet, basename="projects")
 router.register(r'artifacts', ArtifactViewSet, basename="artifacts")
 router.register(r'block_criteria', BlockCriteriaViewSet, basename="block_criteria")
@@ -37,12 +36,12 @@ urlpatterns = [
     path(r'metrics/', include("prometheus_metrics.urls")),
     path('api/api-auth', obtain_auth_token, name='api_auth'),
     path('api/upload-files/<uuid:uuid>', upload_images, name='upload_files'),
-    path('api/webhook-processing-complete', webhook_processing_complete, name='webhook'),
-    path('api/downloads/<uuid:uuid>/<artifact>', download_artifact, name="download_artifact"),
-    path('api/downloads/<uuid:uuid>/<options>/<artifact>', download_artifact_movil, name="download_artifact"),
+#    path('api/webhook-processing-complete', webhook_processing_complete, name='webhook'),
+#    path('api/downloads/<uuid:uuid>/<artifact>', download_artifact, name="download_artifact"),
+#    path('api/downloads/<uuid:uuid>/<options>/<artifact>', download_artifact_movil, name="download_artifact"),
     path('api/uploads/<uuid:uuid>/vectorfile', upload_vectorfile, name="upload_vector"),
     path('api/uploads/<uuid:uuid>/geotiff', upload_geotiff, name="upload_geotiff"),
-    path('api/preview/<uuid:uuid>', preview_flight_url, name="preview_flight_url"),
+#    path('api/preview/<uuid:uuid>', preview_flight_url, name="preview_flight_url"),
     path('api/rastercalcs/check', check_formula, name="check_formula"),
     path('api/rastercalcs/<uuid:uuid>', create_raster_index, name="create_raster_index"),
     path('mapper/<uuid:uuid>', mapper, name="mapper"),

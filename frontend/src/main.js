@@ -57,7 +57,8 @@ Vue.use(ReactiveStorage, {
   "token": "",
   "isAdmin": false, 
   "otherUserPk": 0,
-  "loggedInUser": {}
+  "loggedInUser": {},
+  "isMap":false,
 });
 const moment = require('moment');
 require('moment/locale/es');

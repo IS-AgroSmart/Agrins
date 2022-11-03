@@ -22,7 +22,7 @@ def recompute_disk_space(modeladmin, request, queryset):
 
 recompute_disk_space.short_description = "Recompute disk space used by the selected object(s)"
 
-
+'''
 class FlightAdmin(admin.ModelAdmin):
     def pretty_used_space(self, obj: Flight):
         return _format_size(obj.used_space)
@@ -32,7 +32,7 @@ class FlightAdmin(admin.ModelAdmin):
     list_display = ("name", "uuid", "user", "date", "camera", "state", "pretty_used_space")
 
     actions = (recompute_disk_space,)
-
+'''
 
 class UserProjectAdmin(admin.ModelAdmin):
     def pretty_used_space(self, obj: UserProject):
@@ -78,6 +78,6 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(Flight, FlightAdmin)
+#admin.site.register(Flight, FlightAdmin)
 admin.site.register(Artifact)
 admin.site.register(UserProject, UserProjectAdmin)

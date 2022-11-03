@@ -42,8 +42,8 @@ class UserSerializer(serializers.ModelSerializer):
        
 
         # when user is created, link him to all existing demo flights & projects
-        for demo_flight in Flight.objects.filter(is_demo=True).all():
-            user.demo_flights.add(demo_flight)
+        #for demo_flight in Flight.objects.filter(is_demo=True).all():
+        #    user.demo_flights.add(demo_flight)
         for demo_project in UserProject.objects.filter(is_demo=True).all():
             user.demo_projects.add(demo_project)
 
@@ -54,7 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["pk", 'username', 'email', 'is_staff', 'password', 'type', 'organization', 'first_name','last_name',
                   'used_space','phone','city','profession', 'maximum_space', 'remaining_images']
 
-
+'''
 class FlightSerializer(serializers.ModelSerializer):
     #nodeodm_info = serializers.SerializerMethodField()
 
@@ -65,7 +65,7 @@ class FlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flight
         fields = ["uuid", "name", "user", "date", "is_demo", "deleted"]
-
+'''
 
 class ArtifactSerializer(serializers.ModelSerializer):
     class Meta:
@@ -75,14 +75,14 @@ class ArtifactSerializer(serializers.ModelSerializer):
 
 class UserProjectSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())
-    flights = serializers.PrimaryKeyRelatedField(many=True,queryset=Flight.objects.all())
+    #flights = serializers.PrimaryKeyRelatedField(many=True,queryset=Flight.objects.all())
     artifacts = serializers.PrimaryKeyRelatedField(many=True,queryset=Artifact.objects.all())
 
     def create(self, validated_data):
-        flights = validated_data.pop("flights")
+        #flights = validated_data.pop("flights")
         artifacts = validated_data.pop("artifacts")
         proj = UserProject.objects.create(**validated_data)
-        proj.flights.set(flights)
+        #proj.flights.set(flights)
         proj.artifacts.set(artifacts)
         proj._create_geoserver_proj_workspace()
         proj.update_disk_space()
@@ -91,7 +91,7 @@ class UserProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProject
-        fields = ['uuid', 'user', 'flights', 'artifacts', "name", "description", "is_demo", "deleted"]
+        fields = ['uuid', 'user', 'artifacts', "name", "description", "is_demo", "deleted"]
 
 
 class BlockCriteriaSerializer(serializers.ModelSerializer):

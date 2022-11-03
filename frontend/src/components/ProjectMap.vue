@@ -1,8 +1,5 @@
 <template>
-    <div  style="height:100%; padding-top: 500px; background-color: #fafafa;">        
-        
-    <iframe style="height:100%; padding-top: 500px;" :src="mapper_url" height="50%" width="50%" frameborder="0">Your browser doesn't support iFrames.</iframe>
-        </div>
+    <iframe style="background-color: #ffffff; position: relative; z-index: 2220;" :src="mapper_url" height="100%" width="100%" frameborder="0">Your browser doesn't support iFrames.</iframe>
 </template>
 
 <script>

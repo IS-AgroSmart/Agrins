@@ -1,5 +1,5 @@
 <template>
-    <div class=" pt-3" style="padding-left:15px; padding-right:15px;">
+    <div class=" pt-3" style="background-color: #ffffff; position: relative; z-index: 2220; padding-left:10%; padding-right:10%;">
         <b-link href="#" @click="goBack()" class="mb-3">&lt; Volver al proyecto</b-link>
         <br><br>
 

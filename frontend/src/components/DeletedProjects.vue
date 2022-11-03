@@ -1,7 +1,9 @@
 <template>
-    <div class="pt-3 px-3">
-        <h1>Mis proyectos eliminados</h1>
-    
+    <div  style="height:100%; padding-top: 90px; background-color: #fafafa;">        
+        <div style="margin-left: 5%;border-radius: 10px;margin-right: 5%;  ">
+            <div class="d-flex bd-highlight mb-3 border-bottom">
+                <div class="p-2 bd-highlight"><h5>Proyectos eliminados</h5>  </div>
+            </div>
         <b-skeleton-wrapper :loading="loading">
             <template #loading>
                 <b-row>
@@ -22,7 +24,7 @@
             </div>
             <b-alert v-if="noProjects" variant="info" show>No tiene proyectos eliminados</b-alert>
         </b-skeleton-wrapper>
-    </div>
+    </div></div>
 </template>
 
 <script>
@@ -50,6 +52,7 @@ export default {
                     headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
                 })
                 .then(response => this.projects = response.data)
+                .then(() => this.$router.push("/projects"))
                 .catch(error => this.error = error);
         },
     },

@@ -8,16 +8,10 @@
             </b-form-group>           
             
             <b-form-group id="input-group-2" label="Descripción:*" label-for="input-2">
-                <b-form-textarea size="sm" id="input-2" v-model="mensaje" placeholder="Describa el proyecto" rows="8" max-rows="16" required></b-form-textarea>
+                <b-form-textarea size="sm" id="input-2" v-model="form.description" placeholder="Describa el proyecto" rows="8" max-rows="16" required></b-form-textarea>
             </b-form-group> 
 
-            <b-form-group id="input-group-3" label="Vuelos:" label-for="input-3">
-                <div :class="{ 'invalid': !sameCamera }">
-                    <multiselect id="input-3" v-model="form.flights" :options="flights" label="name" :custom-label="flightLabel" track-by="uuid" value-field="uuid" placeholder="Escoja al menos un vuelo" multiple :state="sameCamera"></multiselect>
-                    <small class="form-text text-danger" v-if="!sameCamera">Todos los vuelos de un mismo proyecto deben haber usado la misma cámara</small>
-                    <small class="form-text text-muted">Seleccione uno o varios vuelos con Ctrl.</small>
-                </div>
-            </b-form-group>
+          
             
             <b-row align-h="center" style="padding-bottom:2%">
                 <b-button style="padding-top:0%; padding-bottom:0%" type="submit" pill variant="info">Agregar</b-button>
@@ -41,11 +35,11 @@
                 form: {
                     name: "",
                     description: "",
-                    flights: [],
+                    /*flights: [],*/
                     artifacts: {}
                 },
                 error: "",
-                flights: [],
+                /**flights: [],*/
                 artifacts: {},
             };
         },
@@ -60,9 +54,9 @@
                 fd.set("name", this.form.name);
                 fd.set("description", this.form.description);
                 // HACK: DRF needs this for ManyToMany, otherwise it gets nervous
-                for (var flight of this.form.flights) {
-                    fd.append("flights", flight.uuid);
-                }
+                //for (var flight of this.form.flights) {
+                //    fd.append("flights", flight.uuid);
+                //}
                 axios
                     .post("api/projects/", fd, {
                         headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
@@ -70,30 +64,22 @@
                     .then(() => this.$router.push("/projects"))
                     .catch(error => this.error = "ERROR: " + error.response.data.name[0]);
             },
-            flightLabel(flight) {
-                let cameraName = this.$cameras.find((x) => x.value == flight.camera).text;
-                return `${flight.name} (${cameraName})`
-            },
-            _isCandidate(flight) {
-                return flight.state == "COMPLETE" && !flight.is_demo
-            }
+            //flightLabel(flight) {
+            //    let cameraName = this.$cameras.find((x) => x.value == flight.camera).text;
+            //    return `${flight.name} (${cameraName})`
+            //},
+            //_isCandidate(flight) {
+            //    return flight.state == "COMPLETE" && !flight.is_demo
+            //}
         },
         computed: {
-            anyFlights: function() {
-                return this.form.flights.length > 0;
-            },
-            sameCamera: function() {
-                if (!this.anyFlights) return true;
-                return this.form.flights.every((flight) => flight.camera == this.form.flights[0].camera);
-            }
+            //anyFlights: function() {
+            //    return this.form.flights.length > 0;
+            //},
+            //sameCamera: function() {
+            //    if (!this.anyFlights) return true;
+            //    return this.form.flights.every((flight) => flight.camera == this.form.flights[0].camera);
+            //}
         },
-        created() {
-            axios
-                .get("api/flights", {
-                    headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
-                })
-                .then(response => (this.flights = response.data.filter(this._isCandidate)))
-                .catch(error => (this.error = error));
-        }
-    };
+    }
     </script>

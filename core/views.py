@@ -71,7 +71,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 instance.type = UserType.DELETED.name
                 instance.is_active = False
                 instance.save()
-
+'''
 class FlightViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = FlightSerializer
@@ -145,7 +145,7 @@ class FlightViewSet(viewsets.ModelViewSet):
             else:
                 instance.deleted = True
                 instance.save()
-
+'''
 
 class ArtifactViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -158,7 +158,7 @@ class ArtifactViewSet(viewsets.ModelViewSet):
 class UserProjectViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserProjectSerializer
-
+    
     @action(detail=False)
     def deleted(self, request):
         if self.request.user.type == UserType.ADMIN.name and "HTTP_TARGETUSER" in self.request.META:
@@ -179,8 +179,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.user = None
         for user in User.objects.all():
             user.demo_projects.add(project)
-        for flight in project.flights.all():
-            flight.make_demo()
+        #for flight in project.flights.all():
+        #    flight.make_demo()
         project.save()
         prev_user.update_disk_space()
         return Response({})
@@ -193,8 +193,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.is_demo = False
         project.user = request.user
         project.demo_users.clear()
-        for flight in project.flights.all():
-            flight.unmake_demo(request.user)
+        #for flight in project.flights.all():
+        #    flight.unmake_demo(request.user)
         project.save()
         request.user.update_disk_space()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -228,8 +228,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         return super(UserProjectViewSet, self).create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        all_flights = [Flight.objects.get(
-            uuid=uuid) for uuid in self.request.POST.getlist("flights")]
+        #all_flights = [Flight.objects.get(
+        #    uuid=uuid) for uuid in self.request.POST.getlist("flights")]
         target_user = self._get_effective_user(self.request)
         serializer.save(user=target_user)#, flights=[f for f in all_flights if f.user == target_user])
 
@@ -247,19 +247,19 @@ class UserProjectViewSet(viewsets.ModelViewSet):
 
 @csrf_exempt
 def upload_images(request, uuid):
-    flight = get_object_or_404(Flight, uuid=uuid)
+    #flight = get_object_or_404(Flight, uuid=uuid)
     user = Token.objects.get(key=request.headers["Authorization"][6:]).user
-    if not user.type == UserType.ADMIN.name and not flight.user == user:
-        return HttpResponse(status=403)
-    if flight.user.used_space >= flight.user.maximum_space:
-        return HttpResponse("Subida fallida. Su almacenamiento está lleno.",
-                            status=402)  # HTTP 402 Payment Required
-    if len(request.FILES.getlist("images")) > flight.user.remaining_images:
-        return HttpResponse(f"Subida fallida. Tiene un límite de {flight.user.remaining_images} imágenes.",
-                            status=402)
+    #if not user.type == UserType.ADMIN.name and not flight.user == user:
+    #    return HttpResponse(status=403)
+    #if flight.user.used_space >= flight.user.maximum_space:
+    #    return HttpResponse("Subida fallida. Su almacenamiento está lleno.",
+    #                        status=402)  # HTTP 402 Payment Required
+    #if len(request.FILES.getlist("images")) > flight.user.remaining_images:
+    #    return HttpResponse(f"Subida fallida. Tiene un límite de {flight.user.remaining_images} imágenes.",
+    #                        status=402)
     # Deduct the images ON THE FLIGHT OWNER! (not on the poor admin that is impersonating the User)
-    flight.user.remaining_images -= len(request.FILES.getlist("images"))
-    flight.user.save()
+    #flight.user.remaining_images -= len(request.FILES.getlist("images"))
+    #flight.user.save()
 
     files = []
     filenames = []
@@ -284,25 +284,25 @@ def upload_images(request, uuid):
     if r.status_code != 200:
         return HttpResponse(status=500)'''
 
-    flight.state = FlightState.COMPLETE.name
-    flight.save()  # change Flight state to PROCESSING
+    #flight.state = FlightState.COMPLETE.name
+    #flight.save()  # change Flight state to PROCESSING
 
     return HttpResponse()
 
-
+'''
 @csrf_exempt
 def webhook_processing_complete(request):
     data = json.loads(request.body.decode("utf-8"))
-    flight = Flight.objects.get(uuid=data["uuid"])
+    #flight = Flight.objects.get(uuid=data["uuid"])
     username = flight.user.username
 
     # BUGFIX 117: get the real data from a trusted source
     from nodeodm_proxy import api
-    data = api.get_info(settings.NODEODM_SERVER_URL, flight.uuid, settings.NODEODM_SERVER_TOKEN).json()
+    #data = api.get_info(settings.NODEODM_SERVER_URL, flight.uuid, settings.NODEODM_SERVER_TOKEN).json()
 
-    flight.processing_time = data.get("processingTime", 0)
+    #flight.processing_time = data.get("processingTime", 0)
     num_images = data.get("imagesCount", 0)
-    flight.num_images = num_images
+    #flight.num_images = num_images
     if data["status"]["code"] == 30:
         flight.state = FlightState.ERROR.name
         flight.user.remaining_images += num_images  # give the images back if task failed
@@ -366,7 +366,7 @@ def download_artifact(request, uuid, artifact):
 
 
 def download_artifact_movil(request, uuid, options, artifact):
-    flight = get_object_or_404(Flight, uuid=uuid)
+    #flight = get_object_or_404(Flight, uuid=uuid)
     content = {}
     option_values = {
         "c": 'pointcloud',
@@ -388,7 +388,7 @@ def download_artifact_movil(request, uuid, options, artifact):
     else:
         raise Http404
     return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
-
+'''
 
 @csrf_exempt
 def upload_vectorfile(request, uuid):
@@ -423,7 +423,7 @@ def upload_vectorfile(request, uuid):
         with cd(project.get_disk_path() + "/" + file_name):
             os.system('ogr2ogr -f "ESRI Shapefile" "{0}.shp" "{0}.kml"'.format(file_name))
 
-    GEOSERVER_BASE_URL = "http://localhost:8080/geoserver/rest/workspaces/"
+    GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
 
     requests.put(
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/datastores/" +
@@ -432,14 +432,14 @@ def upload_vectorfile(request, uuid):
         headers={"Content-Type": "text/plain"},
         data="file:///media/USB/" +
              str(project.uuid) + "/" + file_name + "/" + file_name + ".shp",
-        auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+        auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
 
     requests.put(
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/datastores/" +
         file_name + "/featuretypes/" + file_name + ".json",
         headers={"Content-Type": "application/json"},
         data='{"featureType": {"enabled": true, "srs": "EPSG:4326" }}',
-        auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+        auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
     return HttpResponse(status=201)
@@ -466,16 +466,16 @@ def upload_geotiff(request, uuid):
         for chunk in file.chunks():
             f.write(chunk)
 
-    GEOSERVER_BASE_URL = "http://localhost:8080/geoserver/rest/workspaces/"
+    GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
 
     requests.put(
-        GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/coveragestores/" +
+         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/coveragestores/" +
         geotiff_name + "/"
                        "external.geotiff",
         headers={"Content-Type": "text/plain"},
         data="file:///media/USB/" +
              str(project.uuid) + "/" + geotiff_name + "/" + geotiff_name + ".tiff",
-        auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+        auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
 
     requests.put(
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/coveragestores/" +
@@ -488,19 +488,19 @@ def upload_geotiff(request, uuid):
                 {"string": ["SUGGESTED_TILE_SIZE", "512,512"]}
             ]}
         }}),
-        auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD))
+        auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
     return HttpResponse(status=201)
 
-
+'''
 def preview_flight_url(request, uuid):
     flight = get_object_or_404(Flight, uuid=uuid)
 
     ans = requests.get(
-        "http://localhost:8080/geoserver/rest/workspaces/" + flight._get_geoserver_ws_name() +
+        "http://container-geoserver:8080/geoserver/rest/workspaces/" + flight._get_geoserver_ws_name() +
         "/coveragestores/ortho/coverages/odm_orthophoto.json",
-        auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD)).json()
+        auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD)).json()
     bbox = ans["coverage"]["nativeBoundingBox"]
     base = "/geoserver/geoserver/" + flight._get_geoserver_ws_name() + \
            "/wms?service=WMS&version=1.1.0&request=GetMap&layers=" + flight._get_geoserver_ws_name() + \
@@ -509,7 +509,7 @@ def preview_flight_url(request, uuid):
            "&width=1000&height=1000&srs=EPSG:32617&format=application/openlayers"
 
     return JsonResponse({"url": base, "bbox": bbox, "srs": ans["coverage"]["srs"]})
-
+'''
 
 @csrf_exempt
 def check_formula(request):
@@ -533,9 +533,9 @@ def create_raster_index(request, uuid):
     formula = data.get("formula", "")
 
     print("FORMULA->" + formula)
-    for flight in project.flights.all():
-        flight.create_index_raster(clean_index, formula)
-        flight.update_disk_space()
+    #for flight in project.flights.all():
+    #    flight.create_index_raster(clean_index, formula)
+    #    flight.update_disk_space()
     project._create_index_datastore(clean_index)
     project.update_disk_space()
     project.user.update_disk_space()
@@ -555,10 +555,10 @@ def mapper(request, uuid):
                    "upload_shapefiles_path": "/#/projects/" + str(project.uuid) + "/upload/shapefile",
                    "upload_geotiff_path": "/#/projects/" + str(project.uuid) + "/upload/geotiff",
                    "upload_new_index_path": "/#/projects/" + str(project.uuid) + "/upload/index",
-                   "is_multispectral": project.all_flights_multispectral(),
+                   "is_multispectral":  True,
                    "is_demo": project.is_demo,
                    "uuid": project.uuid,
-                   "flights": project.flights.all().order_by("date")
+                   #"flights": project.flights.all().order_by("date")
                    })
 
 
@@ -566,9 +566,9 @@ def mapper_bbox(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
 
     ans = requests.get(
-        "http://localhost:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
+        "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
         "/coveragestores/mainortho/coverages/mainortho.json",
-        auth=HTTPBasicAuth('admin', settings.GEOSERVER_PASSWORD)).json()
+        auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
 
     return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
 
@@ -639,7 +639,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         # message:
         email_plaintext_message,
         # from:
-        "passwords@flysensorec.com",
+        settings.EMAIL_HOST_USER,
         # to:
         [reset_password_token.user.email]
     )

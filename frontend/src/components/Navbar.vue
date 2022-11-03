@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-navbar id="NavMainTop" toggleable="lg" placement="sticky-top" class="border-bottom">
+        <b-navbar v-if="!this.storage.isMap" id="NavMainTop" toggleable="lg" placement="sticky-top" class="border-bottom">
             <b-navbar-brand v-if="isLoggedIn" style="margin-left:3%;margin-top: 0%;padding-bottom: 0%;">
                 <img height="60" width="200" src="../assets/logoB.png" class="d-inline-block align-top" alt="Agrins">                
             </b-navbar-brand>
@@ -12,7 +12,7 @@
             <b-collapse id="nav-collapse" is-nav>
                 <div v-if="isLoggedIn" class="ml-auto" style="padding-top:25px ; ">
                     <b-navbar-nav>
-                        <b-nav-item v-if="isAdmin" to="/flights" data-cy="navbar-flights">Vuelos</b-nav-item>
+                        <!--<b-nav-item v-if="isAdmin" to="/flights" data-cy="navbar-flights">Vuelos</b-nav-item>-->
                         <b-nav-item to="/dashboard" data-cy="navbar-dashboard"><p class="text-info">Dashboard</p></b-nav-item>
                         <b-nav-item to="/projects"><p class="text-info">Proyectos</p></b-nav-item>
                         <!--<b-nav-item v-if="isAdmin" data-cy="navbar-grupos"><p class="text-info">Grupos</p></b-nav-item>-->

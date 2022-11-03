@@ -4,7 +4,9 @@
             <div class="d-flex bd-highlight mb-3 border-bottom">
                 <div class="p-2 bd-highlight"><h5>Proyectos</h5>  </div>
                 
-                <div class="ml-auto p-2 bd-highlight"><add-new-project /></div>
+                <div class="ml-auto p-2 bd-highlight">
+                    <add-new-project />
+                </div>
             </div>            
             
         <b-skeleton-wrapper :loading="loading">
