@@ -7,11 +7,12 @@
     <link rel="stylesheet" type="text/css" href="ol/ol.css">
     <link rel="stylesheet" type="text/css"
           href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/classic/theme-crisp/resources/theme-crisp-all.css"/>
+    <link rel="stylesheet" type="text/css" href="http://openlayers.org/en/master/css/ol.css">    
 </head>
 
 <body >
-    <div id='description' style="background-color:#f5f5f5;" >
-        
+    <div id='description'>
+    <!--
         <button onclick="top.window.location.href='/#/projects/'" >Inicio</button>
         {% if not is_demo %}
             <button onclick="top.window.location.href='{{ upload_shapefiles_path }}'" > + Vector</button>
@@ -29,12 +30,15 @@
                 </div>
             {% endif %}
         {% endif %}
-    
+    -->
         <a id="geojson-download" download="map.png"></a>
     </div>    
     <div id="map" class="map"></div>
+    <div id="data"><p style="padding-left: 3%; padding-right:3%">{{ project_notes }}</p></div>
+
 
 <style>
+    
     .measure-point {
         top: 265px;
         left: .5em;
@@ -180,6 +184,7 @@
     const project_name = "{{ project_name }}";
     const uuid = "{{ uuid }}";
     const project_path = "{{ project_geoserver_path }}";
+    const moreThanOneFlight = true; //{{ flights|length|gt:1|yesno:"true,false" }};
     const isMultispectral = {{ is_multispectral|yesno:"true,false" }};
     const isDemo = {{ is_demo|yesno:"true,false" }};
 </script>

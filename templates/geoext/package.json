@@ -19,7 +19,7 @@
   },
   "output": "${package.dir}/build",
   "local": true,
-  "theme": "theme-neptune",
+  "theme": "theme-material",
   "requires": [],
   "toolkit": "classic",
   "repository": {

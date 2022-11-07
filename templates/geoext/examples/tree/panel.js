@@ -1,279 +1,7 @@
 Ext.require([
     'GeoExt.component.Map',
-    'GeoExt.data.store.LayersTree'
-]);
-
-/**
- * A plugin for Ext.grid.column.Column s that overwrites the internal cellTpl to
- * support legends.
- */
-Ext.define('BasicTreeColumnLegends', {
-    extend: 'Ext.AbstractPlugin',
-    alias: 'plugin.basic_tree_column_legend',
-    config: {
-        hidden: false,
-        viewTemplate: {
-            layout: 'fit',
-            mergin: 9
-        }
-
-    },
-    createView: function (config) {
-        var view = this.callParent(arguments);
-        view.items = config.configPartItems;
-        if(config.hidden) view.hidden = true; // apply the  "hidden" config to the view.
-        return view;
-    },
-
-    /**
-     * @private
-     */
-    originalCellTpl: Ext.clone(Ext.tree.Column.prototype.cellTpl).join(''),
-
-    /**
-     * The Xtemplate strings that will be used instead of the plain {value}
-     * when rendering
-     */
-    valueReplacementTpl: [
-        '{value}',
-        '<tpl if="this.hasLegend(values.record)"><br />',
-        '<tpl for="lines">',
-        '<img src="{parent.blankUrl}"',
-        ' class="{parent.childCls} {parent.elbowCls}-img ',
-        '{parent.elbowCls}-<tpl if=".">line<tpl else>empty</tpl>"',
-        ' role="presentation"/>',
-        '</tpl>',
-        '<img src="{blankUrl}" class="{childCls} x-tree-elbow-img">',
-        '<img src="{blankUrl}" class="{childCls} x-tree-elbow-img">',
-        '<img src="{blankUrl}" class="{childCls} x-tree-elbow-img">',
-        '{[this.getLegendHtml(values.record)]}',
-        '</tpl>'
-    ],
-
-    /**
-     * The context for methods available in the template
-     */
-    valueReplacementContext: {
-        hasLegend: function(rec) {
-            var isChecked = rec.get('checked');
-            var layer = rec.data;
-            return isChecked && !(layer instanceof ol.layer.Group);
-        },
-        getLegendHtml: function(rec) {
-            var layer = rec.data;
-            var legendUrl = layer.get('legendUrl');
-            if (!legendUrl) {
-                legendUrl = 'https://geoext.github.io/geoext2/' +
-                    'website-resources/img/GeoExt-logo.png';
-            }
-            return '<img class="legend" src="' + legendUrl + '" height="32" />';
-        }
-    },
-
-    init: function(column) {
-        var me = this;
-        if (!(column instanceof Ext.grid.column.Column)) {
-            Ext.log.warn('Plugin shall only be applied to instances of' +
-                    ' Ext.grid.column.Column');
-            return;
-        }
-        var valuePlaceHolderRegExp = /\{value\}/g;
-        var replacementTpl = me.valueReplacementTpl.join('');
-        var newCellTpl = me.originalCellTpl.replace(
-            valuePlaceHolderRegExp, replacementTpl
-        );
-
-        column.cellTpl = [
-            newCellTpl,
-            me.valueReplacementContext
-        ];
-    }
-});
-
-var mapComponent;
-var mapPanel;
-var treePanel;
-var treePanel2;
-
-Ext.application({
-    name: 'LegendTrees',
-    launch: function() {
-        var source1;
-        var source2;
-        var source3;
-        var layer1;
-        var layer2;
-        var layer3;
-        var layer4;
-        var group;
-        var olMap;
-        var treeStore;
-        var treeStore2;
-
-
-        source1 = new ol.source.Stamen({layer: 'watercolor'});
-        layer1 = new ol.layer.Tile({
-            legendUrl: 'https://stamen-tiles-d.a.ssl.fastly.net/' +
-                'watercolor/2/1/0.jpg',
-            source: source1,
-            name: 'Stamen Watercolor'
-        });
-
-        source2 = new ol.source.Stamen({layer: 'terrain-labels'});
-        layer2 = new ol.layer.Tile({
-            legendUrl: 'https://stamen-tiles-b.a.ssl.fastly.net/' +
-                'terrain-labels/4/4/6.png',
-            source: source2,
-            name: 'Stamen Terrain Labels'
-        });
-
-        source3 = new ol.source.TileWMS({
-            url: 'https://ows.terrestris.de/osm-gray/service',
-            params: {'LAYERS': 'OSM-WMS', 'TILED': true}
-        });
-        layer3 = new ol.layer.Tile({
-            legendUrl: 'https://ows.terrestris.de/osm-gray/service?' +
-                'SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&' +
-                'TRANSPARENT=true&LAYERS=OSM-WMS&TILED=true&WIDTH=256&' +
-                'HEIGHT=256&CRS=EPSG%3A3857&STYLES=&' +
-                'BBOX=0%2C0%2C10018754.171394622%2C10018754.171394622',
-            source: source3,
-            name: 'terrestris OSM WMS',
-            visible: false
-        });
-
-        layer4 = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            name: 'Vector '
-        });
-
-        group = new ol.layer.Group({
-            layers: [layer1, layer2],
-            name: 'Some Stamen Layers'
-        });
-
-        olMap = new ol.Map({
-            layers: [group, layer3, layer4],
-            view: new ol.View({
-                center: [0, 0],
-                zoom: 2
-            })
-        });
-
-        mapComponent = Ext.create('GeoExt.component.Map', {
-            map: olMap
-        });
-
-        mapPanel = Ext.create('Ext.panel.Panel', {
-            region: 'center',
-            layout: 'fit',
-            border: false,
-            items: [mapComponent]
-        });
-
-        treeStore = Ext.create('GeoExt.data.store.LayersTree', {
-            layerGroup: olMap.getLayerGroup()
-        });
-
-        treePanel = Ext.create('Ext.tree.Panel', {
-            title: 'Capas',
-            store: treeStore,
-            border: false,
-            rootVisible: false,
-            hideHeaders: true,
-            lines: false,
-            flex: 1,
-            columns: {
-                header: false,
-                items: [
-                    {
-                        xtype: 'treecolumn',
-                        dataIndex: 'text',
-                        flex: 1,
-                        plugins: [
-                            {
-                                ptype: 'basic_tree_column_legend'
-                            }
-                        ]
-                    }
-                ]
-            }
-        });
-
-        treeStore2 = Ext.create('GeoExt.data.store.LayersTree', {
-            layerGroup: olMap.getLayerGroup()
-        });
-
-        treePanel2 = Ext.create('Ext.tree.Panel', {
-            title: 'Mapa Base',
-            store: treeStore2,
-            rootVisible: false,
-            border: false,
-            flex: 1,
-            hideHeaders: true,
-            lines: false,
-            features: [{
-                ftype: 'rowbody',
-                setupRowData: function(rec, rowIndex, rowValues) {
-                    var headerCt = this.view.headerCt;
-                    var colspan = headerCt.getColumnCount();
-                    var isChecked = rec.get('checked');
-                    var layer = rec.data;
-                    var GrpClass = ol.layer.Group;
-                    var hasLegend = isChecked && !(layer instanceof GrpClass);
-                    var legendUrl = hasLegend && layer.get('legendUrl');
-                    var legHtml = '';
-
-                    if (!legendUrl) {
-                        legendUrl = 'https://geoext.github.io/geoext2/' +
-                            'website-resources/img/GeoExt-logo.png';
-                    }
-                    legHtml = '<img class="legend" src="' + legendUrl +
-                        '" height="32" />';
-
-                    // Usually you would style the my-body-class in CSS file
-                    Ext.apply(rowValues, {
-                        rowBody: hasLegend ? legHtml : '',
-                        rowBodyCls: 'my-body-class',
-                        rowBodyColspan: colspan
-                    });
-                }
-            }]
-        });
-
-        var description = Ext.create('Ext.panel.Panel', {
-            contentEl: 'description',
-            title: project_name,
-            height: 58,
-            border: true,
-            bodyPadding: 1,
-        });
-
-        Ext.create('Ext.Viewport', {
-            layout: 'border',
-            items: [
-                mapPanel,
-                {
-                    xtype: 'panel',
-                    region: 'west',
-                    width: 300,
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
-                    items: [
-                        description,
-                        treePanel,                        
-                        treePanel2
-                    ]
-                }
-            ]
-        });
-    }
-});
-/*Ext.require([
-    'GeoExt.component.Map',
-    'GeoExt.data.store.LayersTree'
+    'GeoExt.data.store.LayersTree',
+    'Ext.Button',
 ]);
 
 let mapComponent;
@@ -288,20 +16,21 @@ let shapefiles = [], indices = [];
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
 noCacheHeaders.append('pragma', 'no-cache');
 noCacheHeaders.append('cache-control', 'no-cache');
-fillShapefiles;
-fillShapefiles;
+fillShapefiles();
+fillRasters();
 initApp();
-/*fetch(`/geoserver/${project_path}/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities`,
+// fetch(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/project_a4029f71-835b-474c-92a3-ccc05ce5de2e/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities")
+/*fetch(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/" + project_path + "/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities",
     {headers: noCacheHeaders})
     .then(response => response.text())
     .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
     .then(data => {
         let times;
-        //times = data.getElementsByTagName("WMS_Capabilities")[0].getElementsByTagName("Capability")[0].getElementsByTagName("Layer")[0].getElementsByTagName("Dimension")[0].innerHTML;
-        //TIMES = [];
-        //for (let time of times.split(",")) {
-        //    TIMES.push(time.substring(0, 10));
-        //}
+        times = data.getElementsByTagName("WMS_Capabilities")[0].getElementsByTagName("Capability")[0].getElementsByTagName("Layer")[0].getElementsByTagName("Dimension")[0].innerHTML;
+        TIMES = [];
+        for (let time of times.split(",")) {
+            TIMES.push(time.substring(0, 10));
+        }
     })
     .then(fillShapefiles)
     .then(fillRasters)
@@ -323,7 +52,7 @@ function initApp() {
             let treeStore;
 
             basemapsGroup = new ol.layer.Group({
-                name: "Mapas base",
+                name: "Mapas base",                
                 layers: [
                     new ol.layer.Tile({
                         name: "Satélite (ArcGIS/ESRI)",
@@ -341,13 +70,19 @@ function initApp() {
                         source: new ol.source.OSM(),
                         visible: false
                     }),
+                    new ol.layer.Tile({
+                        legendUrl: 'https://stamen-tiles-d.a.ssl.fastly.net/' +
+                            'watercolor/2/1/0.jpg',
+                        source: new ol.source.Stamen({layer: 'watercolor'}),
+                        name: 'Stamen Watercolor'
+                    }),
                 ],
             });
 
             rgbLayer = new ol.layer.Tile({
                 name: "Ortomosaico RGB",
                 source: new ol.source.TileWMS({
-                    url: `/geoserver/geoserver/${project_path}/ows?version=1.3.0`,
+                    url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",
                     params: {"LAYERS": project_path + ":mainortho", tiled: true}
                 })
             });
@@ -366,9 +101,9 @@ function initApp() {
                 name: "Índices",
                 layers: indices,
             });
-
+            //delete raterGroup review
             olMap = new ol.Map({
-                layers: [basemapsGroup, rasterGroup, shapefilesGroup].concat(isMultispectral ? [indicesGroup] : []),
+                layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
                 view: new ol.View({
                     center: [0, 0],
                     zoom: 2,
@@ -378,7 +113,7 @@ function initApp() {
                 target: 'map',
             });
 
-            //fitMap(); // Must happen after olMap is defined!
+            fitMap(); // Must happen after olMap is defined!
             addMeasureInteraction();
 
             let zoomslider = new ol.control.ZoomSlider();
@@ -400,7 +135,7 @@ function initApp() {
                     var options = opt_options || {};
                     var img = document.createElement('img');
                     var someIndexLayer = indices[0].getSource().getParams()["LAYERS"];
-                    img.setAttribute("src", "/geoserver/geoserver/styles/gradient.png");
+                    img.setAttribute("src", window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/styles/gradient.png");
                     var element = document.createElement('div');
                     element.className = 'legend ol-unselectable ol-control';
 
@@ -469,9 +204,11 @@ function initApp() {
             });
 
             timeSlider = Ext.create('Ext.slider.Single', {
-                width: 214,
+                //width: 20,
+                height: 350,
                 value: TIMES.length - 1,
                 increment: 1,
+                vertical: true,
                 minValue: 0,
                 maxValue: TIMES.length - 1,
                 useTips: true,
@@ -500,16 +237,16 @@ function initApp() {
                 updateTime(index, dateLabel, TIMES.length - 1);
             }
 
-            let timePanel;
-            if (moreThanOneFlight) {
-                timePanel = Ext.create('Ext.panel.Panel', {
-                    bodyPadding: 5,  // Don't want content to crunch against the borders
-                    width: 300,
-                    title: 'Tiempo',
-                    items: [timeSlider, dateLabel],
-                    renderTo: Ext.getBody()
-                });
-            }
+            let timePanel;            
+            timePanel = Ext.create('Ext.panel.Panel', {
+                bodyPadding: 5,  // Don't want content to crunch against the borders
+                width: 250,
+                align: 'right',
+                //title: 'Línea de tiempo',
+                items: [timeSlider, dateLabel],                    
+                //renderTo: Ext.getBody()
+            });
+            
 
             mapPanel = Ext.create('Ext.panel.Panel', {
                 region: 'center',
@@ -525,16 +262,66 @@ function initApp() {
                 layerGroup: treeLayerGroup
             });
 
+
+            let btindexs
+            let btInicio
+            let btadd
+            let btModel
+
+            btModel=Ext.create('Ext.Button', {
+                text: 'Modelo',                    
+                handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo..."); }
+            });
+
+            btInicio =Ext.create('Ext.Button', {
+                text: 'Regresar',  
+                handler: function() {
+                    top.window.location.href='/#/projects/'
+                }
+            });
+
+            btadd = Ext.create('Ext.button.Split', {
+                text: 'Agregar',                
+                menu: new Ext.menu.Menu({
+                    items: [                        
+                        {text: 'Vector', handler: function(){ top.window.location.href= "/#/projects/" + uuid + "/upload/shapefile" }},
+                        {text: 'Geotiff', handler: function(){ top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                     
+                        
+                    ]
+                })
+            });
+
+            btindexs = Ext.create('Ext.button.Split', {
+                text: 'Índices',                
+                menu: new Ext.menu.Menu({
+                    items: [
+                        // these will render as dropdown menu items when the arrow is clicked:
+                        {text: 'GCI', handler: function(){ alert("Índice: GCI \nTipo: Multiespectral \nFunción: Utilzado para estimar contenido de clorofila en un amplio rango de especies.\nEstado: En desarrollo..."); }},
+                        {text: 'GRRI', handler: function(){ alert("Índice: GRRI \nTipo: Visible \nFunción: \nEstado: En desarrollo..."); }},
+                        {text: 'MGRVI', handler: function(){ alert("Índice: MGRVI \nTipo: Visible \nFunción: Captura la diferencia de reflectancia por la absorción de la clorofila a y la clorofila b.\nEstado: En desarrollo..."); }},
+                        {text: 'NDRE', handler: function(){ alert("Índice: NDRE \nTipo: Multiespectral \nFunción: Utilizado para identificar las áreas con plantas saludables mediante el monitoreo de la clorofila. Puede detectar el estrés en la planta aún cuando no sea visible en la superficie.\nEstado: En desarrollo..."); }},
+                        {text: 'NDVI', handler: function(){ alert("Índice: NDVI \nTipo: Multiespectral \nFunción: Identifica densidad y vitalidad de la vegetación de un área. La vegetación densa y sana tiene valores cercanos al 1 positivo, el suelo tiene valores cercanos a 0 y las nubes, nieve y el agua tienen valores negativos.\nEstado: En desarrollo..."); }},
+                        {text: 'NGRDI', handler: function(){ alert("Índice: NGRDI \nTipo: Visible \nFunción: Permite diferenciar entre vegetación (positivos), suelo (negativos) y agua (cero).\nEstado: En desarrollo..."); }},
+                    ]
+                })
+            });
+
             treePanel = Ext.create('Ext.tree.Panel', {
-                title: project_name,
+                //title: project_name,
                 viewConfig: {
                     plugins: {ptype: 'treeviewdragdrop'}
                 },
                 store: treeStore,
                 rootVisible: false,
                 flex: 1,
-                border: false
+                border: false,
+                tbar: [{
+                    // segmented button to change the selection mode
+                    xtype: 'segmentedbutton',
+                    items: isDemo ? [btInicio] : [btInicio, btadd, btindexs,btModel]
+                }]
             });
+            
 
             let description = Ext.create('Ext.panel.Panel', {
                 contentEl: 'description',
@@ -551,13 +338,29 @@ function initApp() {
                     {
                         xtype: 'panel',
                         region: 'west',
-                        width: 400,
+                        collapsible: true,
+                        title: project_name,
+                        width: 300,
+                        split: true,
                         layout: {
                             type: 'vbox',
                             align: 'stretch'
                         },
-                        items: [treePanel, description, timePanel] 
-                    }
+                        items: [treePanel]
+                    },
+                    {
+                        contentEl: 'data',
+                        title: 'Descripción',
+                        region: 'south',
+                        border: false,
+                        margin: '0 0 0 0',
+                        height: 120, 
+                        split: true,      
+                        collapsible: true,                 
+                        //items: [timePanel]
+
+                    },
+                    
                 ]
             });
         },
@@ -577,15 +380,16 @@ function fillShapefiles() {
                             source: new ol.source.Vector({
                                 format: new ol.format.GeoJSON(),
                                 projection: 'EPSG:4326',
-                                url: `/geoserver/geoserver/${project_path}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${art.layer}&outputFormat=application/json`
+                                url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
+                                //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
                             })
                         }));
                     else if (art.type === "ORTHOMOSAIC")
-                        shapefiles.push(new ol.layer.Tile({
+                        shapefiles.push(new ol.layer.Image({
                             name: art.name,
-                            source: new ol.source.TileWMS({
-                                url: `/geoserver/geoserver/${project_path}/ows?version=1.3.0`,
-                                params: {"LAYERS": art.layer, tiled: true}
+                            source: new ol.source.ImageWMS({
+                                url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",
+                                params: {"LAYERS": art.layer}
                             })
                         }));
                 }
@@ -602,7 +406,7 @@ function fillRasters() {
                     indices.push(new ol.layer.Image({
                         name: index.title,
                         source: new ol.source.ImageWMS({
-                            url: `/geoserver/geoserver/${project_path}/ows?version=1.3.0`,
+                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",
                             params: {"LAYERS": index.layer}
                         })
                     }));
@@ -932,8 +736,6 @@ function addIndex(index) {
     }).then(function (response) {
         if (response.status === 200) {
             window.location.reload(true); // Reload page if index created successfully
-        } else if (response.status === 402) {
-            throw "Su almacenamiento está lleno, no puede crear nuevos índices";
         } else throw response.text();
     }).catch((msg) => alert(msg));
 }
