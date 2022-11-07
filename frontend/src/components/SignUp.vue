@@ -80,7 +80,10 @@
                                 <b-row>
                                     <b-col>
                                         <b-form-group id="input-group-7" label="Profesión:*" label-for="input-7">
-                                            <b-form-select size="sm" id="input-7" required v-model="form.profession" :options="optionsProf"></b-form-select>
+                                            <b-form-input size="sm"  id="input-1" type="text" v-model="form.name" :state="nameState" required ></b-form-input>
+                                            <b-form-invalid-feedback id="input-live-feedback">
+                                                La profesión no puede superar los 150 caracteres.
+                                            </b-form-invalid-feedback>
                                         </b-form-group>
                                     </b-col>
                                     <b-col>
@@ -98,9 +101,15 @@
                                     <b-col class="text-center">
                                         <b-form-checkbox required v-model="acept" value="true" unchecked-value="false" >Acepto los <b-link variant="info" v-b-modal.modal-scrollable>términos y condiciones</b-link></b-form-checkbox>                                    
                                                 <b-modal id="modal-scrollable" ok-only scrollable title="Términos y Condiciones">
-                                                <p class="my-4" v-for="i in 20" :key="i">
-                                                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis
-                                                in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+                                                <p>
+Este contrato es contentivo de los términos y condiciones aplicables al uso del contenido, productos y/o servicios de la web Agrins para hacer uso del contenido, productos y/o servicios del sitio web el usuario deberá sujetarse a los presentes términos y condiciones. <br>
+I. OBJETIVO Se persigue la regulación el acceso y utilización del contenido, productos y/o servicios a disposición del público en general en el dominio planteado. El titular se guarda el derecho de realizar cualquier tipo de reforma en la página en cualquier momento y sin previo aviso, al suscriptor. El acceso a la página web por parte del usuario es libre y gratuito, la utilización del contenido, productos y/o servicios no conlleva un costo para el usuario. El sitio web está dirigido a un público con enfoques agrícolas del Ecuador y se ajusta a los parámetros legales establecidos en dicho territorio. La administración del sitio web puede ejercerse por terceros, es decir, personas distintas al titular, sin afectar esto los presentes términos y condiciones. <br>
+SOBRE DERECHOS DEL USUARIO<br>
+La actividad del usuario en el sitio web como publicaciones o comentarios estarán sujetos a los presentes términos y condiciones. El usuario se compromete a utilizar el contenido, productos y/o servicios de forma lícita, sin faltar a la moral o al orden público. El usuario se compromete a proporcionar información verídica en los formularios del sitio web. El acceso al sitio web no supone una relación directa ni física  entre el usuario y el titular del sitio web. El usuario manifiesta ser mayor de edad y contar con la capacidad jurídica de acatar los presentes términos y condiciones.<br>
+ACCESO Y NAVEGACIÓN DENTRO DEL SITIO<br>
+El titular no responde por la continuidad y disponibilidad del contenido, productos y/o servicios en a largo plazo, se realizará acciones que fomenten el buen funcionamiento de dicho sitio web sin responsabilidad alguna. El titular no se responsabiliza de que el software esté libre de errores que puedan causar un daño al software y/o hardware del equipo del cual el usuario accede al sitio web. De igual forma, no se responsabiliza por los posibles daños psicológicos que puedan ocasionar el acceso y utilización del sitio web.<br>
+El titular establecerá roles para cada uno de los usuarios en base al uso que le dará al sistema, cada uno de esos roles tendrá accesos y capacidad de almacenamiento para subir proyecto establecidos con el fin que el sitio web no se sobrecargue, una vez que un usuario llene su almacenamiento no podrá crear más proyectos a menos que elimine uno de los existentes libreando así espacio para los nuevos.<br>                                               
+                                                
                                                 </p>
                                             </b-modal>
                                     </b-col>                                  
@@ -147,13 +156,6 @@ export default {
                 city:''
             },
             error: false,
-            optionsProf: [
-                { value: 'Agricultor', text: 'Agricultor' },
-                { value: 'Director', text: 'Director' },
-                { value: 'Investigador', text: 'Investigador' },           
-                { value: 'Profesional', text: 'Profesional'},
-                { value: 'Otro', text: 'Otro'},
-            ],
             optionsInst:[
                 { value: 'Publico', text: 'Público' },
                 { value: 'Privado', text: 'Privado' },

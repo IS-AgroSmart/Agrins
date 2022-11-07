@@ -15,7 +15,7 @@
                         <b-icon-facebook font-scale="2" variant="info"/>
                     </div>
                     <div>                                
-                        <p style="color:#087990"><b-icon-envelope variant="info"/> contacto@agrins.com</p>
+                        <p style="color:#087990"><b-icon-envelope variant="info"/> agrins2022@gmail.com</p>
                     </div>
                     <div>
                         <p style="color:#087990"><b-icon-telephone variant="info"/> +593 9999900099</p>
