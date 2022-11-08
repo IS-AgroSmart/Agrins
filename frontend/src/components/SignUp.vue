@@ -80,8 +80,8 @@
                                 <b-row>
                                     <b-col>
                                         <b-form-group id="input-group-7" label="Profesión:*" label-for="input-7">
-                                            <b-form-input size="sm"  id="input-1" type="text" v-model="form.profession" :state="professionState" required ></b-form-input>
-                                            <b-form-invalid-feedback id="input-live-feedback">
+                                            <b-form-input size="sm"  id="input-7" type="text" v-model="form.profession" :state="professionState" required ></b-form-input>
+                                            <b-form-invalid-feedback id="input-live-feedback5">
                                                 La profesión no puede superar los 150 caracteres.
                                             </b-form-invalid-feedback>
                                         </b-form-group>
@@ -173,8 +173,8 @@ export default {
             return this.form.name.length <= 150;
         },
         professionState() {
-            if (this.form.name.length == 0) return null;
-            return this.form.name.length <= 150;
+            if (this.form.profession.length == 0) return null;
+            return this.form.profession.length <= 150;
         },
         lastnameState() {
             if (this.form.lastname.length == 0) return null;
