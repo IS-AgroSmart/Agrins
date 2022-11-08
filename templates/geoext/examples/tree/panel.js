@@ -105,15 +105,17 @@ function initApp() {
             olMap = new ol.Map({
                 layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
                 view: new ol.View({
-                    center: [0, 0],
-                    zoom: 2,
+                    //center: [0, 0],
+                    center: ol.proj.fromLonLat([-79.9637110931326,-2.1400643536418857]),
+                    zoom: 18,
                     minZoom: 2,
                     maxZoom: 24
                 }),
                 target: 'map',
             });
 
-            fitMap(); // Must happen after olMap is defined!
+            //fitMap(); // Must happen after olMap is defined!
+            
             addMeasureInteraction();
 
             let zoomslider = new ol.control.ZoomSlider();
@@ -372,30 +374,33 @@ function fillShapefiles() {
     return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
         {headers: noCacheHeaders})
         .then(response => response.json())
-        .then(data => {
-                for (let art of data.artifacts) {
-                    if (art.type === "SHAPEFILE")
-                        shapefiles.push(new ol.layer.Vector({
-                            name: art.name,
-                            source: new ol.source.Vector({
-                                format: new ol.format.GeoJSON(),
-                                projection: 'EPSG:4326',
-                                url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
+        .then(data => {            
+            for (let art of data.artifacts) {                   
+                if (art.type === "SHAPEFILE"){
+                    //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
+                    shapefiles.push(new ol.layer.Vector({
+                        name: art.name,
+                        source: new ol.source.Vector({
+                            format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
+                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
                                 //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
-                            })
-                        }));
-                    else if (art.type === "ORTHOMOSAIC")
-                        shapefiles.push(new ol.layer.Image({
-                            name: art.name,
-                            source: new ol.source.ImageWMS({
-                                url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",
-                                params: {"LAYERS": art.layer}
-                            })
-                        }));
+                        })
+                }));}
+                else if (art.type === "ORTHOMOSAIC"){
+                    console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                    shapefiles.push(new ol.layer.Image({
+                        name: art.name,
+                        source: new ol.source.ImageWMS({
+                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
+                            params: {"LAYERS": art.layer}
+                        })                            
+                }));}
                 }
             }
         );
 }
+
+
 
 function fillRasters() {
     return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/indices",
@@ -426,6 +431,13 @@ function fitMap() {
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
         });
 }
+/*
+//imageSource.once('imageloadend', function(e) {
+function fitMap(){
+    console.info('image loaded');
+    var view = olMap.getView();
+    view.fitExtent(layerImage.getExtent(), map.getSize());   
+};*/
 
 function _createControl(handler, buttonContent, buttonClass, buttonTooltip) {
     let controlClass = function (opt_options) {
