@@ -47,11 +47,11 @@
                     <b-row class="text-center">
                         <b-col md>
                             <div class="mb-2">
-                                <img width="300" height="200" src="/pc.png" thumbnail/>
+                                <img width="250" height="150" src="/pc.png" thumbnail/>
                             </div>
                             <div>
-                                <h5><b>SIG WEB</b></h5>
-                                <p>Disponemos de una solución web para la gestión de la cartografía de los cultivos.</p>
+                                <h5><b>SIG WEB (geoportal)</b></h5>
+                                <p>Disponemos de una solución web para el mapeo y gestión de la cartografía de cultivos.</p>
                             </div>
                         </b-col>
                         <b-col md>
@@ -60,7 +60,7 @@
                             </div>
                             <div>
                                 <h5><b>Proyectos</b></h5>
-                                <p>En la plataforma web, se podrá crear modificar y compartir cartografía.</p>
+                                <p>En la plataforma web se podrá visualizar, consultar y descargar la geoinformación creada en el proyecto.</p>
                         </div>
                     </b-col>
                     <b-col md>
@@ -69,7 +69,7 @@
                         </div>
                         <div>
                             <h5><b>Índices de vegetación</b></h5>
-                            <p>A partir de las imágenes aéreas se pueden estimar índices de vegetación como el Índice de Vegetación de Diferencia Normalizada (NDVI), para el diagnóstico en los cultivos.</p>
+                            <p>A partir de las imágenes aéreas se podrá estimar índices espectrales de vegetación y aplicar modelos de predicción para el monitoreo y diagnóstico en los cultivos.</p>
                         </div>
                     </b-col>
                 </b-row>
@@ -104,10 +104,17 @@
                         <b-row class="text-center">
                             <b-col></b-col>
                             <b-col cols="10">
-                                <b-row align-h="center" class="py-5">
+                                <b-row align-h="center" >
                                     <h2><b>¿Quienes Somos?</b></h2>
                                 </b-row>
-                                <b-row align-h="center" class="py-1">
+                                <b-row align-h="center" >
+                                    
+                                    <div style="height:300px; width:300px;padding-bottom:0% ">
+                                        <b-embed type="video" aspect="4by3" controls >                                        
+                                            <source src="video.mp4" type="video/mp4">
+                                        </b-embed>
+                                    </div>
+                                
                                     <p>Agrins está formado por investigadores de 3 universidades públicas del Ecuador: ESPOL de Guayaquil, UTM de Portoviejo y Universidad de Cuenca, especializados en el campo de la agricultura, computación y en el uso de técnicas y herramientas tecnológicas para el monitoreo y diagnóstico de los cultivos.</p>
                                 </b-row>
 
