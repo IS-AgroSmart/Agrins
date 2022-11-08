@@ -16,25 +16,22 @@
         <div style="height: 100%; margin-left: 5%;border-radius: 10px;margin-right: 5%;  ">
             <b-card no-body>
                 <b-tabs size="sm" content-class="mt-3" justified>
-                <b-tab style="height: 100%;background-color:;" title="Proyecto" active>
-                    <div>
-                        <div class="d-flex bd-highlight">
-                            <div class="text-center">                                                               
-                                <b-img  src="./card_proj.png" fluid alt="Fluid image"></b-img>                             
-                               
-                                <div class="text-center">
-                                    <b-button-group size="sm">
+                <b-tab class="text-center" style="height: 100%;background-color:;" title="Proyecto" active>
+                    <div class="text-center">
+                        <div class="text-center">                                                               
+                            <b-img  src="./card_proj.png" fluid alt="Fluid image"></b-img>                               
+                            <div class="text-center">
+                                <b-button-group size="sm">
                                     <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" class="mx-1 my-1" variant="success">Ver Mapa</b-button>
                                     <b-button v-if="!project.is_demo" @click="finalDeleteProject" variant="danger" class="mx-1 my-1" >Eliminar</b-button>
-                                    </b-button-group>
-                                </div>
-                                <h5>
-                                    Descripción
-                                </h5>
+                                </b-button-group>
+                            </div>
+                            <h5>
+                                Descripción
+                            </h5>
                                 <p>{{this.project.description}}</p>
                             </div>
-                        </div>
-                    </div>
+                        </div>                    
                 </b-tab>
                 <b-tab style="background-color:white;" title="Recursos"><b-card-text>
                     <div style="padding-left: 3%; padding-top:3%">
@@ -52,7 +49,7 @@
 </template>
 
 <script>
-// import forceLogin from './mixins/force_login';
+import forceLogin from './mixins/force_login';
 import axios from 'axios';
 
 export default {
@@ -100,6 +97,6 @@ export default {
         project: { type: Object },
         deleted: { type: Boolean, default: false }
     },
-    // mixins: [forceLogin] // forceLogin not required, this will only be instantiated from page components
+    mixins: [forceLogin] // forceLogin not required, this will only be instantiated from page components
 }
 </script>
