@@ -28,7 +28,7 @@
                     <b-row>
                         <b-col cols="9">                            
                             <b-row class="text-justify">
-                                <p style="padding-left:5%;padding-top: 3%;">La creciente demanda de alimentos de una población en aumento  plantea desafíos para los gobiernos  en términos de soberanía  alimentaria; sin embargo desde el punto de vista de los productores los desafíos estan relacionados con la baja competitividad de la región, los altos costos de producción y la baja productividad. <b-link href="/">LEER MÁS >></b-link></p>
+                                <p style="padding-left:5%;padding-top: 3%;">La creciente demanda de alimentos de una población en aumento plantea desafíos para los gobiernos en términos de soberanía y seguridad alimentaria; sin embargo, desde el punto de vista de los productores los desafíos están relacionados con la baja competitividad de la región, los altos costos de producción y la baja productividad. Para afrontar estos desafíos se debe entender mejor los sistemas agrícolas mediante el monitoreo y análisis continuo de las características agronómicas y de producción. </p>
                             </b-row>
                         </b-col>
                         <b-col align-v="start" style="padding-top: 0%;">
@@ -85,10 +85,11 @@
                         </b-row>
                         <b-row align-h="center" class="py-4" >
                             <ul>
-                                <li style="color:white"><h6>Aumento de la productividad en los cultivos, mediante la implementación de tecnologías.</h6></li>
-                                <li style="color:white"><h6>Reducción de los costos de producción mediante el uso eficiente de recursos.</h6></li>
-                                <li style="color:white"><h6>Minimiza las labores de control en campo.</h6></li>
-                                <li style="color:white"><h6>Mayor precisión en el manejo de los campos de producción.</h6></li>
+                                <li style="color:white"><h6>Aumento de la productividad en los cultivos.</h6></li>
+                                <li style="color:white"><h6>Uso eficiente de los insumos agrícolas .</h6></li>
+                                <li style="color:white"><h6>Minimiza las actividades de monitoreo en campo.</h6></li>
+                                <li style="color:white"><h6>Mayor precisión en el manejo de los campos de producción agrícola.</h6></li>
+                                <li style="color:white"><h6>Disminuye los costos de producción.</h6></li>
                             </ul>
                         </b-row>
 
@@ -109,13 +110,13 @@
                                 </b-row>
                                 <b-row align-h="center" >
                                     
-                                    <div style="height:300px; width:300px;padding-bottom:0% ">
-                                        <b-embed type="video" aspect="4by3" controls >                                        
-                                            <source src="video.mp4" type="video/mp4">
+                                    <div style="height:300px; width:300px;padding-bottom:0%" >
+                                        <b-embed type="video" aspect="4by3" controls >
+                                            <source src="https://drive.google.com/file/d/17sYsKNspBBluQj60R5mv6Mby8mCzAxM4/view?usp=sharing" type="video/mp4">
                                         </b-embed>
                                     </div>
                                 
-                                    <p>Agrins está formado por investigadores de 3 universidades públicas del Ecuador: ESPOL de Guayaquil, UTM de Portoviejo y Universidad de Cuenca, especializados en el campo de la agricultura, computación y en el uso de técnicas y herramientas tecnológicas para el monitoreo y diagnóstico de los cultivos.</p>
+                                    <p>Agrins está formado por investigadores de tres universidades públicas del Ecuador: ESPOL de Guayaquil, UTM de Portoviejo y Universidad de Cuenca, especializados en el campo de la agricultura, computación y en el uso de técnicas y herramientas tecnológicas para el monitoreo y diagnóstico de los cultivos.</p>
                                 </b-row>
 
                             </b-col>

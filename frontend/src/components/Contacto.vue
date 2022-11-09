@@ -15,10 +15,10 @@
                         <b-icon-facebook font-scale="2" variant="info"/>
                     </div>
                     <div>                                
-                        <p style="color:#087990"><b-icon-envelope variant="info"/> agrins2022@gmail.com</p>
+                        <p style="color:#087990"><b-icon-envelope variant="info"/> mrealpe@fiec.espol.edu.ec</p>
                     </div>
                     <div>
-                        <p style="color:#087990"><b-icon-telephone variant="info"/> +593 9999900099</p>
+                        <p style="color:#087990"><b-icon-telephone variant="info"/> (+593) 42269761</p>
                     </div>
                 </b-col>                
                 <b-col md >

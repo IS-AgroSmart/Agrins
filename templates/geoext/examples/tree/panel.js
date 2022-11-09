@@ -53,18 +53,7 @@ function initApp() {
 
             basemapsGroup = new ol.layer.Group({
                 name: "Mapas base",                
-                layers: [
-                    new ol.layer.Tile({
-                        name: "Satélite (ArcGIS/ESRI)",
-                        source: new ol.source.XYZ({
-                            attributions: ['Powered by Esri.',
-                                'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
-                                'Icons from Wikimedia Commons',],
-                            attributionsCollapsible: false,
-                            url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                            maxZoom: 23
-                        })
-                    }),
+                layers: [                    
                     new ol.layer.Tile({
                         name: "OpenStreetMap",
                         source: new ol.source.OSM(),
@@ -74,7 +63,20 @@ function initApp() {
                         legendUrl: 'https://stamen-tiles-d.a.ssl.fastly.net/' +
                             'watercolor/2/1/0.jpg',
                         source: new ol.source.Stamen({layer: 'watercolor'}),
-                        name: 'Stamen Watercolor'
+                        name: 'Stamen Watercolor',
+                        visible: false
+                    }),
+                    new ol.layer.Tile({
+                        name: "Satélite (ArcGIS/ESRI)",
+                        visible: true,
+                        source: new ol.source.XYZ({
+                            attributions: ['Powered by Esri.',
+                                'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
+                                'Icons from Wikimedia Commons',],
+                            attributionsCollapsible: false,
+                            url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                            maxZoom: 25
+                        })
                     }),
                 ],
             });
@@ -107,7 +109,7 @@ function initApp() {
                 view: new ol.View({
                     //center: [0, 0],
                     center: ol.proj.fromLonLat([-79.9637110931326,-2.1400643536418857]),
-                    zoom: 18,
+                    zoom: 16,
                     minZoom: 2,
                     maxZoom: 24
                 }),
@@ -133,6 +135,7 @@ function initApp() {
 
             // Add legend, only if there is at least one index
             if (indices.length > 0) {
+                
                 let LegendControl = function (opt_options) {
                     var options = opt_options || {};
                     var img = document.createElement('img');
@@ -156,12 +159,13 @@ function initApp() {
                 map: olMap,
                 width: 140
             });
-            selectClick = new ol.interaction.Select({
+            selectClick = new ol.interaction.Select({                
                 condition: ol.events.condition.click,
                 layers: (layer) => layer instanceof ol.layer.Vector,
                 hitTolerance: 10,
             });
             selectClick.on('select', function (e) {
+                console.log("Select layer");
                 if (delete_handler)
                     document.removeEventListener("keydown", delete_handler);
 
@@ -264,49 +268,47 @@ function initApp() {
                 layerGroup: treeLayerGroup
             });
 
-
-            let btindexs
             let btInicio
-            let btadd
-            let btModel
 
-            btModel=Ext.create('Ext.Button', {
-                text: 'Modelo',                    
-                handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo..."); }
-            });
-
-            btInicio =Ext.create('Ext.Button', {
-                text: 'Regresar',  
+            btInicio = Ext.create('Ext.Button', {
+                text: '< Regresar',  
+                renderTo: Ext.getBody(),
                 handler: function() {
                     top.window.location.href='/#/projects/'
                 }
             });
-
-            btadd = Ext.create('Ext.button.Split', {
-                text: 'Agregar',                
-                menu: new Ext.menu.Menu({
-                    items: [                        
+            
+            tabMenu = Ext.create('Ext.button.Segmented', {            
+                renderTo: Ext.getBody(),
+                //allowMultiple: true,
+                items: [{
+                     text: 'Agregar',
+                     tooltip: 'Agregar índices',
+                     menu: [
                         {text: 'Vector', handler: function(){ top.window.location.href= "/#/projects/" + uuid + "/upload/shapefile" }},
-                        {text: 'Geotiff', handler: function(){ top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                     
-                        
-                    ]
-                })
-            });
-
-            btindexs = Ext.create('Ext.button.Split', {
-                text: 'Índices',                
-                menu: new Ext.menu.Menu({
-                    items: [
-                        // these will render as dropdown menu items when the arrow is clicked:
-                        {text: 'GCI', handler: function(){ alert("Índice: GCI \nTipo: Multiespectral \nFunción: Utilzado para estimar contenido de clorofila en un amplio rango de especies.\nEstado: En desarrollo..."); }},
+                        {text: 'Geotiff', handler: function(){ top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                         
+                     ]
+                },{
+                     text: 'Índices',
+                     tooltip: 'Generar ïndices',
+                     menu: [
+                        {text: 'GCI', handler: function(){ alert("Índice: GCI \nTipo: Multiespectral \nFunción: Utilizado para estimar contenido de clorofila en un amplio rango de especies.\nEstado: En desarrollo..."); }},
                         {text: 'GRRI', handler: function(){ alert("Índice: GRRI \nTipo: Visible \nFunción: \nEstado: En desarrollo..."); }},
                         {text: 'MGRVI', handler: function(){ alert("Índice: MGRVI \nTipo: Visible \nFunción: Captura la diferencia de reflectancia por la absorción de la clorofila a y la clorofila b.\nEstado: En desarrollo..."); }},
                         {text: 'NDRE', handler: function(){ alert("Índice: NDRE \nTipo: Multiespectral \nFunción: Utilizado para identificar las áreas con plantas saludables mediante el monitoreo de la clorofila. Puede detectar el estrés en la planta aún cuando no sea visible en la superficie.\nEstado: En desarrollo..."); }},
                         {text: 'NDVI', handler: function(){ alert("Índice: NDVI \nTipo: Multiespectral \nFunción: Identifica densidad y vitalidad de la vegetación de un área. La vegetación densa y sana tiene valores cercanos al 1 positivo, el suelo tiene valores cercanos a 0 y las nubes, nieve y el agua tienen valores negativos.\nEstado: En desarrollo..."); }},
                         {text: 'NGRDI', handler: function(){ alert("Índice: NGRDI \nTipo: Visible \nFunción: Permite diferenciar entre vegetación (positivos), suelo (negativos) y agua (cero).\nEstado: En desarrollo..."); }},
-                    ]
-                })
-            });
+
+                     ]
+                },{
+                     text: 'Modelo',
+                     menu: [
+                        {text: 'Altura', handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo...")}},
+                        {text: 'Clorofila',handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la clorofila de cultivos.\nEstado: En desarrollo...")}}
+                     ]
+                }],
+                
+           });
 
             treePanel = Ext.create('Ext.tree.Panel', {
                 //title: project_name,
@@ -320,8 +322,9 @@ function initApp() {
                 tbar: [{
                     // segmented button to change the selection mode
                     xtype: 'segmentedbutton',
-                    items: isDemo ? [btInicio] : [btInicio, btadd, btindexs,btModel]
-                }]
+                    items: isDemo ? [btInicio] : [btInicio, tabMenu]
+                }],
+               
             });
             
 
@@ -342,7 +345,7 @@ function initApp() {
                         region: 'west',
                         collapsible: true,
                         title: project_name,
-                        width: 300,
+                        width: 315,
                         split: true,
                         layout: {
                             type: 'vbox',

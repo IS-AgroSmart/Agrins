@@ -34,12 +34,43 @@
                         </div>                    
                 </b-tab>
                 <b-tab style="background-color:white;" title="Recursos"><b-card-text>
-                    <div style="padding-left: 3%; padding-top:3%">
-                    <p>Link documentos: <b-link href="">Proyecto.pdf</b-link></p>
-                    <p>Capas: </p>
-                    <p><b-link href=""> Orthomosaico.tif</b-link></p></div>
+                    <div style="padding-left: 3%; padding-right: 3%; ">                        
+                        <div>                           
+                            <b-card>                                
+                                <b-breadcrumb v-if="project.is_demo">                                    
+                                    <b-breadcrumb-item target="_blank" href="demo-recurso.pdf">{{projectName}}/ Demo-recurso.pdf</b-breadcrumb-item>
+                                </b-breadcrumb>                                
+
+                                <b-button v-if="!project.is_demo" v-b-toggle.collapse-1-inner size="sm">+ Agregar recurso</b-button>
+                                <b-collapse id="collapse-1-inner" class="mt-2">
+                                    <b-card>En desarrollo...</b-card>
+                                </b-collapse>
+                            </b-card>                            
+                        </div>
+                        <div v-if="project.is_demo" class="accordion" role="tablist">
+                            <b-card no-body class="mb-1">
+                            <b-card-header header-tag="header" class="p-1" role="tab">
+                                <b-button class="text-left" block v-b-toggle.accordion-1 squared variant="outline-secondary">Capa Maiz.geotiff</b-button>
+                            </b-card-header>
+                            <b-collapse id="accordion-1"  accordion="my-accordion" role="tabpanel">
+                                <b-card-body>
+                                <b-card-text>La capa con nombre <code>Maiz.geotiff</code> no está disponible para descarga</b-card-text>
+                                <b-card-text>{{ text }}</b-card-text>
+                                </b-card-body>
+                            </b-collapse>
+                            </b-card>
+                            </div>
+
+                    
+                   </div>
                 </b-card-text></b-tab>
-                <b-tab style="background-color:white;" title="Configuración"><b-card-text>Configuración del proyecto</b-card-text></b-tab>
+
+                <b-tab v-if="!project.is_demo" style="background-color:white;" title="Configuración">
+                    <div style="padding-left: 3%; padding-right: 3%; ">
+                        <b-card-text>Configuración del proyecto</b-card-text>
+                    </div> 
+                </b-tab>
+                
                 </b-tabs>
             </b-card>
         </div>
