@@ -111,7 +111,9 @@
                                 <b-row align-h="center" >
                                     
                                     <div style="height:300px; width:300px;padding-bottom:0%" >
-                                        <iframe src="https://drive.google.com/file/d/17sYsKNspBBluQj60R5mv6Mby8mCzAxM4/preview" width="280" height="280" allow="autoplay"></iframe>
+                                        <b-embed type="video" aspect="4by3" controls >
+                                            <source src="https://drive.google.com/file/d/17sYsKNspBBluQj60R5mv6Mby8mCzAxM4/view?usp=share_link" type="video/mp4">
+                                        </b-embed>
                                     </div>
                                 
                                     <p>Agrins está formado por investigadores de tres universidades públicas del Ecuador: ESPOL de Guayaquil, UTM de Portoviejo y Universidad de Cuenca, especializados en el campo de la agricultura, computación y en el uso de técnicas y herramientas tecnológicas para el monitoreo y diagnóstico de los cultivos.</p>
