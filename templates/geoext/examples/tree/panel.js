@@ -75,7 +75,7 @@ function initApp() {
                                 'Icons from Wikimedia Commons',],
                             attributionsCollapsible: false,
                             url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                            maxZoom: 25
+                            //maxZoom: 25
                         })
                     }),
                 ],
