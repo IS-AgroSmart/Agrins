@@ -39,22 +39,22 @@
                                             <b-form-input size="sm" id="input-4" type="tel" v-model="form.phone" :state="phoneState" required placeholder="Teléfono"></b-form-input>
                                         </b-form-group>
                                     </b-col>
-                                </b-row>                            
+                                </b-row>  
                                 <b-row >
                                     <b-col>
                                         <b-form-group id="input-group-5" label="Contraseña:*" label-for="input-5">
-                                            <b-input-group>
+                                            <b-input-group class="mt-3">
                                                 <b-form-input  id="input-5" v-if="showPassword" type="text" size="sm" :state="passwordState" v-model="form.password" required placeholder="Contraseña" data-cy="password"></b-form-input>
                                                 <b-form-input  id="input-5" v-if="!showPassword" type="password" size="sm" :state="passwordState" v-model="form.password" required placeholder="Contraseña" data-cy="password"></b-form-input>
-                                                <b-form-invalid-feedback id="input-live-feedback3">
-                                                    Escriba una contraseña de al menos 8 caracteres
-                                                </b-form-invalid-feedback>
                                                 <b-input-group-append>
                                                     <b-button size="sm" variant="secondary" @click="showPassword = !showPassword">
                                                         <b-icon-eye-fill v-show="showPassword" />
                                                         <b-icon-eye-slash-fill v-show="!showPassword" />                                        
                                                     </b-button>                                
                                                 </b-input-group-append>
+                                                <b-form-invalid-feedback id="input-live-feedback3">
+                                                    Escriba una contraseña de al menos 8 caracteres
+                                                </b-form-invalid-feedback>
                                             </b-input-group>
                                         </b-form-group>
                                     </b-col>
@@ -63,15 +63,15 @@
                                             <b-input-group>
                                                 <b-form-input  id="input-6" v-if="showPassword1" type="text" size="sm" :state="confirmpasswordState" v-model="form.confirmpassword" required placeholder="Contraseña" data-cy="password"></b-form-input>
                                                 <b-form-input  id="input-6" v-if="!showPassword1" type="password" size="sm" :state="confirmpasswordState" v-model="form.confirmpassword" required placeholder="Contraseña" data-cy="password"></b-form-input>
-                                                <b-form-invalid-feedback id="input-live-feedback4">
-                                                    La contaseña debe ser igual
-                                                </b-form-invalid-feedback>
                                                 <b-input-group-append>
                                                     <b-button size="sm" variant="secondary" @click="showPassword1 = !showPassword1">
                                                         <b-icon-eye-fill v-show="showPassword1" />
                                                         <b-icon-eye-slash-fill v-show="!showPassword1" />                                        
                                                     </b-button>                                
                                                 </b-input-group-append>
+                                                <b-form-invalid-feedback id="input-live-feedback4">
+                                                    La contaseña debe ser igual
+                                                </b-form-invalid-feedback>
                                             </b-input-group>
                                         </b-form-group>
 
@@ -169,15 +169,15 @@ export default {
     },
     computed: {
         nameState() {
-            if (this.form.name.length == 0) return null;
+            if (this.form.name.length < 3) return null;
             return this.form.name.length <= 150;
         },
         professionState() {
-            if (this.form.profession.length == 0) return null;
+            if (this.form.profession.length < 3) return null;
             return this.form.profession.length <= 150;
         },
         lastnameState() {
-            if (this.form.lastname.length == 0) return null;
+            if (this.form.lastname.length <3) return null;
             return this.form.lastname.length <= 150;
         },
         passwordState() {

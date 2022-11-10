@@ -70,7 +70,7 @@ class FlightSerializer(serializers.ModelSerializer):
 class ArtifactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artifact
-        fields = ["pk", "type", "project", "name", "type"]
+        fields = ["pk", "type", "project", "name", "project"]
 
 
 class UserProjectSerializer(serializers.ModelSerializer):
@@ -91,7 +91,7 @@ class UserProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProject
-        fields = ['uuid', 'user', 'artifacts', "name", "description", "is_demo", "deleted"]
+        fields = ['uuid', 'user', 'artifacts', "name", "description", "is_demo", "used_space", "deleted"]
 
 
 class BlockCriteriaSerializer(serializers.ModelSerializer):

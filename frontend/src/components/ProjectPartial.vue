@@ -8,7 +8,7 @@
             <b-row class="float-right">
                     <b-badge v-if="project.is_demo" squared variant="warning">DEMO</b-badge>                    
                     <b-badge v-if="isAdmin" variant="success" squared>PROPIETARIO</b-badge>
-                    <b-badge v-if="!project.is_demo && !isAdmin" variant="success" squared>PROPIETARIO</b-badge>
+                    <b-badge v-if="!project.is_demo && !isAdmin" variant="success" squared>PROPIETARIO</b-badge>                    
             </b-row>
             </template>            
         </b-card>

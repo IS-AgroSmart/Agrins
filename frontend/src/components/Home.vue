@@ -112,7 +112,7 @@
                                     
                                     <div style="height:300px; width:300px;padding-bottom:0%" >
                                         <b-embed type="video" aspect="4by3" controls >
-                                            <source src="https://drive.google.com/file/d/17sYsKNspBBluQj60R5mv6Mby8mCzAxM4/view?usp=share_link" type="video/mp4">
+                                            <source src="video.mp4" type="video/mp4">
                                         </b-embed>
                                     </div>
                                 
