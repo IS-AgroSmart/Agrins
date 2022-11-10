@@ -17,7 +17,7 @@
             <b-card no-body>
                 <b-tabs size="sm" content-class="mt-3" justified>
                 <b-tab style="height: 100%;background-color:;" title="Proyecto" active>
-                    <small style="padding-left: 3%; padding-top: 0%; fontSize:14px" class="text-muted"> Almacenamiento actual: {{this.project.used_space/1024}}MB  </small>
+                    <small style="padding-left: 3%; padding-top: 0%; fontSize:14px" class="text-muted">Tamaño del proyecto: {{this.project.used_space/1024}}MB  </small>
                     <div class="text-center">
                         <div class="text-center">                                                               
                             <b-img  src="./card_proj.png" fluid alt="Fluid image"></b-img>                               
@@ -25,6 +25,7 @@
                                 <b-button-group size="sm">
                                     <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" class="mx-1 my-1" variant="success">Ver Mapa</b-button>
                                     <b-button v-if="this.project.user == this.storage.loggedInUser.pk" @click="finalDeleteProject" variant="danger" class="mx-1 my-1" >Eliminar</b-button>
+                                    <b-button v-if="this.project.user == this.storage.loggedInUser.pk" class="mx-1 my-1"> Editar</b-button>
                                 </b-button-group>
                             </div>
                             <h5>
@@ -43,7 +44,7 @@
                                     <b-breadcrumb-item target="_blank" href="demo-recurso.pdf">{{projectName}}/ Demo-recurso.pdf</b-breadcrumb-item>
                                 </b-breadcrumb>                                
 
-                                <b-button v-if="!project.is_demo" v-b-toggle.collapse-1-inner size="sm">+ Agregar recurso</b-button>
+                                <b-button v-if="!project.is_demo" variant="info" v-b-toggle.collapse-1-inner size="sm">+ Agregar recurso</b-button>
                                 <b-collapse id="collapse-1-inner" class="mt-2">
                                     <b-card>En desarrollo...</b-card>
                                 </b-collapse>
@@ -53,7 +54,7 @@
                         <div class="accordion" role="tablist">
                             <b-card v-for="(artic, index) in project.artifacts" :key="artic" no-body class="mb-1">
                                 <b-card-header header-tag="header" class="p-1" role="tab">
-                                    <b-button class="text-left" block v-b-toggle="'artifact'+index" variant="secondary">Capa {{artic}}</b-button>
+                                    <b-button class="text-left" block v-b-toggle="'artifact'+index" variant="light">Capa {{artic}}</b-button>
                                 </b-card-header>
                                 <b-collapse :id="'artifact'+index" :accordion="'artifact-accordion'+index" role="tabpanel">
                                     <b-card-body>
