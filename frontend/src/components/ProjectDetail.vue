@@ -25,7 +25,7 @@
                                 <b-button-group size="sm">
                                     <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" class="mx-1 my-1" variant="success">Ver Mapa</b-button>
                                     <b-button v-if="this.project.user == this.storage.loggedInUser.pk" @click="finalDeleteProject" variant="danger" class="mx-1 my-1" >Eliminar</b-button>
-                                    <b-button v-if="this.project.user == this.storage.loggedInUser.pk" class="mx-1 my-1"> Editar</b-button>
+                                    <!--<b-button v-if="this.project.user == this.storage.loggedInUser.pk" class="mx-1 my-1"> Editar</b-button>-->
                                 </b-button-group>
                             </div>
                             <h5>
