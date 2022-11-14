@@ -8,15 +8,15 @@
                 <b-input-group>
                     <b-form-input  id="input-5" v-if="showPassword" type="text" size="sm" :state="passwordState" v-model="form.password" required placeholder="Nueva Contraseña" data-cy="password"></b-form-input>
                     <b-form-input  id="input-5" v-if="!showPassword" type="password" size="sm" :state="passwordState" v-model="form.password" required placeholder="Nueva Contraseña" data-cy="password"></b-form-input>
-                        <b-form-invalid-feedback id="input-live-feedback3">
-                            Escriba una contraseña de al menos 8 caracteres
-                        </b-form-invalid-feedback>
                         <b-input-group-append>
                             <b-button size="sm" variant="secondary" @click="showPassword = !showPassword">
                                 <b-icon-eye-fill v-show="showPassword" />
                                 <b-icon-eye-slash-fill v-show="!showPassword" />                                        
                             </b-button>                                
                         </b-input-group-append>
+                        <b-form-invalid-feedback id="input-live-feedback4">
+                                Las contraseñas no coinciden
+                            </b-form-invalid-feedback>
                     </b-input-group>
                 </b-form-group>
 
@@ -25,15 +25,15 @@
                     <b-input-group>
                         <b-form-input  id="input-6" v-if="showPassword1" type="text" size="sm" :state="confirmpasswordState" v-model="form.confirmpassword" required placeholder="Contraseña" data-cy="password"></b-form-input>
                             <b-form-input  id="input-6" v-if="!showPassword1" type="password" size="sm" :state="passwordRepeatedState" v-model="form.repeatedPassword" required placeholder="Contraseña" data-cy="password"></b-form-input>
-                            <b-form-invalid-feedback id="input-live-feedback4">
-                                Las contraseñas no coinciden
-                            </b-form-invalid-feedback>
                             <b-input-group-append>
                                 <b-button size="sm" variant="secondary" @click="showPassword1 = !showPassword1">
                                     <b-icon-eye-fill v-show="showPassword1" />
                                     <b-icon-eye-slash-fill v-show="!showPassword1" />                                        
                                 </b-button>                                
                             </b-input-group-append>
+                            <b-form-invalid-feedback id="input-live-feedback4">
+                                Las contraseñas no coinciden
+                            </b-form-invalid-feedback>
                         </b-input-group>
                 </b-form-group>
 

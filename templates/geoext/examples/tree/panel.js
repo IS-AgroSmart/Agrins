@@ -107,11 +107,12 @@ function initApp() {
             olMap = new ol.Map({
                 layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
                 view: new ol.View({
-                    //center: [0, 0],
-                    center: ol.proj.fromLonLat([-79.9637110931326,-2.1400643536418857]),
-                    zoom: 16,
+                    center: [0, 0],
+                    //center: ol.proj.fromLonLat([-79.9637110931326,-2.1400643536418857]),//Espol
+                    center: ol.proj.fromLonLat([-78.92380042643215, -3.0434972596960046]),//Quingeo
+                    zoom: 18,
                     minZoom: 2,
-                    maxZoom: 24
+                    //maxZoom: 24
                 }),
                 target: 'map',
             });
