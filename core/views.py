@@ -481,9 +481,10 @@ def upload_geotiff(request, uuid):
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/coveragestores/" +
         geotiff_name + "/coverages/" + geotiff_name + ".json",
         headers={"Content-Type": "application/json"},
-        data='{"coverage": {"name": "odm_orthophoto", "title": "odm_orthophoto", "enabled": true, ' +
-                     '"parameters": { "entry": [ { "string": [ "InputTransparentColor", "#000000" ] }, ' +
-                     '{ "string": [ "SUGGESTED_TILE_SIZE", "512,512" ] } ] }}} ',                     
+        data='{"coverage": { "enabled": true, "metadata": { "entry": [ { "@key": "time", ' +
+                '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
+                '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
+                '"OutputTransparentColor", "#000000" ] } ] } }} ',                    
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
@@ -560,7 +561,7 @@ def mapper(request, uuid):
 
 def mapper_bbox(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
-
+    
     ans = requests.get(
         "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
         "/coveragestores/mainortho/coverages/mainortho.json",

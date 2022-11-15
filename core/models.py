@@ -86,8 +86,8 @@ class UserProject(DiskSpaceTrackerMixin, BaseProject):
                       headers={"Content-Type": "application/json"},
                       data='{"workspace": {"name": "' + self._get_geoserver_ws_name() + '"}}',
                       auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
-
-        self._create_mainortho_datastore()
+        os.makedirs(self.get_disk_path())
+        #self._create_mainortho_datastore()
         # For multispectral: repeat for any bands apart from RGB
 
     def _create_mainortho_datastore(self):
