@@ -109,7 +109,9 @@ function initApp() {
                 view: new ol.View({
                     center: [0, 0],
                     //center: ol.proj.fromLonLat([-79.9637110931326,-2.1400643536418857]),//Espol
-                    center: ol.proj.fromLonLat([-78.92380042643215, -3.0434972596960046]),//Quingeo
+                    //center: ol.proj.fromLonLat([-78.92380042643215, -3.0434972596960046]),//Quingeo
+                    center: ol.proj.fromLonLat([-78.96637337549922, -2.780614787393679]),//Octavio
+                    
                     zoom: 18,
                     minZoom: 2,
                     //maxZoom: 24
@@ -117,7 +119,7 @@ function initApp() {
                 target: 'map',
             });
 
-            //fitMap(); // Must happen after olMap is defined!
+            fitMap(); // Must happen after olMap is defined!
             
             addMeasureInteraction();
 
@@ -273,6 +275,7 @@ function initApp() {
 
             btInicio = Ext.create('Ext.Button', {
                 text: '< Regresar',  
+                active: true,
                 renderTo: Ext.getBody(),
                 handler: function() {
                     top.window.location.href='/#/projects/'
@@ -280,18 +283,20 @@ function initApp() {
             });
             
             tabMenu = Ext.create('Ext.button.Segmented', {            
-                renderTo: Ext.getBody(),
+                //renderTo: Ext.getBody(),
                 //allowMultiple: true,
                 items: [{
                      text: 'Agregar',
-                     tooltip: 'Agregar índices',
+                     //active: true,
+                     //tooltip: 'Agregar índices',
                      menu: [
                         {text: 'Vector', handler: function(){ top.window.location.href= "/#/projects/" + uuid + "/upload/shapefile" }},
                         {text: 'Geotiff', handler: function(){ top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                         
                      ]
                 },{
                      text: 'Índices',
-                     tooltip: 'Generar ïndices',
+                     //active: true,
+                     //tooltip: 'Generar ïndices',
                      menu: [
                         {text: 'GCI', handler: function(){ alert("Índice: GCI \nTipo: Multiespectral \nFunción: Utilizado para estimar contenido de clorofila en un amplio rango de especies.\nEstado: En desarrollo..."); }},
                         {text: 'GRRI', handler: function(){ alert("Índice: GRRI \nTipo: Visible \nFunción: \nEstado: En desarrollo..."); }},
@@ -303,6 +308,7 @@ function initApp() {
                      ]
                 },{
                      text: 'Modelo',
+                     //active: true,
                      menu: [
                         {text: 'Altura', handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo...")}},
                         {text: 'Clorofila',handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la clorofila de cultivos.\nEstado: En desarrollo...")}}
@@ -323,11 +329,31 @@ function initApp() {
                 tbar: [{
                     // segmented button to change the selection mode
                     xtype: 'segmentedbutton',
+                    active:true,
                     items: isDemo ? [btInicio] : [btInicio, tabMenu]
                 }],
+                listeners: {
+
+                    itemclick: {
+                        fn: function(view, record, item, index, event) {
+                            //the record is the data node that was clicked
+                            //the item is the html dom element in the tree that was clicked
+                            //index is the index of the node relative to its parent
+                            nodeId = record.data.id;
+                            htmlId = item.id;
+                            console.log("nodo id:"+nodeId + " htmlid "+ htmlId+ "index: "+index);
+                            console.log("Data id:"+ record.data.id);
+                            console.log("Data visible:"+ record.data.visible);
+                            console.log("Data capa:"+ record.data.text);      
+                            console.log("Data visible:"+ record.hide);                      
+                        }
+                    }
+                
+                }
                
             });
             
+  
 
             let description = Ext.create('Ext.panel.Panel', {
                 contentEl: 'description',
@@ -374,6 +400,8 @@ function initApp() {
     });
 }
 
+
+
 function fillShapefiles() {
     return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
         {headers: noCacheHeaders})
@@ -397,6 +425,7 @@ function fillShapefiles() {
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
+
                         })                            
                 }));}
                 }

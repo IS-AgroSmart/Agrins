@@ -481,13 +481,9 @@ def upload_geotiff(request, uuid):
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/coveragestores/" +
         geotiff_name + "/coverages/" + geotiff_name + ".json",
         headers={"Content-Type": "application/json"},
-        data=json.dumps({"coverage": {
-            "enabled": True,
-            "parameters": {"entry": [
-                {"string": ["InputTransparentColor", "#000000"]},
-                {"string": ["SUGGESTED_TILE_SIZE", "512,512"]}
-            ]}
-        }}),
+        data='{"coverage": {"name": "odm_orthophoto", "title": "odm_orthophoto", "enabled": true, ' +
+                     '"parameters": { "entry": [ { "string": [ "InputTransparentColor", "#000000" ] }, ' +
+                     '{ "string": [ "SUGGESTED_TILE_SIZE", "512,512" ] } ] }}} ',                     
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
