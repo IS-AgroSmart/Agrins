@@ -24,8 +24,13 @@
                             <div class="text-center">
                                 <b-button-group size="sm">
                                     <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" class="mx-1 my-1" variant="success">Ver Mapa</b-button>
-                                    <b-button v-if="this.project.user == this.storage.loggedInUser.pk" @click="finalDeleteProject" variant="danger" class="mx-1 my-1" >Eliminar</b-button>
+                                    <!--BTELIMINAR <b-button v-if="this.project.user == this.storage.loggedInUser.pk" @click="finalDeleteProject" variant="danger" class="mx-1 my-1" >Eliminar</b-button>-->
                                     <!--<b-button v-if="this.project.user == this.storage.loggedInUser.pk" class="mx-1 my-1"> Editar</b-button>-->
+                                    <b-button v-b-modal.modal-1 v-if="this.project.user == this.storage.loggedInUser.pk"  variant="danger" class="mx-1 my-1" >Eliminar</b-button>
+                                    
+                                    <b-modal id="modal-1" ok-only title="Eliminar proyecto">
+                                        <p class="my-4">{{this.storage.loggedInUser.username}} : no tiene permisos para eliminar este proyecto.</p>
+                                    </b-modal>
                                 </b-button-group>
                             </div>
                             <h5>
