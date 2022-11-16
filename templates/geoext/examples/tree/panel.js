@@ -70,13 +70,14 @@ function initApp() {
                     new ol.layer.Tile({
                         name: "Satélite (ArcGIS/ESRI)",
                         visible: true,
+                        
                         source: new ol.source.XYZ({
                             attributions: ['Powered by Esri.',
                                 'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
                                 'Icons from Wikimedia Commons',],
                             attributionsCollapsible: false,
                             url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                            //maxZoom: 25
+                            
                         })
                     }),
                 ],
@@ -111,7 +112,6 @@ function initApp() {
                     center: ol.proj.fromLonLat(startZone),                    
                     zoom: 18,
                     minZoom: 2,
-                    //maxZoom: 24
                 }),
                 target: 'map',
             });
