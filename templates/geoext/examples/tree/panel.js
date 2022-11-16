@@ -9,7 +9,7 @@ let mapPanel;
 let treePanel, timeSlider;
 
 let selectClick;
-
+let startZone = [];
 let TIMES = [];
 let shapefiles = [], indices = [];
 
@@ -19,6 +19,7 @@ noCacheHeaders.append('cache-control', 'no-cache');
 fillShapefiles();
 fillRasters();
 initApp();
+fitMap();
 // fetch(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/project_a4029f71-835b-474c-92a3-ccc05ce5de2e/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities")
 /*fetch(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/" + project_path + "/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities",
     {headers: noCacheHeaders})
@@ -107,11 +108,7 @@ function initApp() {
             olMap = new ol.Map({
                 layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
                 view: new ol.View({
-                    //center: [0, 0],
-                    //center: ol.proj.fromLonLat([-79.9637110931326,-2.1400643536418857]),//Espol
-                    //center: ol.proj.fromLonLat([-78.92380042643215, -3.0434972596960046]),//Quingeo
-                    center: ol.proj.fromLonLat([-78.96637337549922, -2.780614787393679]),//Octavio
-                    
+                    center: ol.proj.fromLonLat(startZone),                    
                     zoom: 18,
                     minZoom: 2,
                     //maxZoom: 24
@@ -119,7 +116,7 @@ function initApp() {
                 target: 'map',
             });
 
-            fitMap(); // Must happen after olMap is defined!
+            //fitMap(); // Must happen after olMap is defined!
             
             addMeasureInteraction();
 
@@ -388,7 +385,8 @@ function initApp() {
                         margin: '0 0 0 0',
                         height: 120, 
                         split: true,      
-                        collapsible: true,                 
+                        collapsible: true,
+                        collapsed: true,                 
                         //items: [timePanel]
 
                     },
@@ -454,7 +452,27 @@ function fillRasters() {
 }
 
 function fitMap() {
-    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/bbox",
+    //center: ol.proj.fromLonLat([-79.9637110931326,-2.1400643536418857]),//Espol
+                    //center: ol.proj.fromLonLat([-78.92380042643215, -3.0434972596960046]),//Quingeo
+                    //center: ol.proj.fromLonLat([-78.96637337549922, -2.780614787393679]),//Octavio
+                    //center: ol.proj.fromLonLat([-79.10137132790128, -2.962291419744297]),//Victoria-P
+    if(project_name == 'Quingeo'){
+        startZone = [-78.92380042643215, -3.0434972596960046];
+    }
+    else if(project_name == 'Octavio Cordero'){
+        startZone = [-78.96637337549922, -2.780614787393679];
+    }
+    else if(project_name == 'GEA-Espol'){
+        startZone = [-79.9637110931326,-2.1400643536418857];
+    }
+    else if(project_name == 'UCUENCA-last'){
+        startZone = [-79.10137132790128, -2.962291419744297];
+    }
+    else{
+        startZone =  [-79.9637110931326,-2.1400643536418857];
+    }
+
+    /*fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/bbox",
         {headers: noCacheHeaders,})
         .then(response => response.json())
         .then(data => {
@@ -462,7 +480,7 @@ function fitMap() {
             const maxCoords = ol.proj.transform([data.bbox.maxx, data.bbox.maxy], data.srs, "EPSG:3857");
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
-        });
+        });*/
 }
 /*
 //imageSource.once('imageloadend', function(e) {

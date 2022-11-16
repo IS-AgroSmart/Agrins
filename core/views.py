@@ -561,7 +561,7 @@ def mapper(request, uuid):
 
 def mapper_bbox(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
-    
+    print('revisión mappebox')
     ans = requests.get(
         "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
         "/coveragestores/mainortho/coverages/mainortho.json",
