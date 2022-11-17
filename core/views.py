@@ -484,7 +484,11 @@ def upload_geotiff(request, uuid):
         data='{"coverage": { "enabled": true, "metadata": { "entry": [ { "@key": "time", ' +
                 '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
                 '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
-                '"OutputTransparentColor", "#000000" ] } ] } }} ',                    
+                '"InputTransparentColor", "#000000" ] } ] } }} ',        
+
+        #data='{"coverage": {"name": "odm_orthophoto", "title": "odm_orthophoto", "enabled": true, ' +
+         #            '"parameters": { "entry": [ { "string": [ "InputTransparentColor", "#000000" ] }, ' +
+          #           '{ "string": [ "SUGGESTED_TILE_SIZE", "512,512" ] } ] }}} ',
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()

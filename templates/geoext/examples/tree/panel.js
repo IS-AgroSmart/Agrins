@@ -462,14 +462,17 @@ function fitMap() {
     else if(project_name == 'Octavio Cordero'){
         startZone = [-78.96637337549922, -2.780614787393679];
     }
-    else if(project_name == 'GEA-Espol'){
+    else if(project_name == 'GEA-ESPOL'){
+        startZone = [-79.9637110931326,-2.1400643536418857];
+    }
+    else if(project_name == 'GEA-2019'){
         startZone = [-79.9637110931326,-2.1400643536418857];
     }
     else if(project_name == 'UCUENCA-last'){
         startZone = [-79.10137132790128, -2.962291419744297];
     }
     else{
-        startZone =  [-79.9637110931326,-2.1400643536418857];
+        startZone =  [-79.00464989126978,-2.897357117943853];
     }
 
     /*fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/bbox",
