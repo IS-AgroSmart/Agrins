@@ -20,7 +20,11 @@
   "output": "${package.dir}/build",
   "local": true,
   "theme": "theme-material",
-  "requires": [],
+  "requires": [
+    "font-pictos",
+    "font-awesome",
+    "font-ext"
+  ],
   "toolkit": "classic",
   "repository": {
     "type": "git",

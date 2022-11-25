@@ -564,6 +564,7 @@ def mapper(request, uuid):
 
 
 def mapper_bbox(request, uuid):
+    a
     project = UserProject.objects.get(uuid=uuid)
     print('revisión mappebox')
     ans = requests.get(

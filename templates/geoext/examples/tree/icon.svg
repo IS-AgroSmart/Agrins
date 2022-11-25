@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="200" xml:space="preserve">
+    <style type="text/css">.fill {fill : #4E79B2; stroke:#4E79B2;}.fillo{fill : #83A1C9; stroke:#83A1C9;}</style>
+    <defs>
+        <g id="net">
+            <polygon points="82,30 82,0 52,0 52,12 44,12 44,0 38,0 38,47 30,47 30,35 0,35 0,65 30,65 30,53 38,53 38,100 44,100 44,88 52,88 52,100 82,100 82,70 52,70 52,82 44,82 44,18 52,18 52,30 "/>
+        </g>
+    </defs>
+    <use x="0" y="0" xlink:href="#net" class="fill"/>
+    <use x="0" y="100" xlink:href="#net" class="fillo"/>
+</svg>

@@ -106,7 +106,7 @@ function initApp() {
                 layers: indices,
             });
             //delete raterGroup review
-            olMap = new ol.Map({
+            olMap = new ol.Map({                
                 layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
                 view: new ol.View({
                     center: ol.proj.fromLonLat(startZone),                    
@@ -115,6 +115,10 @@ function initApp() {
                 }),
                 target: 'map',
             });
+
+            
+
+
 
             //fitMap(); // Must happen after olMap is defined!
             
@@ -132,6 +136,11 @@ function initApp() {
             olMap.addControl(new SaveMeasurementsControl());
             let ClearMeasurementsControl = createClearControl();
             olMap.addControl(new ClearMeasurementsControl());
+            let Scale = new ol.control.ScaleLine();
+            olMap.addControl(Scale);
+            let FullScreen = new ol.control.FullScreen();
+            olMap.addControl(FullScreen);            
+
 
             // Add legend, only if there is at least one index
             if (indices.length > 0) {
@@ -245,7 +254,7 @@ function initApp() {
 
             let timePanel;            
             timePanel = Ext.create('Ext.panel.Panel', {
-                bodyPadding: 5,  // Don't want content to crunch against the borders
+                //bodyPadding: 5,  // Don't want content to crunch against the borders
                 width: 250,
                 align: 'right',
                 //title: 'Línea de tiempo',
@@ -258,7 +267,8 @@ function initApp() {
                 region: 'center',
                 border: false,
                 layout: 'fit',
-                items: [mapComponent]
+                items: [mapComponent],
+               
             });
 
             let treeLayers = olMap.getLayers().getArray().filter(layer => layer != interactionLayer);
@@ -271,19 +281,37 @@ function initApp() {
             let btInicio
 
             btInicio = Ext.create('Ext.Button', {
-                text: '< Regresar',  
-                active: true,
-                renderTo: Ext.getBody(),
+                text: 'Cerrar',  
+                //active: true,
+                //icon: 'home.png'
+                //iconCls: 'pictos-home',
+                //glyph: 'f015@FontAwesome',
+                //renderTo: Ext.getBody(),
+                //iconCls: 'x-fa fa-home',
+                //glyph: 'R@FontAwesome',
+                //type: 'close',
                 handler: function() {
-                    top.window.location.href='/#/projects/'
+                    Ext.Msg.show({
+                        title:'Salir',
+                        message: 'Desea salir del visualizador?',
+                        buttons: Ext.Msg.YESNO,
+                        icon: Ext.Msg.QUESTION,
+                        fn: function(btn) {
+                            if (btn === 'yes') {
+                                top.window.location.href='/#/projects/'                            
+                            } else {
+                                console.log('Cancel pressed');
+                            } 
+                        }
+                    });                    
                 }
             });
             
-            tabMenu = Ext.create('Ext.button.Segmented', {            
+            tabMenu = Ext.create('Ext.toolbar.Toolbar', {            
                 //renderTo: Ext.getBody(),
                 //allowMultiple: true,
                 items: [{
-                     text: 'Agregar',
+                    text: 'Agregar',
                      //active: true,
                      //tooltip: 'Agregar índices',
                      menu: [
@@ -292,10 +320,17 @@ function initApp() {
                      ]
                 },{
                      text: 'Índices',
-                     //active: true,
-                     //tooltip: 'Generar ïndices',
                      menu: [
-                        {text: 'GCI', handler: function(){ alert("Índice: GCI \nTipo: Multiespectral \nFunción: Utilizado para estimar contenido de clorofila en un amplio rango de especies.\nEstado: En desarrollo..."); }},
+                        {text: 'GCI', 
+                        handler: function(){ 
+                            Ext.create('Ext.window.Window', {
+                                title: 'Indice CGI',
+                                height: 200,
+                                width: 300,
+                                layout: 'fit',
+                                
+                            }).show();
+                        }},
                         {text: 'GRRI', handler: function(){ alert("Índice: GRRI \nTipo: Visible \nFunción: \nEstado: En desarrollo..."); }},
                         {text: 'MGRVI', handler: function(){ alert("Índice: MGRVI \nTipo: Visible \nFunción: Captura la diferencia de reflectancia por la absorción de la clorofila a y la clorofila b.\nEstado: En desarrollo..."); }},
                         {text: 'NDRE', handler: function(){ alert("Índice: NDRE \nTipo: Multiespectral \nFunción: Utilizado para identificar las áreas con plantas saludables mediante el monitoreo de la clorofila. Puede detectar el estrés en la planta aún cuando no sea visible en la superficie.\nEstado: En desarrollo..."); }},
@@ -305,31 +340,54 @@ function initApp() {
                      ]
                 },{
                      text: 'Modelo',
-                     //active: true,
                      menu: [
                         {text: 'Altura', handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo...")}},
                         {text: 'Clorofila',handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la clorofila de cultivos.\nEstado: En desarrollo...")}}
                      ]
                 }],
                 
-           });
+           });         
+        
 
             treePanel = Ext.create('Ext.tree.Panel', {
-                //title: project_name,
-                viewConfig: {
-                    plugins: {ptype: 'treeviewdragdrop'}
+                viewConfig: {plugins: {ptype: 'treeviewdragdrop'}},
+                layout: {
+                    // layout-specific configs go here
+                    //type: 'accordion',
+                    //titleCollapse: false,
+                    //animate: true,
                 },
                 store: treeStore,
-                rootVisible: false,
+                rootVisible: false,                
                 flex: 1,
                 border: false,
                 tbar: [{
-                    // segmented button to change the selection mode
-                    xtype: 'segmentedbutton',
-                    active:true,
-                    items: isDemo ? [btInicio] : [btInicio, tabMenu]
+                    xtype: 'segmentedbutton',                
+                    items: isDemo ? [] : [tabMenu],                    
                 }],
+                tools: [
+                    btInicio,
+                    {type: 'help',tooltip: 'Ayuda', callback: function() { }},
+                    {type: 'print',tooltip: 'Imprimir', callback: function() { }},
+                    {type: 'refresh',tooltip: 'Actualizar',callback: function() {}},
+                ],
                 listeners: {
+                    itemcontextmenu: {
+                        fn:function(tree, record, item, index, e, eOpts ) {
+                          // Optimize : create menu once
+                          var menu_grid = new Ext.menu.Menu({ items:
+                            [
+                                { text: 'Descargar', handler: function() {Ext.Msg.alert('Descargar', 'Función descarga.');} },
+                                { text: 'Eliminar', handler: function() {Ext.Msg.alert('Eliminar', 'Función eliminar.');} },
+                                { text: 'Detalle', handler: function() {Ext.Msg.alert('Detalle', 'Función detalle.');} },
+                            ]
+                            });
+                          // HERE IS THE MAIN CHANGE
+                          var position = [e.getX()-10, e.getY()-10];
+                          e.stopEvent();
+                          menu_grid.showAt(position);
+                       }
+                    },
 
                     itemclick: {
                         fn: function(view, record, item, index, event) {
@@ -342,7 +400,7 @@ function initApp() {
                             console.log("Data id:"+ record.data.id);
                             console.log("Data visible:"+ record.data.visible);
                             console.log("Data capa:"+ record.data.text);      
-                            console.log("Data visible:"+ record.hide);                      
+                            console.log("Data layerprueba:"+ item.layerName);                      
                         }
                     }
                 
@@ -361,21 +419,23 @@ function initApp() {
             });
 
             Ext.create('Ext.Viewport', {
+                
                 layout: 'border',
                 items: [
-                    mapPanel,
+                    mapPanel,                    
                     {
                         xtype: 'panel',
                         region: 'west',
-                        collapsible: true,
                         title: project_name,
-                        width: 315,
+                        collapsible: true,                        
+                        width: 260,
                         split: true,
                         layout: {
                             type: 'vbox',
                             align: 'stretch'
                         },
-                        items: [treePanel]
+                        items: [treePanel],
+                        
                     },
                     {
                         contentEl: 'data',
