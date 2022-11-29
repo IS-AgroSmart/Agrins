@@ -108,6 +108,7 @@ function initApp() {
             //delete raterGroup review
             olMap = new ol.Map({                
                 layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
+
                 view: new ol.View({
                     center: ol.proj.fromLonLat(startZone),                    
                     zoom: 18,
@@ -350,12 +351,11 @@ function initApp() {
         
 
             treePanel = Ext.create('Ext.tree.Panel', {
-                viewConfig: {plugins: {ptype: 'treeviewdragdrop'}},
-                layout: {
-                    // layout-specific configs go here
-                    //type: 'accordion',
-                    //titleCollapse: false,
-                    //animate: true,
+                //viewConfig: {plugins: {ptype: 'treeviewdragdrop'}},
+                header:{
+                    titlePosition:1,
+                    defaults:{ type:'tool'},
+                    items:[btInicio]
                 },
                 store: treeStore,
                 rootVisible: false,                
@@ -366,10 +366,13 @@ function initApp() {
                     items: isDemo ? [] : [tabMenu],                    
                 }],
                 tools: [
-                    btInicio,
                     {type: 'help',tooltip: 'Ayuda', callback: function() { }},
                     {type: 'print',tooltip: 'Imprimir', callback: function() { }},
                     {type: 'refresh',tooltip: 'Actualizar',callback: function() {}},
+                    {type: 'expand',tooltip: 'Expandir',callback: function() {}},
+                    {type: 'collapse',tooltip: 'Contraer',callback: function() {}},
+                    {type: 'restore',tooltip: 'Linea de tiempo',callback: function() {}},
+                    {type: 'gear',tooltip: 'Configuración',callback: function() {}},
                 ],
                 listeners: {
                     itemcontextmenu: {
