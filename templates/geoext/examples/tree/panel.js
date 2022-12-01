@@ -12,6 +12,7 @@ let selectClick;
 let startZone = [];
 let TIMES = [];
 let shapefiles = [], indices = [];
+let artifactLayer = [];
 
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
 noCacheHeaders.append('pragma', 'no-cache');
@@ -49,7 +50,7 @@ function initApp() {
     Ext.application({
         launch: function () {
             let rgbLayer;
-            let rasterGroup, basemapsGroup, shapefilesGroup, indicesGroup, mainlayerGroup;
+            let rasterGroup, basemapsGroup, shapefilesGroup, indicesGroup;
             let treeStore;
 
             let omslayer = new ol.layer.Tile({name: "OpenStreetMap", source: new ol.source.OSM(), visible: false });
@@ -352,12 +353,12 @@ function initApp() {
                     items: isDemo ? [] : [tabMenu],                    
                 }],
                 tools: [
-                    {type: 'help',tooltip: 'Ayuda', callback:  'onHelp',scope:this},
-                    {type: 'print',tooltip: 'Imprimir', callback: onPrint},
+                    {type: 'help',tooltip: 'Ayuda', callback: onHelp},
+                    //{type: 'print',tooltip: 'Imprimir', callback: onPrint},
                     {type: 'refresh',tooltip: 'Actualizar',callback: function() {}},
-                    {type: 'expand',tooltip: 'Expandir',callback: function() {}},
-                    {type: 'collapse',tooltip: 'Contraer',callback: function() {}},
-                    {type: 'gear',tooltip: 'Configuración',callback: function() {}},
+                    {type: 'expand',tooltip: 'Expandir',callback: onExpand},
+                    {type: 'collapse',tooltip: 'Contraer',callback: onContract},
+                    {type: 'gear',tooltip: 'Configuración',callback: onConfig},
                 ],
                 listeners: {
                     itemcontextmenu: {
@@ -412,6 +413,7 @@ function initApp() {
                         baseCls: 'bt-satelite', 
                         renderTo : Ext.getBody(),
                         tooltip: 'Satélite (ArcGIS/ESRI)',                                          
+                        //text: 'Satélite',                                          
                         height: 60,
                         flex: 1,
                         handler: function() { 
@@ -426,6 +428,7 @@ function initApp() {
                         itemId: 'btosmID',
                         baseCls: 'bt-osm', 
                         tooltip: 'OpenStreetMap',                                          
+                        //text: 'OpenStreetMap',                                          
                         height: 60,
                         flex: 1,                     
                         handler: function() {
@@ -439,7 +442,8 @@ function initApp() {
                         xtype: 'button',
                         itemId: 'btstamenID',
                         baseCls: 'bt-stamen', 
-                        tooltip: 'Stamen Watercolor',                                          
+                        tooltip: 'Stamen Watercolor',                                   
+                        //text: 'Stamen Watercolor',                                   
                         height: 60,
                         flex: 1,
                         handler: function() {
@@ -492,15 +496,101 @@ function initApp() {
     });
 }
 
-function onPrint(){
-    Ext.create('Ext.window.Window', {
-        title: 'funcion de impresion',
+function onExpand(){
+    treePanel.expandAll();
+}
+
+function onContract(){
+    treePanel.collapseAll();
+}
+
+function onHelp(){
+    var navigate = function(panel, direction){
+        var layout = panel.getLayout();
+        layout[direction]();
+        Ext.getCmp('move-prev').setDisabled(!layout.getPrev());
+        Ext.getCmp('move-next').setDisabled(!layout.getNext());
+    };    
+    let cardHelp = new Ext.create('Ext.panel.Panel', {       
+        width: 500,
         height: 200,
-        width: 300,
+        layout: 'card',
+        bodyStyle: 'padding:5px',        
+        bbar: [
+            {
+                id: 'move-prev',
+                text: 'Anterior',
+                handler: function(btn) {
+                    navigate(btn.up("panel"), "prev");
+                },
+                disabled: true
+            },
+            '->', // greedy spacer so that the buttons are aligned to each side
+            {
+                id: 'move-next',
+                text: 'Siguiente',
+                handler: function(btn) {
+                    navigate(btn.up("panel"), "next");
+                }
+            }
+        ],
+        // the panels (or "cards") within the layout
+        items: [{
+            id: 'card-0',
+            html: '<h1> Geoportal Agrins</h1>'+
+                    '<p> A continuación encontrará una guía para el uso de la plataforma.</p>'+
+                    '<ol><li>Agregar capas</li><li>Obtener índices</li><li>Modelo</li>'+
+                    '<li>Mediciones</li><li>Áreas</li><li>Puntos</li><li>Mapa bases</li></ol'+
+                    '<ol><li>Eliminar capa</li><li>Detalle de capa</li><li>Salir del visualizador</li>'
+                    
+        },{
+            id: 'card-1',
+            html:'<h5> Agregar Capa</h5>'+
+                    '<p> En la plataforma puede agregar archivos (multiespectrales, RGB) .tiff deberá especificad el modelo de la cámara para poder obtener los índices así como ejeccutar el modelo.</p>'+
+                    '<p> Además podrá agregar archivos kml y shapefile </p>'+
+                '<h5> Obtener índices</h5>'+
+                    '<p> Seleccione el índice requerido de la lista disponible (GCI, GRRI, MGRVI, NDRE, NDVI, NGRDI)</p>'+
+                '<h5> Modelo</h5>'+
+                    '<p> En el geoportal podrá obtener dos modelos uno para determinar la altura y otro para clorofila.</p>'
+                    
+        },{
+            id: 'card-2',
+            html: '<h3> Continuar..</h3>'+            
+            '<p> Continuar agregando </p>'
+        }],
+    });
+    
+    Ext.create('Ext.window.Window', {
+        title: 'Ayuda',
+        height: 500,
+        width: 310,
         layout: 'fit',
-        
+        items: [  // Let's put an empty grid in just to illustrate fit layout
+           cardHelp,            
+    ]
     }).show();
 }
+
+function onConfig(){
+    Ext.create('Ext.window.Window', {
+        title: project_name,
+        height: 500,
+        width: 310,
+        layout: 'fit',
+        items: [  // Let's put an empty grid in just to illustrate fit layout        
+        {
+            xtype: 'label',
+            text: 'project_notes',
+            
+            margin: '0 0 0 10'
+        }       
+    ]
+    }).show();
+}
+
+
+
+
 
 function fillShapefiles() {
     return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
@@ -508,7 +598,8 @@ function fillShapefiles() {
         .then(response => response.json())
         .then(data => {            
             for (let art of data.artifacts) {   
-                let layerfile=[];                 
+                let layerfile=[];     
+                artifactLayer.push(art);            
                 if (art.type === "SHAPEFILE"){
                     //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
                     layerfile.push(new ol.layer.Vector({

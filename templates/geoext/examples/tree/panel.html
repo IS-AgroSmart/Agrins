@@ -83,6 +83,7 @@
         height: 70px;
         border-radius: 5px !important;
         margin: 2px;
+        color: black;
     }
 
    
@@ -262,6 +263,7 @@
 
 
 <script>
+    
     Ext.Loader.setConfig({
         enabled: true,
         paths: {
@@ -269,12 +271,14 @@
         }
     });
 
+    
     const project_name = "{{ project_name }}";
     const uuid = "{{ uuid }}";
     const project_path = "{{ project_geoserver_path }}";
     const moreThanOneFlight = true; //{{ flights|length|gt:1|yesno:"true,false" }};
     const isMultispectral = {{ is_multispectral|yesno:"true,false" }};
     const isDemo = {{ is_demo|yesno:"true,false" }};
+    
 </script>
 <script src="panel.js"></script>
 </body>
