@@ -484,7 +484,7 @@ def upload_geotiff(request, uuid):
         data='{"coverage": { "enabled": true, "metadata": { "entry": [ { "@key": "time", ' +
                 '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
                 '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
-                '"InputTransparentColor", "#000000" ] } ] } }} ',        
+                '"OutputTransparentColor", "#000000" ] } ] } }} ',        
 
         #data='{"coverage": {"name": "odm_orthophoto", "title": "odm_orthophoto", "enabled": true, ' +
          #            '"parameters": { "entry": [ { "string": [ "InputTransparentColor", "#000000" ] }, ' +

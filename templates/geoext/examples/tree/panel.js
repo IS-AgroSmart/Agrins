@@ -49,38 +49,20 @@ function initApp() {
     Ext.application({
         launch: function () {
             let rgbLayer;
-            let rasterGroup, basemapsGroup, shapefilesGroup, indicesGroup;
+            let rasterGroup, basemapsGroup, shapefilesGroup, indicesGroup, mainlayerGroup;
             let treeStore;
 
+            let omslayer = new ol.layer.Tile({name: "OpenStreetMap", source: new ol.source.OSM(), visible: false });
+            let stamenlayer = new ol.layer.Tile({source: new ol.source.Stamen({layer: 'watercolor'}), name: 'Stamen Watercolor', visible: false });
+            let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", visible: true,                
+                source: new ol.source.XYZ({ attributions: ['Powered by Esri.',
+                        'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
+                        'Icons from Wikimedia Commons',], attributionsCollapsible: false,
+                    url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    
+                })});
+
             basemapsGroup = new ol.layer.Group({
-                name: "Mapas base",                
-                layers: [                    
-                    new ol.layer.Tile({
-                        name: "OpenStreetMap",
-                        source: new ol.source.OSM(),
-                        visible: false
-                    }),
-                    new ol.layer.Tile({
-                        legendUrl: 'https://stamen-tiles-d.a.ssl.fastly.net/' +
-                            'watercolor/2/1/0.jpg',
-                        source: new ol.source.Stamen({layer: 'watercolor'}),
-                        name: 'Stamen Watercolor',
-                        visible: false
-                    }),
-                    new ol.layer.Tile({
-                        name: "Satélite (ArcGIS/ESRI)",
-                        visible: true,
-                        
-                        source: new ol.source.XYZ({
-                            attributions: ['Powered by Esri.',
-                                'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
-                                'Icons from Wikimedia Commons',],
-                            attributionsCollapsible: false,
-                            url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                            
-                        })
-                    }),
-                ],
+                layers: [omslayer, stamenlayer, satelitelayer],
             });
 
             rgbLayer = new ol.layer.Tile({
@@ -96,8 +78,7 @@ function initApp() {
                 layers: [rgbLayer],
             });
 
-            shapefilesGroup = new ol.layer.Group({
-                name: "Vectores & GeoTIFFs",
+            shapefilesGroup = new ol.layer.Group({                
                 layers: shapefiles,
             });
 
@@ -108,16 +89,13 @@ function initApp() {
             //delete raterGroup review
             olMap = new ol.Map({                
                 layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
-
                 view: new ol.View({
                     center: ol.proj.fromLonLat(startZone),                    
                     zoom: 18,
                     minZoom: 2,
                 }),
                 target: 'map',
-            });
-
-            
+            });          
 
 
 
@@ -140,8 +118,10 @@ function initApp() {
             let Scale = new ol.control.ScaleLine();
             olMap.addControl(Scale);
             let FullScreen = new ol.control.FullScreen();
-            olMap.addControl(FullScreen);            
+            olMap.addControl(FullScreen);
 
+         
+            
 
             // Add legend, only if there is at least one index
             if (indices.length > 0) {
@@ -276,13 +256,13 @@ function initApp() {
             let treeLayerGroup = new ol.layer.Group();
             treeLayerGroup.setLayers(new ol.Collection(treeLayers));
             treeStore = Ext.create('GeoExt.data.store.LayersTree', {
-                layerGroup: treeLayerGroup
+                layerGroup: shapefilesGroup,// treeLayerGroup
             });
 
             let btInicio
 
             btInicio = Ext.create('Ext.Button', {
-                text: 'Cerrar',  
+                text: '&nbsp;⇱&nbsp; Cerrar',  
                 //active: true,
                 //icon: 'home.png'
                 //iconCls: 'pictos-home',
@@ -291,6 +271,7 @@ function initApp() {
                 //iconCls: 'x-fa fa-home',
                 //glyph: 'R@FontAwesome',
                 //type: 'close',
+                tooltip: 'Cerrar visualizador',
                 handler: function() {
                     Ext.Msg.show({
                         title:'Salir',
@@ -312,15 +293,18 @@ function initApp() {
                 //renderTo: Ext.getBody(),
                 //allowMultiple: true,
                 items: [{
-                    text: 'Agregar',
+                    text: '&nbsp;✚&nbsp;Agregar',
+                    width: '95px',
                      //active: true,
                      //tooltip: 'Agregar índices',
                      menu: [
                         {text: 'Vector', handler: function(){ top.window.location.href= "/#/projects/" + uuid + "/upload/shapefile" }},
                         {text: 'Geotiff', handler: function(){ top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                         
                      ]
-                },{
-                     text: 'Índices',
+                },
+                {
+                     text: '&nbsp;≡&nbsp;Índices',
+                     width: '88px',
                      menu: [
                         {text: 'GCI', 
                         handler: function(){ 
@@ -339,8 +323,10 @@ function initApp() {
                         {text: 'NGRDI', handler: function(){ alert("Índice: NGRDI \nTipo: Visible \nFunción: Permite diferenciar entre vegetación (positivos), suelo (negativos) y agua (cero).\nEstado: En desarrollo..."); }},
 
                      ]
-                },{
-                     text: 'Modelo',
+                },
+                {
+                     text: '&nbsp;⠵&nbsp;Modelo',
+                     width: '90px',
                      menu: [
                         {text: 'Altura', handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo...")}},
                         {text: 'Clorofila',handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la clorofila de cultivos.\nEstado: En desarrollo...")}}
@@ -366,12 +352,11 @@ function initApp() {
                     items: isDemo ? [] : [tabMenu],                    
                 }],
                 tools: [
-                    {type: 'help',tooltip: 'Ayuda', callback: function() { }},
-                    {type: 'print',tooltip: 'Imprimir', callback: function() { }},
+                    {type: 'help',tooltip: 'Ayuda', callback:  'onHelp',scope:this},
+                    {type: 'print',tooltip: 'Imprimir', callback: onPrint},
                     {type: 'refresh',tooltip: 'Actualizar',callback: function() {}},
                     {type: 'expand',tooltip: 'Expandir',callback: function() {}},
                     {type: 'collapse',tooltip: 'Contraer',callback: function() {}},
-                    {type: 'restore',tooltip: 'Linea de tiempo',callback: function() {}},
                     {type: 'gear',tooltip: 'Configuración',callback: function() {}},
                 ],
                 listeners: {
@@ -409,16 +394,62 @@ function initApp() {
                 
                 }
                
-            });
-            
+            });     
   
-
-            let description = Ext.create('Ext.panel.Panel', {
-                contentEl: 'description',
-                title: 'Descripción',
-                height: 300,
+            let imgbasemap = Ext.create('Ext.panel.Panel', {
+                //contentEl: '"bases"',
+                title: 'Mapa base&nbsp;➟&nbspSatélite (ArcGIS/ESRI)',
+                collapsible: true, 
+                itemId: 'basemapID',
+                //height: 150,
                 border: false,
-                bodyPadding: 5
+                bodyPadding: 5,
+                layout: 'hbox',
+                items: [                    
+                    {
+                        xtype: 'button',
+                        itemId: 'btsateliteID',
+                        baseCls: 'bt-satelite', 
+                        renderTo : Ext.getBody(),
+                        tooltip: 'Satélite (ArcGIS/ESRI)',                                          
+                        height: 60,
+                        flex: 1,
+                        handler: function() { 
+                            this.up('panel').setTitle('Mapa base&nbsp;➟&nbspSatélite (ArcGIS/ESRI)')
+                            satelitelayer.setVisible(true);
+                            omslayer.setVisible(false);
+                            stamenlayer.setVisible(false);
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        itemId: 'btosmID',
+                        baseCls: 'bt-osm', 
+                        tooltip: 'OpenStreetMap',                                          
+                        height: 60,
+                        flex: 1,                     
+                        handler: function() {
+                            this.up('panel').setTitle('Mapa base&nbsp;➟&nbspOpenStreetMap')
+                            satelitelayer.setVisible(false);
+                            omslayer.setVisible(true);
+                            stamenlayer.setVisible(false);             
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        itemId: 'btstamenID',
+                        baseCls: 'bt-stamen', 
+                        tooltip: 'Stamen Watercolor',                                          
+                        height: 60,
+                        flex: 1,
+                        handler: function() {
+                            this.up('panel').setTitle('Mapa base&nbsp;➟&nbspStamen Watercolor')
+                            satelitelayer.setVisible(false);
+                            omslayer.setVisible(false);
+                            stamenlayer.setVisible(true);             
+                        }
+                    }
+                ]
             });
 
             Ext.create('Ext.Viewport', {
@@ -431,16 +462,16 @@ function initApp() {
                         region: 'west',
                         title: project_name,
                         collapsible: true,                        
-                        width: 260,
+                        width: 310,
                         split: true,
                         layout: {
                             type: 'vbox',
                             align: 'stretch'
                         },
-                        items: [treePanel],
+                        items: [treePanel, imgbasemap],
                         
                     },
-                    {
+                    /*{
                         contentEl: 'data',
                         title: 'Descripción',
                         region: 'south',
@@ -453,7 +484,7 @@ function initApp() {
                         //items: [timePanel]
 
                     },
-                    
+                    */
                 ]
             });
         },
@@ -461,17 +492,26 @@ function initApp() {
     });
 }
 
-
+function onPrint(){
+    Ext.create('Ext.window.Window', {
+        title: 'funcion de impresion',
+        height: 200,
+        width: 300,
+        layout: 'fit',
+        
+    }).show();
+}
 
 function fillShapefiles() {
     return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
         {headers: noCacheHeaders})
         .then(response => response.json())
         .then(data => {            
-            for (let art of data.artifacts) {                   
+            for (let art of data.artifacts) {   
+                let layerfile=[];                 
                 if (art.type === "SHAPEFILE"){
                     //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
-                    shapefiles.push(new ol.layer.Vector({
+                    layerfile.push(new ol.layer.Vector({
                         name: art.name,
                         source: new ol.source.Vector({
                             format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
@@ -481,14 +521,39 @@ function fillShapefiles() {
                 }));}
                 else if (art.type === "ORTHOMOSAIC"){
                     console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
-                    shapefiles.push(new ol.layer.Image({
-                        name: art.name,
+                    layerfile.push(new ol.layer.Image({
+                        name: '&nbsp;🄼&nbsp'+art.name,
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
 
                         })                            
                 }));}
+                else if (art.type === "RGB"){
+                    console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                    layerfile.push(new ol.layer.Image({
+                        name: '&nbsp;🅁&nbsp'+art.name,
+                        source: new ol.source.ImageWMS({
+                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
+                            params: {"LAYERS": art.layer}
+
+                        })                            
+                }));}
+                else if (art.type === "INDEX"){
+                    console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                    layerfile.push(new ol.layer.Image({
+                        name: '&nbsp;🄸&nbsp'+art.name,
+                        source: new ol.source.ImageWMS({
+                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
+                            params: {"LAYERS": art.layer}
+
+                        })                            
+                }));}
+                let layerGroup = new ol.layer.Group({
+                    name: art.name,
+                    layers: layerfile,
+                });
+                shapefiles.push(layerGroup)            
                 }
             }
         );
@@ -519,7 +584,7 @@ function fitMap() {
                     //center: ol.proj.fromLonLat([-78.92380042643215, -3.0434972596960046]),//Quingeo
                     //center: ol.proj.fromLonLat([-78.96637337549922, -2.780614787393679]),//Octavio
                     //center: ol.proj.fromLonLat([-79.10137132790128, -2.962291419744297]),//Victoria-P
-    if(project_name == 'Quingeo'){
+    if(project_name == 'Quingeo-Cuenca'){
         startZone = [-78.92380042643215, -3.0434972596960046];
     }
     else if(project_name == 'Octavio Cordero'){

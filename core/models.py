@@ -476,12 +476,15 @@ class ArtifactType(Enum):
     ORTHOMOSAIC = "Orthomosaic"
     SHAPEFILE = "Shapefile"
     INDEX = "Index"
+    RGB = "Rgb"
 
     @classmethod
     def filename(cls, art):
         if art.type == ArtifactType.SHAPEFILE.name:
             return "poly.shp"
         elif art.type == ArtifactType.INDEX.name:
+            return art.name + ".tif"
+        elif art.type == ArtifactType.RGB.name:
             return art.name + ".tif"
 
 
