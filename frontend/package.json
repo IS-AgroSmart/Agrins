@@ -20,6 +20,7 @@
     "jquery": "^3.5.1",
     "js-file-download": "^0.4.9",
     "leaflet": "^1.6.0",
+    "olcs": "^2.13.1",
     "openlayers-ext": "^3.1.5",
     "proj4": "^2.6.0",
     "vue": "^2.6.10",

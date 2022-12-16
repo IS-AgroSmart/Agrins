@@ -171,16 +171,27 @@ function initApp() {
                   }
             };
             selectbase.addEventListener('change', handleSelectBase, false);
-                    
-
             var element = document.createElement('div');
             element.className = 'controls ol-control';
             element.appendChild(selectbase);
-
             var baseMapSelect= new ol.control.Control({
                 element: element
             });
             olMap.addControl(baseMapSelect);
+
+            var x = document.createElement("INPUT");
+            x.setAttribute("type", "range");
+            x.setAttribute("min", "1");
+            x.setAttribute("max", "100");
+            x.setAttribute("value", "50");
+            var element1 = document.createElement('div');
+            element1.className = 'range ol-control';
+            element1.appendChild(x);
+            var swiper= new ol.control.Control({
+                element: element1
+            });
+            olMap.addControl(swiper);
+
 
           
             // Add legend, only if there is at least one index
@@ -317,18 +328,8 @@ function initApp() {
                 layerGroup: shapefilesGroup,// treeLayerGroup
             });
 
-            let btInicio
-
-            btInicio = Ext.create('Ext.Button', {
-                text: '&nbsp;⇱&nbsp; Cerrar',  
-                //active: true,
-                //icon: 'home.png'
-                //iconCls: 'pictos-home',
-                //glyph: 'f015@FontAwesome',
-                //renderTo: Ext.getBody(),
-                //iconCls: 'x-fa fa-home',
-                //glyph: 'R@FontAwesome',
-                //type: 'close',
+            let btInicio = Ext.create('Ext.Button', {
+                text: '🏠 Cerrar',  
                 tooltip: 'Cerrar visualizador',
                 handler: function() {
                     Ext.Msg.show({
@@ -347,6 +348,96 @@ function initApp() {
                 }
             });
 
+            let btayuda = Ext.create('Ext.Button', {
+                text: '？',  
+                tooltip: 'Ayuda',
+                handler: function(){
+                    var navigate = function(panel, direction){
+                        var layout = panel.getLayout();
+                        layout[direction]();
+                        Ext.getCmp('move-prev').setDisabled(!layout.getPrev());
+                        Ext.getCmp('move-next').setDisabled(!layout.getNext());
+                    };    
+                    let cardHelp = new Ext.create('Ext.panel.Panel', {       
+                        width: 500,
+                        height: 200,
+                        layout: 'card',
+                        bodyStyle: 'padding:5px',        
+                        bbar: [
+                            {
+                                id: 'move-prev',
+                                text: 'Anterior',
+                                handler: function(btn) {
+                                    navigate(btn.up("panel"), "prev");
+                                },
+                                disabled: true
+                            },
+                            '->', // greedy spacer so that the buttons are aligned to each side
+                            {
+                                id: 'move-next',
+                                text: 'Siguiente',
+                                handler: function(btn) {
+                                    navigate(btn.up("panel"), "next");
+                                }
+                            }
+                        ],
+                        // the panels (or "cards") within the layout
+                        items: [{
+                            id: 'card-0',
+                            html: '<h1> Geoportal Agrins</h1>'+
+                                    '<p> A continuación encontrará una guía para el uso de la plataforma.</p>'+
+                                    '<ol><li>Agregar capas</li><li>Obtener índices</li><li>Modelo</li>'+
+                                    '<li>Mediciones</li><li>Áreas</li><li>Puntos</li><li>Mapa bases</li></ol'+
+                                    '<ol><li>Eliminar capa</li><li>Detalle de capa</li><li>Salir del visualizador</li>'
+                                    
+                        },{
+                            id: 'card-1',
+                            html:'<h5> Agregar Capa</h5>'+
+                                    '<p> En la plataforma puede agregar archivos (multiespectrales, RGB) .tiff deberá especificad el modelo de la cámara para poder obtener los índices así como ejeccutar el modelo.</p>'+
+                                    '<p> Además podrá agregar archivos kml y shapefile </p>'+
+                                '<h5> Obtener índices</h5>'+
+                                    '<p> Seleccione el índice requerido de la lista disponible (GCI, GRRI, MGRVI, NDRE, NDVI, NGRDI)</p>'+
+                                '<h5> Modelo</h5>'+
+                                    '<p> En el geoportal podrá obtener dos modelos uno para determinar la altura y otro para clorofila.</p>'
+                                    
+                        },{
+                            id: 'card-2',
+                            html: '<h3> Continuar..</h3>'+            
+                            '<p> Continuar agregando </p>'
+                        }],
+                    });
+                    
+                    Ext.create('Ext.window.Window', {
+                        title: 'Ayuda',
+                        height: 500,
+                        width: 310,
+                        layout: 'fit',
+                        items: [  // Let's put an empty grid in just to illustrate fit layout
+                           cardHelp,            
+                    ]
+                    }).show();
+                }
+                
+            });
+
+            let btExpand = Ext.create('Ext.Button', {
+                text: '☰',  
+                tooltip: 'Expandir',
+                handler: function(){
+                    treePanel.expandAll();
+                }
+            });
+
+            let btColapse = Ext.create('Ext.Button', {
+                text: '┇',  
+                tooltip: 'Contraer',
+                handler: function(){
+                    treePanel.collapseAll();
+                }
+            });
+
+           
+
             let artifact = Ext.create('Ext.data.Store', {
                 fields: ['abbr', 'name'],
                 data : [artifactLayer]
@@ -361,7 +452,7 @@ function initApp() {
                 displayField: 'name',
                 valueField: 'abbr',
                 height: '25',
-                renderTo: Ext.getBody()
+                //renderTo: Ext.getBody()
             });
             
             let panelindex = Ext.create('Ext.form.Panel', {                
@@ -409,7 +500,7 @@ function initApp() {
                 //allowMultiple: true,
                 items: [
                 {
-                    text: '&nbsp;✚&nbsp;Agregar',
+                    text: '➕ Agregar',
                     width: '95px',
                      //active: true,
                      //tooltip: 'Agregar índices',
@@ -419,7 +510,7 @@ function initApp() {
                      ]
                 },
                 {
-                     text: '&nbsp;≡&nbsp;Índices',
+                     text: '📊 Índices',
                      width: '88px',
                      menu: [
                         {text: 'GCI', 
@@ -444,7 +535,7 @@ function initApp() {
                      ]
                 },
                 {
-                     text: '&nbsp;⠵&nbsp;Modelo',
+                     text: '🔗 Modelo',
                      width: '90px',
                      menu: [
                         {text: 'Altura', handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo...")}},
@@ -452,8 +543,8 @@ function initApp() {
                      ]
                 }],
                 
-           });         
-        
+           });             
+
 
             treePanel = Ext.create('Ext.tree.Panel', {
                 //viewConfig: {plugins: {ptype: 'treeviewdragdrop'}},
@@ -470,13 +561,15 @@ function initApp() {
                     xtype: 'segmentedbutton',                
                     items: isDemo ? [] : [tabMenu],                    
                 }],
+                fbar:[{ 
+                    type: 'button', 
+                    text: 'Mapa 3D',                   
+                    },
+                ],
                 tools: [
-                    {type: 'help',tooltip: 'Ayuda', callback: onHelp},
-                    //{type: 'print',tooltip: 'Imprimir', callback: onPrint},
-                    {type: 'refresh',tooltip: 'Actualizar',callback: function() {}},
-                    {type: 'expand',tooltip: 'Expandir',callback: onExpand},
-                    {type: 'collapse',tooltip: 'Contraer',callback: onContract},
-                    //{type: 'gear',tooltip: 'Configuración',callback: onConfig},
+                    btayuda,
+                    btExpand,
+                    btColapse,
                 ],
                 listeners: {
                     itemcontextmenu: {
@@ -498,13 +591,8 @@ function initApp() {
 
                     itemclick: {
                         fn: function(view, record, item, index, event) {
-                            //the record is the data node that was clicked
-                            //the item is the html dom element in the tree that was clicked
-                            //index is the index of the node relative to its parent
-
                             if (record.data.text.substring(0, 5) !='Grupo'){
-                                fitMap(record.data.text);
-                                console.log('ES HOJA')
+                                fitMap(record.data.text);                            
                             }
                         }
                     }
@@ -512,66 +600,10 @@ function initApp() {
                 }
                
             });     
-  
-            let imgbasemap = Ext.create('Ext.panel.Panel', {
-                //contentEl: '"bases"',
-                title: 'Mapa base&nbsp;➟&nbspSatélite (ArcGIS/ESRI)',
-                collapsible: true, 
-                itemId: 'basemapID',
-                //height: 150,
-                border: false,
-                bodyPadding: 5,
-                layout: 'hbox',
-                items: [                    
-                    {
-                        xtype: 'button',
-                        itemId: 'btsateliteID',
-                        baseCls: 'bt-satelite', 
-                        renderTo : Ext.getBody(),
-                        tooltip: 'Satélite (ArcGIS/ESRI)',                                          
-                        //text: 'Satélite',                                          
-                        height: 60,
-                        flex: 1,
-                        handler: function() { 
-                            this.up('panel').setTitle('Mapa base&nbsp;➟&nbspSatélite (ArcGIS/ESRI)')
-                            satelitelayer.setVisible(true);
-                            omslayer.setVisible(false);
-                            stamenlayer.setVisible(false);
-                        }
-                    },
-                    {
-                        xtype: 'button',
-                        itemId: 'btosmID',
-                        baseCls: 'bt-osm', 
-                        tooltip: 'OpenStreetMap',                                          
-                        //text: 'OpenStreetMap',                                          
-                        height: 60,
-                        flex: 1,                     
-                        handler: function() {
-                            this.up('panel').setTitle('Mapa base&nbsp;➟&nbspOpenStreetMap')
-                            satelitelayer.setVisible(false);
-                            omslayer.setVisible(true);
-                            stamenlayer.setVisible(false);             
-                        }
-                    },
-                    {
-                        xtype: 'button',
-                        itemId: 'btstamenID',
-                        baseCls: 'bt-stamen', 
-                        tooltip: 'Stamen Watercolor',                                   
-                        //text: 'Stamen Watercolor',                                   
-                        height: 60,
-                        flex: 1,
-                        handler: function() {
-                            this.up('panel').setTitle('Mapa base&nbsp;➟&nbspStamen Watercolor')
-                            satelitelayer.setVisible(false);
-                            omslayer.setVisible(false);
-                            stamenlayer.setVisible(true);             
-                        }
-                    }
-                ]
-            });
 
+            var elem = document. getElementById("spiner"); 
+            elem. parentNode. removeChild(elem);
+  
             Ext.create('Ext.Viewport', {
                 
                 layout: 'border',
@@ -582,29 +614,15 @@ function initApp() {
                         region: 'west',
                         title: project_name,
                         collapsible: true,                        
-                        width: 310,
+                        width: 290,
                         split: true,
                         layout: {
                             type: 'vbox',
                             align: 'stretch'
                         },
-                        items: [treePanel, imgbasemap],
+                        items: [treePanel],
                         
                     },
-                    /*{
-                        contentEl: 'data',
-                        title: 'Descripción',
-                        region: 'south',
-                        border: false,
-                        margin: '0 0 0 0',
-                        height: 120, 
-                        split: true,      
-                        collapsible: true,
-                        collapsed: true,  
-                        //items: [timePanel]
-
-                    },*/
-                    
                 ]
             });
         },
@@ -612,80 +630,6 @@ function initApp() {
     });
 }
 
-function onExpand(){
-    treePanel.expandAll();
-}
-
-function onContract(){
-    treePanel.collapseAll();
-}
-
-function onHelp(){
-    var navigate = function(panel, direction){
-        var layout = panel.getLayout();
-        layout[direction]();
-        Ext.getCmp('move-prev').setDisabled(!layout.getPrev());
-        Ext.getCmp('move-next').setDisabled(!layout.getNext());
-    };    
-    let cardHelp = new Ext.create('Ext.panel.Panel', {       
-        width: 500,
-        height: 200,
-        layout: 'card',
-        bodyStyle: 'padding:5px',        
-        bbar: [
-            {
-                id: 'move-prev',
-                text: 'Anterior',
-                handler: function(btn) {
-                    navigate(btn.up("panel"), "prev");
-                },
-                disabled: true
-            },
-            '->', // greedy spacer so that the buttons are aligned to each side
-            {
-                id: 'move-next',
-                text: 'Siguiente',
-                handler: function(btn) {
-                    navigate(btn.up("panel"), "next");
-                }
-            }
-        ],
-        // the panels (or "cards") within the layout
-        items: [{
-            id: 'card-0',
-            html: '<h1> Geoportal Agrins</h1>'+
-                    '<p> A continuación encontrará una guía para el uso de la plataforma.</p>'+
-                    '<ol><li>Agregar capas</li><li>Obtener índices</li><li>Modelo</li>'+
-                    '<li>Mediciones</li><li>Áreas</li><li>Puntos</li><li>Mapa bases</li></ol'+
-                    '<ol><li>Eliminar capa</li><li>Detalle de capa</li><li>Salir del visualizador</li>'
-                    
-        },{
-            id: 'card-1',
-            html:'<h5> Agregar Capa</h5>'+
-                    '<p> En la plataforma puede agregar archivos (multiespectrales, RGB) .tiff deberá especificad el modelo de la cámara para poder obtener los índices así como ejeccutar el modelo.</p>'+
-                    '<p> Además podrá agregar archivos kml y shapefile </p>'+
-                '<h5> Obtener índices</h5>'+
-                    '<p> Seleccione el índice requerido de la lista disponible (GCI, GRRI, MGRVI, NDRE, NDVI, NGRDI)</p>'+
-                '<h5> Modelo</h5>'+
-                    '<p> En el geoportal podrá obtener dos modelos uno para determinar la altura y otro para clorofila.</p>'
-                    
-        },{
-            id: 'card-2',
-            html: '<h3> Continuar..</h3>'+            
-            '<p> Continuar agregando </p>'
-        }],
-    });
-    
-    Ext.create('Ext.window.Window', {
-        title: 'Ayuda',
-        height: 500,
-        width: 310,
-        layout: 'fit',
-        items: [  // Let's put an empty grid in just to illustrate fit layout
-           cardHelp,            
-    ]
-    }).show();
-}
 
 function onConfig(){
     Ext.create('Ext.window.Window', {

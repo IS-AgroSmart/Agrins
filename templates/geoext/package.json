@@ -54,6 +54,7 @@
     "mkdirp": "0.5.1",
     "ol": "6.15.1",
     "ol-layerswitcher": "^4.1.0",
+    "olcs": "^2.13.1",
     "openlayers-ext": "^3.1.5"
   },
   "devDependencies": {
