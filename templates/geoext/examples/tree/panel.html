@@ -9,6 +9,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/classic/theme-crisp/resources/theme-crisp-all.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
 
+
     <!--Geocoder
     <link href="https://unpkg.com/ol-geocoder/dist/ol-geocoder.min.css" rel="stylesheet">
     <script src="https://unpkg.com/ol-geocoder"></script>-->
@@ -25,16 +26,19 @@
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL,Object.assign"></script>
     -->
 
-    <!-- ol-ext 
-    <link rel="stylesheet" href="../../dist/ol-ext.css" />
-    <script type="text/javascript" src="../../dist/ol-ext.js"></script>
-    -->
-    
-
-    <!-- ol-ext cdn
+    <!-- ol-ext cdn 
     <link rel="stylesheet" href="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.css" />
     <script type="text/javascript" src="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.js"></script>
         -->
+    
+
+    <!-- font-awesome is an iconic font, which means we can draw resolution-independent icons -->
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+
+    <!--ol-geocoder 
+    <link href="https://unpkg.com/ol-geocoder/dist/ol-geocoder.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/ol-geocoder"></script>    
+    -->
 
 </head>
 
@@ -58,22 +62,24 @@
                 </div>
             {% endif %}
         {% endif %}
-    -->
-        <a id="geojson-download" download="map.png"></a>
-    </div>    
     
-    
-    
-    <div id="map" class="map">
-    </div>
-   <!--    <div id="data"><p style="padding-left: 3%; padding-right:3%">{{ project_notes }}</p>        
-    </div>
-    <button id="btlayer" class="btn"><i class="fa-solid fa-globe" aria-hidden="true"></i></button>
+        <a id="geojson-download" download="map.png"></a>-->
+    </div> 
+    <div id="map" class="map"> </div>
+   <div id="data"><p style="padding-left: 3%; padding-right:3%">{{ project_notes }}</p> </div>
+<!--        <button id="btlayer" class="btn"><i class="fa-solid fa-globe" aria-hidden="true"></i></button>
 -->
 
     
 <style>
     .x-tree-icon { display: none !important; }
+
+    
+    .controls {
+        position: absolute;
+        top: 8px;
+        right: 3em;
+    }
 
     .bt-satelite {
         background: url('https://www.mapas-del-mundo.net/mapas/mundo/mapa-grande-satelite-del-mundo-small.jpg') no-repeat;
@@ -115,7 +121,6 @@
         right: .5em;
     }
 
-
     /* Darker background on mouse-over */
     .btn:hover {
     background-color: rgb(47, 74, 155);
@@ -151,6 +156,11 @@
         left: .5em;
     }
 
+    .ol-data {
+        top: 370px;
+        left: .5em;
+    }
+
     .legend {
         top: .5em;
         right: .5em;
@@ -167,7 +177,8 @@
         padding: 0 0 15px 0;
         bottom: 0;
         left: -50px;
-    {#background-image: url(../../resources/images/anchor.png);#} background-repeat: no-repeat;
+        background-image: url(../../resources/images/anchor.png); 
+        background-repeat: no-repeat;
         background-position: 34px 100%;
     }
 

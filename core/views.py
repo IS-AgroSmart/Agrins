@@ -558,21 +558,21 @@ def mapper(request, uuid):
                    "upload_new_index_path": "/#/projects/" + str(project.uuid) + "/upload/index",
                    "is_multispectral":  True,
                    "is_demo": project.is_demo,
-                   "uuid": project.uuid,
+                   "uuid": project.uuid,                   
                    #"flights": project.flights.all().order_by("date")
                    })
 
 
-def mapper_bbox(request, uuid):
-    a
-    project = UserProject.objects.get(uuid=uuid)
-    print('revisión mappebox')
-    ans = requests.get(
-        "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
-        "/coveragestores/mainortho/coverages/mainortho.json",
-        auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
-
-    return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
+def mapper_bbox(request, uuid, name):    
+    project = UserProject.objects.get(uuid=uuid)    
+    for art in project.artifacts.all():
+        if (art.title == name):
+            ans = requests.get(
+            "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
+            "/coveragestores/"+art.name+"/coverages/"+art.name+".json",
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
+            return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
+    return JsonResponse({"data":"not found"})
 
 
 def mapper_artifacts(request, uuid):

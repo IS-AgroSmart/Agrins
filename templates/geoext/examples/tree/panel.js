@@ -13,14 +13,16 @@ let startZone = [];
 let TIMES = [];
 let shapefiles = [], indices = [];
 let artifactLayer = [];
-
+let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
+let anotatiom= [];
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
 noCacheHeaders.append('pragma', 'no-cache');
 noCacheHeaders.append('cache-control', 'no-cache');
 fillShapefiles();
+fillAnotations();
 fillRasters();
 initApp();
-fitMap();
+//fitMap();
 // fetch(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/project_a4029f71-835b-474c-92a3-ccc05ce5de2e/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities")
 /*fetch(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/" + project_path + "/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities",
     {headers: noCacheHeaders})
@@ -60,7 +62,8 @@ function initApp() {
                         'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
                         'Icons from Wikimedia Commons',], attributionsCollapsible: false,
                     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    
-                })});
+                })});           
+            
 
             basemapsGroup = new ol.layer.Group({
                 layers: [omslayer, stamenlayer, satelitelayer],
@@ -80,29 +83,41 @@ function initApp() {
             });
 
             shapefilesGroup = new ol.layer.Group({                
-                layers: shapefiles,
+                layers: shapefiles
             });
 
             indicesGroup = new ol.layer.Group({
                 name: "Índices",
                 layers: indices,
             });
+            let view = new ol.View({
+                //center: ol.proj.fromLonLat(startZone),                    
+                zoom: 18,
+                minZoom: 2,
+            });
             //delete raterGroup review
             olMap = new ol.Map({                
                 layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
-                view: new ol.View({
-                    center: ol.proj.fromLonLat(startZone),                    
-                    zoom: 18,
-                    minZoom: 2,
-                }),
+                view: view,
                 target: 'map',
             });          
+
+            if(shapefiles.length <= 1){
+                fitInit();
+            }
+            else{
+                let layerg = shapefilesGroup.getLayers().getArray().slice(-1); 
+                let namelayer = layerg[0].getLayers().getArray()[0].get('name');
+                fitMap(namelayer);
+            }
 
 
 
             //fitMap(); // Must happen after olMap is defined!
             
             addMeasureInteraction();
+
+            //olMap.addControl(visualizationselector());
 
             let zoomslider = new ol.control.ZoomSlider();
             olMap.addControl(zoomslider);
@@ -115,18 +130,61 @@ function initApp() {
             let SaveMeasurementsControl = createSaveControl();
             olMap.addControl(new SaveMeasurementsControl());
             let ClearMeasurementsControl = createClearControl();
-            olMap.addControl(new ClearMeasurementsControl());
-            let Scale = new ol.control.ScaleLine();
-            olMap.addControl(Scale);
+            olMap.addControl(new ClearMeasurementsControl());            
             let FullScreen = new ol.control.FullScreen();
             olMap.addControl(FullScreen);
 
-         
+            let Scale = new ol.control.ScaleLine({
+                units: 'metric',
+                minWidth: 100
+            });   
+            olMap.addControl(Scale);
             
+            var selectbase = document.createElement('select');
+            const op1 = document.createElement('option');
+            op1.textContent = 'Satélite (ArcGIS/ESRI';
+            const op2 = document.createElement('option');
+            op2.textContent = 'OpenStreetMap';
+            const op3 = document.createElement('option');
+            op3.textContent = 'Stamen Watercolor';
+            selectbase.appendChild(op1);
+            selectbase.appendChild(op2);
+            selectbase.appendChild(op3);  
+            var handleSelectBase = function(e) {
+                const idx = selectbase.selectedIndex;
+                switch(idx) {
+                    case 0:
+                        satelitelayer.setVisible(true);
+                        omslayer.setVisible(false);
+                        stamenlayer.setVisible(false);
+                      break;
+                    case 1:
+                        satelitelayer.setVisible(false);
+                        omslayer.setVisible(true);
+                        stamenlayer.setVisible(false);
+                      break;
+                    case 2:
+                        satelitelayer.setVisible(false);
+                        omslayer.setVisible(false);
+                        stamenlayer.setVisible(true);
+                        break;                    
+                  }
+            };
+            selectbase.addEventListener('change', handleSelectBase, false);
+                    
 
+            var element = document.createElement('div');
+            element.className = 'controls ol-control';
+            element.appendChild(selectbase);
+
+            var baseMapSelect= new ol.control.Control({
+                element: element
+            });
+            olMap.addControl(baseMapSelect);
+
+          
             // Add legend, only if there is at least one index
-            if (indices.length > 0) {
-                
+            if (indices.length > 0) {                
                 let LegendControl = function (opt_options) {
                     var options = opt_options || {};
                     var img = document.createElement('img');
@@ -134,9 +192,7 @@ function initApp() {
                     img.setAttribute("src", window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/styles/gradient.png");
                     var element = document.createElement('div');
                     element.className = 'legend ol-unselectable ol-control';
-
                     element.appendChild(img);
-
                     ol.control.Control.call(this, {
                         element: element,
                         target: options.target
@@ -249,6 +305,7 @@ function initApp() {
                 region: 'center',
                 border: false,
                 layout: 'fit',
+                //tbar: [ { type: 'button', text: 'Button 1' } ],
                 items: [mapComponent],
                
             });
@@ -289,11 +346,69 @@ function initApp() {
                     });                    
                 }
             });
+
+            let artifact = Ext.create('Ext.data.Store', {
+                fields: ['abbr', 'name'],
+                data : [artifactLayer]
+                
+            });
+            
+            // Create the combo box, attached to the states data store
+            let comboart = new Ext.create('Ext.form.ComboBox', {
+                fieldLabel: 'Seleccionar capa',
+                store: artifact,
+                queryMode: 'local',
+                displayField: 'name',
+                valueField: 'abbr',
+                height: '25',
+                renderTo: Ext.getBody()
+            });
+            
+            let panelindex = Ext.create('Ext.form.Panel', {                
+                bodyPadding: 5,
+                //width: 350,
+                //url: 'save-form.php',
+                //layout: 'anchor',                
+                //defaultType: 'textfield',
+                items: [
+                    {
+                        xtype: 'label',
+                        forId: 'myFieldId',
+                        text: 'Indice multiespectral (Green / NIR) - 1',
+                        margin: '0 0 0 10'
+                    },
+                    comboart
+                    
+                ],            
+                buttons: [{
+                    text: 'Enviar',
+                    formBind: true, //only enabled once the form is valid
+                    disabled: true,
+                    /*handler: function() {
+                        var form = this.up('form').getForm();
+                        if (form.isValid()) {
+                            form.submit({
+                                success: function(form, action) {
+                                   Ext.Msg.alert('Success', action.result.msg);
+                                },
+                                failure: function(form, action) {
+                                    Ext.Msg.alert('Failed', action.result.msg);
+                                }
+                            });
+                        }
+                    }*/
+                }],
+                //renderTo: Ext.getBody()
+            });
+
+
+
             
             tabMenu = Ext.create('Ext.toolbar.Toolbar', {            
                 //renderTo: Ext.getBody(),
                 //allowMultiple: true,
-                items: [{
+                items: [
+                {
                     text: '&nbsp;✚&nbsp;Agregar',
                     width: '95px',
                      //active: true,
@@ -312,8 +427,11 @@ function initApp() {
                             Ext.create('Ext.window.Window', {
                                 title: 'Indice CGI',
                                 height: 200,
-                                width: 300,
+                                width: 400,
                                 layout: 'fit',
+                                items:[
+                                    panelindex
+                                ]
                                 
                             }).show();
                         }},
@@ -358,7 +476,7 @@ function initApp() {
                     {type: 'refresh',tooltip: 'Actualizar',callback: function() {}},
                     {type: 'expand',tooltip: 'Expandir',callback: onExpand},
                     {type: 'collapse',tooltip: 'Contraer',callback: onContract},
-                    {type: 'gear',tooltip: 'Configuración',callback: onConfig},
+                    //{type: 'gear',tooltip: 'Configuración',callback: onConfig},
                 ],
                 listeners: {
                     itemcontextmenu: {
@@ -383,13 +501,11 @@ function initApp() {
                             //the record is the data node that was clicked
                             //the item is the html dom element in the tree that was clicked
                             //index is the index of the node relative to its parent
-                            nodeId = record.data.id;
-                            htmlId = item.id;
-                            console.log("nodo id:"+nodeId + " htmlid "+ htmlId+ "index: "+index);
-                            console.log("Data id:"+ record.data.id);
-                            console.log("Data visible:"+ record.data.visible);
-                            console.log("Data capa:"+ record.data.text);      
-                            console.log("Data layerprueba:"+ item.layerName);                      
+
+                            if (record.data.text.substring(0, 5) !='Grupo'){
+                                fitMap(record.data.text);
+                                console.log('ES HOJA')
+                            }
                         }
                     }
                 
@@ -484,11 +600,11 @@ function initApp() {
                         height: 120, 
                         split: true,      
                         collapsible: true,
-                        collapsed: true,                 
+                        collapsed: true,  
                         //items: [timePanel]
 
-                    },
-                    */
+                    },*/
+                    
                 ]
             });
         },
@@ -589,8 +705,9 @@ function onConfig(){
 }
 
 
-
-
+function fillAnotations(){
+    shapefiles.push(anotationLayer);
+}
 
 function fillShapefiles() {
     return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
@@ -599,7 +716,7 @@ function fillShapefiles() {
         .then(data => {            
             for (let art of data.artifacts) {   
                 let layerfile=[];     
-                artifactLayer.push(art);            
+                artifactLayer.push(art.name);            
                 if (art.type === "SHAPEFILE"){
                     //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
                     layerfile.push(new ol.layer.Vector({
@@ -613,7 +730,7 @@ function fillShapefiles() {
                 else if (art.type === "ORTHOMOSAIC"){
                     console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
-                        name: '&nbsp;🄼&nbsp'+art.name,
+                        name: art.name,
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
@@ -623,7 +740,7 @@ function fillShapefiles() {
                 else if (art.type === "RGB"){
                     console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
-                        name: '&nbsp;🅁&nbsp'+art.name,
+                        name: art.name,
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
@@ -633,7 +750,7 @@ function fillShapefiles() {
                 else if (art.type === "INDEX"){
                     console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
-                        name: '&nbsp;🄸&nbsp'+art.name,
+                        name: art.name,
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
@@ -641,12 +758,14 @@ function fillShapefiles() {
                         })                            
                 }));}
                 let layerGroup = new ol.layer.Group({
-                    name: art.name,
+                    name: 'Grupo '+art.name,
+                    leaf: true, 
                     layers: layerfile,
                 });
                 shapefiles.push(layerGroup)            
-                }
+                }                
             }
+            
         );
 }
 
@@ -670,31 +789,8 @@ function fillRasters() {
         );
 }
 
-function fitMap() {
-    //center: ol.proj.fromLonLat([-79.9637110931326,-2.1400643536418857]),//Espol
-                    //center: ol.proj.fromLonLat([-78.92380042643215, -3.0434972596960046]),//Quingeo
-                    //center: ol.proj.fromLonLat([-78.96637337549922, -2.780614787393679]),//Octavio
-                    //center: ol.proj.fromLonLat([-79.10137132790128, -2.962291419744297]),//Victoria-P
-    if(project_name == 'Quingeo-Cuenca'){
-        startZone = [-78.92380042643215, -3.0434972596960046];
-    }
-    else if(project_name == 'Octavio Cordero'){
-        startZone = [-78.96637337549922, -2.780614787393679];
-    }
-    else if(project_name == 'GEA-ESPOL'){
-        startZone = [-79.9637110931326,-2.1400643536418857];
-    }
-    else if(project_name == 'GEA-2019'){
-        startZone = [-79.9637110931326,-2.1400643536418857];
-    }
-    else if(project_name == 'UCUENCA-last'){
-        startZone = [-79.10137132790128, -2.962291419744297];
-    }
-    else{
-        startZone =  [-79.00464989126978,-2.897357117943853];
-    }
-
-    /*fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/bbox",
+function fitMap(name) {
+    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ name+"/bbox",
         {headers: noCacheHeaders,})
         .then(response => response.json())
         .then(data => {
@@ -702,8 +798,13 @@ function fitMap() {
             const maxCoords = ol.proj.transform([data.bbox.maxx, data.bbox.maxy], data.srs, "EPSG:3857");
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
-        });*/
+        });
 }
+function fitInit(){    
+    olMap.getView().setCenter(ol.proj.transform([-78.58031164977537,-0.394260613241795], 'EPSG:4326', 'EPSG:3857'));
+    olMap.getView().setZoom(5);
+}
+
 /*
 //imageSource.once('imageloadend', function(e) {
 function fitMap(){
@@ -832,12 +933,43 @@ function saveMeasurementsListener() {
         dataProjection: 'EPSG:4326',
         featureProjection: olMap.getView().getProjection()
     });
+    console.log(geojson);
+    let geojsonFormat = new ol.format.GeoJSON();
+    let featArray2 = geojsonFormat.readFeatures(geojson, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857'
+    });
+    let redStyle = new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 6,
+            fill: new ol.style.Fill({
+                color: '#8B0000'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#fff',
+                width: 2
+            })
+        })
+    });
+    let featColl2 = new ol.Collection(featArray2);
+    let vectorLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: featColl2
+        }),
+        style: redStyle
+    });
+    shapefiles.push(vectorLayer);
+    olMap.addLayer(vectorLayer);
+    treePanel.layer.add(vectorLayer);
+
+
 
     let link = document.createElement('a');
     let filename = prompt("Escriba un nombre para el archivo (opcional)", "Mediciones " + project_name);
     if (filename !== null && filename.trim() !== "") link.download = filename + ".geojson";
     else link.download = "measurements.geojson";
     let blob = new Blob([geojson], {type: "application/geo+json;charset=utf-8"});
+    console.log(blob); 
 
     link.href = URL.createObjectURL(blob);
     link.click();
@@ -935,7 +1067,13 @@ function addInteraction() {
         })
     }, this)
     draw.on('drawend', (evt) => {
-        ans = prompt("Escriba el nombre de la medición (opcional)");
+        ans = "";
+        Ext.Msg.prompt('Agregar Medición', 'Escriba el nombre de la medición:', function(btn, text){
+            if (btn == 'ok'){
+                ans = text;
+            }
+        });
+        //ans = prompt("Escriba el nombre de la medición (opcional)");
         if (ans !== null && ans.trim() !== "")
             drawingFeature.set("nombre", ans)
         measureTooltipElement.className = 'tooltip tooltip-static';

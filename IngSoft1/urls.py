@@ -45,7 +45,7 @@ urlpatterns = [
     path('api/rastercalcs/check', check_formula, name="check_formula"),
     path('api/rastercalcs/<uuid:uuid>', create_raster_index, name="create_raster_index"),
     path('mapper/<uuid:uuid>', mapper, name="mapper"),
-    path('mapper/<uuid:uuid>/bbox', mapper_bbox, name="mapper_bbox"),
+    path('mapper/<uuid:uuid>/<str:name>/bbox', mapper_bbox, name="mapper_bbox"),
     # path('mapper/<uuid:uuid>/shapefiles', mapper_shapefiles),
     path('mapper/<uuid:uuid>/indices', mapper_indices, name="mapper_indices"),
     path('mapper/<uuid:uuid>/artifacts', mapper_artifacts, name="mapper_artifacts"),

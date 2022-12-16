@@ -477,6 +477,7 @@ class ArtifactType(Enum):
     SHAPEFILE = "Shapefile"
     INDEX = "Index"
     RGB = "Rgb"
+    GEOM = "Geom"
 
     @classmethod
     def filename(cls, art):
