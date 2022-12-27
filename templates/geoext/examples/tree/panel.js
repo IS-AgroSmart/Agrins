@@ -543,7 +543,13 @@ function initApp() {
                      ]
                 }],
                 
-           });             
+           });     
+
+           /*var ol3d = new olcs.OLCesium({
+            map: olMap,
+            });
+            ol3d.setEnabled(false);
+            */
 
 
             treePanel = Ext.create('Ext.tree.Panel', {
@@ -562,8 +568,12 @@ function initApp() {
                     items: isDemo ? [] : [tabMenu],                    
                 }],
                 fbar:[{ 
-                    type: 'button', 
+                    //type: 'button', 
                     text: 'Mapa 3D',                   
+                    handler: function() {
+                        console.log("value"); 
+                        //ol3d.setEnabled(!ol3d.getEnabled());
+                    },
                     },
                 ],
                 tools: [
@@ -674,6 +684,7 @@ function fillShapefiles() {
                 else if (art.type === "ORTHOMOSAIC"){
                     console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
+                        //style: falseColor,
                         name: art.name,
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
@@ -790,7 +801,7 @@ function createNorthControl() {
 function createPointControl() {
     return _createControl(measurePointListener,
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="90%" height="90%" version="1.1">' +
-        '<circle cx="25" cy="25" r="10" stroke="#fff" stroke-width="6" fill="#00000000"></circle>' +
+        '<circle cx="25" cy="25" r="10" stroke="#000" stroke-width="6" fill="#00000000"></circle>' +
         '</svg>',
         "measure-point", "Anotar punto");
 }
@@ -798,7 +809,7 @@ function createPointControl() {
 function createLengthControl() {
     return _createControl(measureLengthListener,
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 40" width="90%" height="90%">' +
-        '  <path stroke="#fff" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="none" d="M5,20H45M12,12 4,20 12,28M38,12 46,20 38,28"/>' +
+        '  <path stroke="#000" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="none" d="M5,20H45M12,12 4,20 12,28M38,12 46,20 38,28"/>' +
         '</svg>',
         "measure-length", "Medir distancias");
 }
@@ -806,7 +817,7 @@ function createLengthControl() {
 function createAreaControl() {
     return _createControl(measureAreaListener,
         '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 60 588 417" height="90%" width="90%">' +
-        '  <path stroke="#fff" stroke-width="50" stroke-linejoin="round" stroke-linecap="round" fill="none" d="M 246.55624,445.55603 C 130.80587,418.39845 35.513972,395.59161 34.796512,394.87415 C 33.744472,393.82211 33.735832,393.25321 34.751832,391.93421 C 35.444712,391.03469 67.302832,366.53016 105.54765,337.4797 C 143.79247,308.42924 175.07668,284.21068 175.06812,283.66068 C 175.05955,283.11068 137.72969,267.03903 92.112862,247.9459 C 46.496032,228.85277 8.8093816,212.65277 8.3647316,211.9459 C 7.4317416,210.46268 204.30692,12.877091 206.05498,13.542291 C 208.09055,14.316891 577.03254,282.35001 578.28364,283.96311 C 578.98324,284.86521 579.30634,286.25314 579.00154,287.04739 C 577.51514,290.9209 462.03434,492.82834 460.68624,493.91068 C 459.82994,494.59818 458.65284,495.10955 458.07044,495.04706 C 457.48804,494.98458 362.30664,472.71361 246.55624,445.55603 z "/>' +
+        '  <path stroke="#000" stroke-width="50" stroke-linejoin="round" stroke-linecap="round" fill="none" d="M 246.55624,445.55603 C 130.80587,418.39845 35.513972,395.59161 34.796512,394.87415 C 33.744472,393.82211 33.735832,393.25321 34.751832,391.93421 C 35.444712,391.03469 67.302832,366.53016 105.54765,337.4797 C 143.79247,308.42924 175.07668,284.21068 175.06812,283.66068 C 175.05955,283.11068 137.72969,267.03903 92.112862,247.9459 C 46.496032,228.85277 8.8093816,212.65277 8.3647316,211.9459 C 7.4317416,210.46268 204.30692,12.877091 206.05498,13.542291 C 208.09055,14.316891 577.03254,282.35001 578.28364,283.96311 C 578.98324,284.86521 579.30634,286.25314 579.00154,287.04739 C 577.51514,290.9209 462.03434,492.82834 460.68624,493.91068 C 459.82994,494.59818 458.65284,495.10955 458.07044,495.04706 C 457.48804,494.98458 362.30664,472.71361 246.55624,445.55603 z "/>' +
         '</svg>',
         "measure-area", "Medir áreas"
     );
@@ -816,7 +827,7 @@ function createSaveControl() {
     return _createControl(saveMeasurementsListener,
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -256 1792 1792" width="90%" height="90%">' +
         '<g transform="matrix(1,0,0,-1,129.08475,1270.2373)">' +
-        '  <path fill="#fff" d="m 384,0 h 768 V 384 H 384 V 0 z m 896,0 h 128 v 896 q 0,14 -10,38.5 -10,24.5 -20,34.5 l -281,281 q -10,10 -34,20 -24,10 -39,10 V 864 q 0,-40 -28,-68 -28,-28 -68,-28 H 352 q -40,0 -68,28 -28,28 -28,68 v 416 H 128 V 0 h 128 v 416 q 0,40 28,68 28,28 68,28 h 832 q 40,0 68,-28 28,-28 28,-68 V 0 z M 896,928 v 320 q 0,13 -9.5,22.5 -9.5,9.5 -22.5,9.5 H 672 q -13,0 -22.5,-9.5 Q 640,1261 640,1248 V 928 q 0,-13 9.5,-22.5 Q 659,896 672,896 h 192 q 13,0 22.5,9.5 9.5,9.5 9.5,22.5 z m 640,-32 V -32 q 0,-40 -28,-68 -28,-28 -68,-28 H 96 q -40,0 -68,28 -28,28 -28,68 v 1344 q 0,40 28,68 28,28 68,28 h 928 q 40,0 88,-20 48,-20 76,-48 l 280,-280 q 28,-28 48,-76 20,-48 20,-88 z"/>' +
+        '  <path fill="#000" d="m 384,0 h 768 V 384 H 384 V 0 z m 896,0 h 128 v 896 q 0,14 -10,38.5 -10,24.5 -20,34.5 l -281,281 q -10,10 -34,20 -24,10 -39,10 V 864 q 0,-40 -28,-68 -28,-28 -68,-28 H 352 q -40,0 -68,28 -28,28 -28,68 v 416 H 128 V 0 h 128 v 416 q 0,40 28,68 28,28 68,28 h 832 q 40,0 68,-28 28,-28 28,-68 V 0 z M 896,928 v 320 q 0,13 -9.5,22.5 -9.5,9.5 -22.5,9.5 H 672 q -13,0 -22.5,-9.5 Q 640,1261 640,1248 V 928 q 0,-13 9.5,-22.5 Q 659,896 672,896 h 192 q 13,0 22.5,9.5 9.5,9.5 9.5,22.5 z m 640,-32 V -32 q 0,-40 -28,-68 -28,-28 -68,-28 H 96 q -40,0 -68,28 -28,28 -28,68 v 1344 q 0,40 28,68 28,28 68,28 h 928 q 40,0 88,-20 48,-20 76,-48 l 280,-280 q 28,-28 48,-76 20,-48 20,-88 z"/>' +
         '</g></svg>', "save-meas", "Guardar mediciones");
 }
 
@@ -824,8 +835,8 @@ function createClearControl() {
     return _createControl(clearMeasurementsListener,
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
         '<g>' +
-        '  <path stroke="#fff" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" fill="none" d="m6 4v24h11v-1h-10v-22h11v7h7v7h1v-8l-7-7h-1z"/>' +
-        '  <path stroke="#fff" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" fill="none" d="m18 20.707l3.293 3.293-3.293 3.293c.013.025.707.707.707.707l3.293-3.293 3.293 3.293.707-.707-3.293-3.293 3.293-3.293-.707-.707-3.293 3.293-3.293-3.293z"/>' +
+        '  <path stroke="#000" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" fill="none" d="m6 4v24h11v-1h-10v-22h11v7h7v7h1v-8l-7-7h-1z"/>' +
+        '  <path stroke="#000" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" fill="none" d="m18 20.707l3.293 3.293-3.293 3.293c.013.025.707.707.707.707l3.293-3.293 3.293 3.293.707-.707-3.293-3.293 3.293-3.293-.707-.707-3.293 3.293-3.293-3.293z"/>' +
         '</g></svg>',
         "clear-meas", "Eliminar mediciones (use Supr para eliminar una sola medición)")
 }
