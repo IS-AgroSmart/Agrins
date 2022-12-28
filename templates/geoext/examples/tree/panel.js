@@ -1,8 +1,26 @@
+/*CEPRA 2019
+    Authors: Danny Ucho - Jeremy Godoy
+    Date: 10/10/2022
+    Summary: Javascript file for GEOEXT-EXTJS loading layers from geoserver, using openlayers v7
+*/
+
 Ext.require([
     'GeoExt.component.Map',
     'GeoExt.data.store.LayersTree',
     'Ext.Button',
 ]);
+
+/* Mapas Base (Satellite dafult) */
+let omslayer = new ol.layer.Tile({name: "OpenStreetMap", source: new ol.source.OSM(), visible: false });
+let stamenlayer = new ol.layer.Tile({source: new ol.source.Stamen({layer: 'watercolor'}), name: 'Stamen Watercolor', visible: false });
+let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", visible: true,                
+    source: new ol.source.XYZ({ attributions: ['Powered by Esri.',
+        'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
+        'Icons from Wikimedia Commons',], attributionsCollapsible: false,
+    url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    
+})});           
+
+
 
 let mapComponent;
 let mapPanel;
@@ -55,14 +73,7 @@ function initApp() {
             let rasterGroup, basemapsGroup, shapefilesGroup, indicesGroup;
             let treeStore;
 
-            let omslayer = new ol.layer.Tile({name: "OpenStreetMap", source: new ol.source.OSM(), visible: false });
-            let stamenlayer = new ol.layer.Tile({source: new ol.source.Stamen({layer: 'watercolor'}), name: 'Stamen Watercolor', visible: false });
-            let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", visible: true,                
-                source: new ol.source.XYZ({ attributions: ['Powered by Esri.',
-                        'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
-                        'Icons from Wikimedia Commons',], attributionsCollapsible: false,
-                    url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    
-                })});           
+            
             
 
             basemapsGroup = new ol.layer.Group({
@@ -100,6 +111,7 @@ function initApp() {
                 layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
                 view: view,
                 target: 'map',
+                controls: [],
             });          
 
             if(shapefiles.length <= 1){
@@ -119,14 +131,14 @@ function initApp() {
 
             //olMap.addControl(visualizationselector());
 
-            let zoomslider = new ol.control.ZoomSlider();
-            olMap.addControl(zoomslider);
-            let PointControl = createPointControl();
-            olMap.addControl(new PointControl());
-            let MeasureLengthControl = createLengthControl();
-            olMap.addControl(new MeasureLengthControl());
-            let MeasureAreaControl = createAreaControl();
-            olMap.addControl(new MeasureAreaControl());
+            //let zoomslider = new ol.control.ZoomSlider();
+            //olMap.addControl(zoomslider);
+            //let PointControl = createPointControl();
+            //olMap.addControl(new PointControl());
+            //let MeasureLengthControl = createLengthControl();
+            //olMap.addControl(new MeasureLengthControl());
+            //let MeasureAreaControl = createAreaControl();
+            //olMap.addControl(new (MeasureAreaControl));
             let SaveMeasurementsControl = createSaveControl();
             olMap.addControl(new SaveMeasurementsControl());
             let ClearMeasurementsControl = createClearControl();
@@ -139,6 +151,7 @@ function initApp() {
                 minWidth: 100
             });   
             olMap.addControl(Scale);
+
             
             var selectbase = document.createElement('select');
             const op1 = document.createElement('option');
@@ -172,28 +185,108 @@ function initApp() {
             };
             selectbase.addEventListener('change', handleSelectBase, false);
             var element = document.createElement('div');
-            element.className = 'controls ol-control';
+            element.className = 'btn btn-small';
             element.appendChild(selectbase);
-            var baseMapSelect= new ol.control.Control({
+            /*var baseMapSelect= new ol.control.Control({
                 element: element
             });
-            olMap.addControl(baseMapSelect);
+            olMap.addControl(baseMapSelect);*/
+            
+            
 
-            var x = document.createElement("INPUT");
-            x.setAttribute("type", "range");
-            x.setAttribute("min", "1");
-            x.setAttribute("max", "100");
-            x.setAttribute("value", "50");
-            var element1 = document.createElement('div');
-            element1.className = 'range ol-control';
-            element1.appendChild(x);
-            var swiper= new ol.control.Control({
-                element: element1
+            /*button legend
+            btnorth.innerHTML = 'N';
+            btnorth.className = "btn";
+            btnorth.setAttribute("title","Norte");
+            var handleRotateNorth = function(e) { olMap.getView().setRotation(0); };
+            btnorth.addEventListener('click', handleRotateNorth, false);*/
+            var btfullscreen = document.createElement('button');
+            btfullscreen.className = "btn btn-small icon-resize-full";
+            btfullscreen.setAttribute("title","Pantalla completa");                                  
+            const controlFull = new ol.control.FullScreen();                        
+            btfullscreen.addEventListener('click', function () {
+                controlFull.element.querySelector('button').click();
             });
-            olMap.addControl(swiper);
+            olMap.addControl(controlFull);
 
 
-          
+            
+            var btzoomin = document.createElement('button');
+            btzoomin.className = "btn btn-small icon-zoom-in";
+            btzoomin.setAttribute("title","Acercar");
+            var handleZoomin = function(e) {
+                olMap.getView().animate({
+                    zoom: olMap.getView().getZoom() + 1,
+                    duration: 250
+                  })    
+            };
+            btzoomin.addEventListener("click", handleZoomin);
+
+            var btzoomout = document.createElement('button');
+            btzoomout.className = "btn btn-small icon-zoom-out";
+            btzoomout.setAttribute("title","Alejar");
+            var handleZoomout = function(e) {
+                olMap.getView().animate({
+                    zoom: olMap.getView().getZoom() - 1,
+                    duration: 250
+                  })    
+            };
+            btzoomout.addEventListener("click", handleZoomout);
+
+
+            var btnorth = document.createElement('button');
+            btnorth.className = "btn btn-small icon-location-arrow";
+            btnorth.setAttribute("title","Norte");
+            var handleRotateNorth = function(e) {
+                olMap.getView().setRotation(0);
+            };
+            btnorth.addEventListener('click', handleRotateNorth, false);
+            btnorth.addEventListener('touchstart', handleRotateNorth, false);
+
+            var btpoligono = document.createElement("button");
+            btpoligono.className = "btn btn-small icon-crop";
+            btpoligono.setAttribute("title","Dibujar poligono");
+            btpoligono.addEventListener('click', measureAreaListener);
+            var btdistance = document.createElement("button");
+            btdistance.className = "btn btn-small icon-resize-horizontal";
+            btdistance.setAttribute("title","Medir distancia");
+            btdistance.addEventListener("click", measureLengthListener)
+            var btpoint = document.createElement("button");
+            btpoint.className = "btn btn-small icon-map-marker";
+            btpoint.setAttribute("title","Anotar punto");
+            btpoint.addEventListener("click",measurePointListener)
+            var btlegend = document.createElement("button");
+            btlegend.className = "btn btn-small icon-print";
+            btlegend.setAttribute("title","Imprimir capa");
+            var btlegend1 = document.createElement("button");
+            btlegend1.className = "btn btn-small icon-bar-chart";
+            btlegend1.setAttribute("title","Ver leyenda");            
+            var element2 = document.createElement('div');
+            element2.className = 'btcontrols btn-group';         
+            element2.setAttribute("id","idcontrols");
+
+             //element2.appendChild(btnorth);
+            //element2.appendChild(ctfulscreen);
+            element2.appendChild(btzoomin);
+            element2.appendChild(btzoomout);
+            element2.appendChild(btnorth);
+            element2.appendChild(btfullscreen);
+            element2.appendChild(btpoligono);
+            element2.appendChild(btdistance);
+            element2.appendChild(btpoint);
+            element2.appendChild(btlegend);
+            element2.appendChild(btlegend1);
+            element2.appendChild(element);
+            var groupControl = new ol.control.Control({
+                element: element2
+            });
+            olMap.addControl(groupControl);  
+            var att = new ol.control.Attribution();
+            olMap.addControl(att);
+
+
+            
+
             // Add legend, only if there is at least one index
             if (indices.length > 0) {                
                 let LegendControl = function (opt_options) {
@@ -567,7 +660,7 @@ function initApp() {
                     xtype: 'segmentedbutton',                
                     items: isDemo ? [] : [tabMenu],                    
                 }],
-                fbar:[{ 
+                /*fbar:[{ 
                     //type: 'button', 
                     text: 'Mapa 3D',                   
                     handler: function() {
@@ -575,7 +668,7 @@ function initApp() {
                         //ol3d.setEnabled(!ol3d.getEnabled());
                     },
                     },
-                ],
+                ],*/
                 tools: [
                     btayuda,
                     btExpand,
@@ -814,14 +907,14 @@ function createLengthControl() {
         "measure-length", "Medir distancias");
 }
 
-function createAreaControl() {
+/*function createAreaControl() {
     return _createControl(measureAreaListener,
         '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 60 588 417" height="90%" width="90%">' +
         '  <path stroke="#000" stroke-width="50" stroke-linejoin="round" stroke-linecap="round" fill="none" d="M 246.55624,445.55603 C 130.80587,418.39845 35.513972,395.59161 34.796512,394.87415 C 33.744472,393.82211 33.735832,393.25321 34.751832,391.93421 C 35.444712,391.03469 67.302832,366.53016 105.54765,337.4797 C 143.79247,308.42924 175.07668,284.21068 175.06812,283.66068 C 175.05955,283.11068 137.72969,267.03903 92.112862,247.9459 C 46.496032,228.85277 8.8093816,212.65277 8.3647316,211.9459 C 7.4317416,210.46268 204.30692,12.877091 206.05498,13.542291 C 208.09055,14.316891 577.03254,282.35001 578.28364,283.96311 C 578.98324,284.86521 579.30634,286.25314 579.00154,287.04739 C 577.51514,290.9209 462.03434,492.82834 460.68624,493.91068 C 459.82994,494.59818 458.65284,495.10955 458.07044,495.04706 C 457.48804,494.98458 362.30664,472.71361 246.55624,445.55603 z "/>' +
         '</svg>',
         "measure-area", "Medir áreas"
     );
-}
+}*/
 
 function createSaveControl() {
     return _createControl(saveMeasurementsListener,
@@ -1026,6 +1119,9 @@ function addInteraction() {
         Ext.Msg.prompt('Agregar Medición', 'Escriba el nombre de la medición:', function(btn, text){
             if (btn == 'ok'){
                 ans = text;
+            }
+            else{
+                clearMeasurementsListener()
             }
         });
         //ans = prompt("Escriba el nombre de la medición (opcional)");

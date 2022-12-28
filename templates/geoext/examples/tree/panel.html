@@ -34,6 +34,7 @@
 
     <!-- font-awesome is an iconic font, which means we can draw resolution-independent icons -->
     <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    
 
     <!--ol-geocoder 
     <link href="https://unpkg.com/ol-geocoder/dist/ol-geocoder.min.css" rel="stylesheet">
@@ -107,6 +108,23 @@
 <style>
     .x-tree-icon { display: none !important; }
 
+    .btn {
+        /*background-color: rgb(19, 132, 150);*/
+        background-color: rgb(255, 255, 255);
+        border: none;
+        color:  rgb(88, 97, 100);
+        padding-left: 10px;
+        margin: 2px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    /* Darker background on mouse-over */
+    .btn:hover {
+        background-color: rgb(88, 97, 100);
+        color:  rgb(255, 255, 255);
+    }
+
     .container {        
         text-align: center;
         position: absolute;
@@ -116,8 +134,16 @@
     }
     .controls {
         position: absolute;
-        top: 8px;
+        top: 20px;
         right: 3em;
+    }
+
+    .btcontrols {
+        position: absolute;
+        display: inline-block;
+        top: 0%;
+        left: 0%;
+        
     }
 
     .range {
@@ -139,10 +165,10 @@
         right: .5em;
     }
 
-    /* Darker background on mouse-over */
+    /* Darker background on mouse-over 
     .btn:hover {
     background-color: rgb(47, 74, 155);
-    }
+    }*/
     
     .measure-point {
         top: 265px;
@@ -281,9 +307,22 @@
     }
 
     .ol-rotate {
-        top: 3em;
+        top: 7em;
         right: .5em;
     }
+
+    .ol-zoom {
+        left: unset;
+        right: .5em;
+        top: 2.7em;
+    }
+
+    .ol-full-screen { display: none; }
+
+
+   
+    
+
 </style>
 
 <script src="ol/ol.js"></script>
