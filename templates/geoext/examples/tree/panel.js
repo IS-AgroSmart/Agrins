@@ -421,7 +421,7 @@ function initApp() {
                 layerGroup: shapefilesGroup,// treeLayerGroup
             });
 
-            let btInicio = Ext.create('Ext.Button', {
+            let btInicio = Ext.create('Ext.Button', {                
                 text: '🏠 Cerrar',  
                 tooltip: 'Cerrar visualizador',
                 handler: function() {
@@ -588,37 +588,32 @@ function initApp() {
 
 
             
-            tabMenu = Ext.create('Ext.toolbar.Toolbar', {            
+            tabMenu = Ext.create('Ext.toolbar.Toolbar', {   
+                style: {
+                    backgroundColor: 'white',
+                },         
                 //renderTo: Ext.getBody(),
                 //allowMultiple: true,
                 items: [
                 {
                     text: '➕ Agregar',
-                    width: '95px',
+                    width: '95px',                    
                      //active: true,
                      //tooltip: 'Agregar índices',
                      menu: [
-                        {text: 'Vector', handler: function(){ top.window.location.href= "/#/projects/" + uuid + "/upload/shapefile" }},
-                        {text: 'Geotiff', handler: function(){ top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                         
+                        {text: 'Geotiff',handler: function() { addWinTif();}},// handler: function(){ top.window.location.href= "/#/projects/" + uuid + "/upload/shapefile" }},
+                        {text: 'Vector', handler: function(){}}              // top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                         
                      ]
                 },
                 {
                      text: '📊 Índices',
                      width: '88px',
                      menu: [
-                        {text: 'GCI', 
-                        handler: function(){ 
-                            Ext.create('Ext.window.Window', {
-                                title: 'Indice CGI',
-                                height: 200,
-                                width: 400,
-                                layout: 'fit',
-                                items:[
-                                    panelindex
-                                ]
-                                
-                            }).show();
-                        }},
+                        {text: 'GCI', handler: function() {
+                            indexWin('gci',"Ïndice GCI",400, 200);
+                        }
+                        
+                         },
                         {text: 'GRRI', handler: function(){ alert("Índice: GRRI \nTipo: Visible \nFunción: \nEstado: En desarrollo..."); }},
                         {text: 'MGRVI', handler: function(){ alert("Índice: MGRVI \nTipo: Visible \nFunción: Captura la diferencia de reflectancia por la absorción de la clorofila a y la clorofila b.\nEstado: En desarrollo..."); }},
                         {text: 'NDRE', handler: function(){ alert("Índice: NDRE \nTipo: Multiespectral \nFunción: Utilizado para identificar las áreas con plantas saludables mediante el monitoreo de la clorofila. Puede detectar el estrés en la planta aún cuando no sea visible en la superficie.\nEstado: En desarrollo..."); }},
@@ -646,8 +641,10 @@ function initApp() {
 
 
             treePanel = Ext.create('Ext.tree.Panel', {
+                
                 //viewConfig: {plugins: {ptype: 'treeviewdragdrop'}},
                 header:{
+                    
                     titlePosition:1,
                     defaults:{ type:'tool'},
                     items:[btInicio]
@@ -707,17 +704,16 @@ function initApp() {
             var elem = document. getElementById("spiner"); 
             elem. parentNode. removeChild(elem);
   
-            Ext.create('Ext.Viewport', {
-                
+            Ext.create('Ext.Viewport', {                
                 layout: 'border',
                 items: [
                     mapPanel,                    
-                    {
+                    {                   
                         xtype: 'panel',
                         region: 'west',
                         title: project_name,
                         collapsible: true,                        
-                        width: 290,
+                        width: 285,
                         split: true,
                         layout: {
                             type: 'vbox',
@@ -733,6 +729,136 @@ function initApp() {
     });
 }
 
+function indexWin(id, title, width, height){
+    var win = Ext.create('Ext.window.Window', {
+        id: id,
+        name: id,
+        title: title,
+        width: width,
+        height: height,
+        closeAction:'destroy',
+        autoScroll:'true',
+        closable:true,
+        modal: true,
+        bbar:[{
+            text:'Cancelar',
+            handler:function(bt){
+                bt.up('window').close();
+            }
+        }]
+    })
+    win.show(this); 
+}
+
+
+function addWinTif(){
+    var dataCamera = Ext.create('Ext.data.Store', {
+        fields: ['id', 'name'],
+        data : [
+            {"id":"1", "name":"Micasense RedEdge-M"},
+            {"id":"2", "name":"Parrot Sequoia"},
+        ]
+    });
+    var camera = Ext.create('Ext.form.ComboBox', {
+        fieldLabel: 'Elegir cámara',
+        store: dataCamera,
+        width: '100%',
+        queryMode: 'local',
+        allowBlank : false,
+        forceSelection: true,
+        displayField: 'name',
+        valueField: 'id',
+        value:'1'
+        //renderTo: Ext.getBody()
+    });
+    var win = Ext.create('Ext.window.Window', {
+        //id: id,
+        name: id,
+        title: 'Agregar Capa TIF',
+        //width: '80%',
+        height: 220,
+        maxWidth : 500,
+        style:{
+            backgroundColor: 'white'
+        },
+        closeAction:'destroy',
+        autoScroll:'true',
+        closable:true,
+        bodyStyle: {
+            background: '#fff',
+            padding: '10px'
+        },
+        modal: true,
+        items:[
+            {
+                xtype: 'textfield',
+                name: 'name',
+                width:'100%',      
+                labelWidth: 60,
+                fieldLabel: 'Nombre',
+                allowBlank: false  // requires a non-empty value
+            },
+            {
+                xtype: 'filefield',
+                name: 'photo',
+                fieldLabel: 'Archivo .tif',
+                labelWidth: 60,
+                width:'100%',                                
+                msgTarget: 'side',
+                allowBlank: false,
+                anchor: '100%',
+                buttonText: 'Seleccionar...'
+            },
+            
+                camera
+            ,
+            {
+                xtype      : 'fieldcontainer',
+                fieldLabel : 'Tipo Imagen',
+                width:'100%',             
+                defaultType: 'radiofield',                
+                layout: 'hbox',                
+                items: [
+                    {
+                        boxLabel  : 'RGB/BGR',
+                        name      : 'size',
+                        inputValue: 'r',
+                        id        : 'radioRGB',
+                        checked: true
+                    }, 
+                    {xtype: 'tbspacer', width: 10},
+                    {
+                        boxLabel  : 'Multiespectral',
+                        name      : 'size',
+                        inputValue: 'm',
+                        id        : 'radioMultiespectral'
+                    }, 
+                ]
+            },
+        ],
+        bbar:['->',{
+            text:'Cancelar',
+            style:{
+                backgroundColor: 'white'
+            },
+            handler:function(bt){
+                bt.up('window').close();
+            }
+        },
+        {
+            text:'Guardar',
+            style:{
+                backgroundColor: 'white'
+            },
+            handler: function() {
+                Ext.Msg.alert('Success', 'Your photo  has been uploaded.');
+                
+            }
+        }
+    ]
+    })
+    win.show(this); 
+}
 
 function onConfig(){
     Ext.create('Ext.window.Window', {
