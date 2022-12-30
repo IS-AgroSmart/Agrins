@@ -2,6 +2,7 @@
     Authors: Danny Ucho - Jeremy Godoy
     Date: 10/10/2022
     Summary: Javascript file for GEOEXT-EXTJS loading layers from geoserver, using openlayers v7
+    JSON.parse(localStorage.getItem('vrs_')).token;
 */
 
 Ext.require([
@@ -20,139 +21,88 @@ let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", visible
     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    
 })});           
 
-
-
-let mapComponent;
-let mapPanel;
-let treePanel, timeSlider;
-
-let selectClick;
-let startZone = [];
-let TIMES = [];
-let shapefiles = [], indices = [];
-let artifactLayer = [];
+/* Initial values*/
+let mapComponent, mapPanel, treePanel, selectClick, olMap, popup;
+let layers = [], artifactLayer = [];
 let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
-let anotatiom= [];
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
 noCacheHeaders.append('pragma', 'no-cache');
 noCacheHeaders.append('cache-control', 'no-cache');
-fillShapefiles();
-fillAnotations();
-fillRasters();
-initApp();
-//fitMap();
-// fetch(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/project_a4029f71-835b-474c-92a3-ccc05ce5de2e/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities")
-/*fetch(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/" + project_path + "/mainortho/wms?service=WMS&version=1.3.0&request=GetCapabilities",
-    {headers: noCacheHeaders})
-    .then(response => response.text())
-    .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
-    .then(data => {
-        let times;
-        times = data.getElementsByTagName("WMS_Capabilities")[0].getElementsByTagName("Capability")[0].getElementsByTagName("Layer")[0].getElementsByTagName("Dimension")[0].innerHTML;
-        TIMES = [];
-        for (let time of times.split(",")) {
-            TIMES.push(time.substring(0, 10));
-        }
-    })
-    .then(fillShapefiles)
-    .then(fillRasters)
-    .then(initApp);
-*/
-let olMap;
 proj4.defs('EPSG:32617', '+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs');
 proj4.defs('EPSG:32717', '+proj=utm +zone=17 +south +datum=WGS84 +units=m +no_defs');
 proj4.defs('EPSG:32634', '+proj=utm +zone=34 +datum=WGS84 +units=m +no_defs')
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
+var dataCamera = Ext.create('Ext.data.Store', {
+    storeId: 'dataCamera',
+    fields: ['id', 'name'],
+    data : [
+        {"id":"REDEDGE", "name":"Micasense RedEdge-M"},
+        {"id":"PARROT", "name":"Parrot Sequoia"},
+    ]
+});
 
-let popup;
+var dataTypeArtefact = Ext.create('Ext.data.Store', {
+    storeId: 'dataTypeArtefact',
+    fields: ['id', 'name'],
+    data : [
+        {"id":"MULTIESPECTRAL", "name":"Multiespectral"},
+        {"id":"SHAPEFILE", "name":"Shapefile"},
+        {"id":"INDEX", "name":"Index"},
+        {"id":"RGB", "name":"Rgb"},
+        {"id":"KML", "name":"Kml"},
+    ]
+});
+    
+initLayers();
+initApp();
 
 function initApp() {
     Ext.application({
         launch: function () {
-            let rgbLayer;
-            let rasterGroup, basemapsGroup, shapefilesGroup, indicesGroup;
-            let treeStore;
-
-            
-            
+            let basemapsGroup, layersGroup, treeStore;
 
             basemapsGroup = new ol.layer.Group({
                 layers: [omslayer, stamenlayer, satelitelayer],
+            });                        
+            
+            layersGroup = new ol.layer.Group({                
+                layers: layers
             });
-
-            rgbLayer = new ol.layer.Tile({
-                name: "Ortomosaico RGB",
-                source: new ol.source.TileWMS({
-                    url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",
-                    params: {"LAYERS": project_path + ":mainortho", tiled: true}
-                })
-            });
-
-            rasterGroup = new ol.layer.Group({
-                name: "Imágenes",
-                layers: [rgbLayer],
-            });
-
-            shapefilesGroup = new ol.layer.Group({                
-                layers: shapefiles
-            });
-
-            indicesGroup = new ol.layer.Group({
-                name: "Índices",
-                layers: indices,
-            });
-            let view = new ol.View({
-                //center: ol.proj.fromLonLat(startZone),                    
+           
+            let view = new ol.View({               
                 zoom: 18,
                 minZoom: 2,
             });
-            //delete raterGroup review
+            
             olMap = new ol.Map({                
-                layers: [basemapsGroup, shapefilesGroup].concat(isMultispectral ? [] : []),
+                layers: [basemapsGroup, layersGroup],
                 view: view,
                 target: 'map',
                 controls: [],
             });          
 
-            if(shapefiles.length <= 1){
+            if(layers.length < 1){
                 fitInit();
             }
             else{
-                let layerg = shapefilesGroup.getLayers().getArray().slice(-1); 
+                let layerg = layersGroup.getLayers().getArray().slice(-1); 
                 let namelayer = layerg[0].getLayers().getArray()[0].get('name');
                 fitMap(namelayer);
             }
 
 
-
-            //fitMap(); // Must happen after olMap is defined!
-            
             addMeasureInteraction();
-
-            //olMap.addControl(visualizationselector());
-
-            //let zoomslider = new ol.control.ZoomSlider();
-            //olMap.addControl(zoomslider);
-            //let PointControl = createPointControl();
-            //olMap.addControl(new PointControl());
-            //let MeasureLengthControl = createLengthControl();
-            //olMap.addControl(new MeasureLengthControl());
-            //let MeasureAreaControl = createAreaControl();
-            //olMap.addControl(new (MeasureAreaControl));
             let SaveMeasurementsControl = createSaveControl();
             olMap.addControl(new SaveMeasurementsControl());
             let ClearMeasurementsControl = createClearControl();
             olMap.addControl(new ClearMeasurementsControl());            
             let FullScreen = new ol.control.FullScreen();
             olMap.addControl(FullScreen);
-
             let Scale = new ol.control.ScaleLine({
                 units: 'metric',
                 minWidth: 100
             });   
             olMap.addControl(Scale);
-
-            
             var selectbase = document.createElement('select');
             const op1 = document.createElement('option');
             op1.textContent = 'Satélite (ArcGIS/ESRI';
@@ -187,19 +137,6 @@ function initApp() {
             var element = document.createElement('div');
             element.className = 'btn btn-small';
             element.appendChild(selectbase);
-            /*var baseMapSelect= new ol.control.Control({
-                element: element
-            });
-            olMap.addControl(baseMapSelect);*/
-            
-            
-
-            /*button legend
-            btnorth.innerHTML = 'N';
-            btnorth.className = "btn";
-            btnorth.setAttribute("title","Norte");
-            var handleRotateNorth = function(e) { olMap.getView().setRotation(0); };
-            btnorth.addEventListener('click', handleRotateNorth, false);*/
             var btfullscreen = document.createElement('button');
             btfullscreen.className = "btn btn-small icon-resize-full";
             btfullscreen.setAttribute("title","Pantalla completa");                                  
@@ -208,9 +145,6 @@ function initApp() {
                 controlFull.element.querySelector('button').click();
             });
             olMap.addControl(controlFull);
-
-
-            
             var btzoomin = document.createElement('button');
             btzoomin.className = "btn btn-small icon-zoom-in";
             btzoomin.setAttribute("title","Acercar");
@@ -221,7 +155,6 @@ function initApp() {
                   })    
             };
             btzoomin.addEventListener("click", handleZoomin);
-
             var btzoomout = document.createElement('button');
             btzoomout.className = "btn btn-small icon-zoom-out";
             btzoomout.setAttribute("title","Alejar");
@@ -232,8 +165,6 @@ function initApp() {
                   })    
             };
             btzoomout.addEventListener("click", handleZoomout);
-
-
             var btnorth = document.createElement('button');
             btnorth.className = "btn btn-small icon-location-arrow";
             btnorth.setAttribute("title","Norte");
@@ -242,7 +173,6 @@ function initApp() {
             };
             btnorth.addEventListener('click', handleRotateNorth, false);
             btnorth.addEventListener('touchstart', handleRotateNorth, false);
-
             var btpoligono = document.createElement("button");
             btpoligono.className = "btn btn-small icon-crop";
             btpoligono.setAttribute("title","Dibujar poligono");
@@ -255,56 +185,31 @@ function initApp() {
             btpoint.className = "btn btn-small icon-map-marker";
             btpoint.setAttribute("title","Anotar punto");
             btpoint.addEventListener("click",measurePointListener)
-            var btlegend = document.createElement("button");
-            btlegend.className = "btn btn-small icon-print";
-            btlegend.setAttribute("title","Imprimir capa");
-            var btlegend1 = document.createElement("button");
-            btlegend1.className = "btn btn-small icon-bar-chart";
-            btlegend1.setAttribute("title","Ver leyenda");            
-            var element2 = document.createElement('div');
-            element2.className = 'btcontrols btn-group';         
-            element2.setAttribute("id","idcontrols");
-
-             //element2.appendChild(btnorth);
-            //element2.appendChild(ctfulscreen);
-            element2.appendChild(btzoomin);
-            element2.appendChild(btzoomout);
-            element2.appendChild(btnorth);
-            element2.appendChild(btfullscreen);
-            element2.appendChild(btpoligono);
-            element2.appendChild(btdistance);
-            element2.appendChild(btpoint);
-            element2.appendChild(btlegend);
-            element2.appendChild(btlegend1);
-            element2.appendChild(element);
+            var btprint = document.createElement("button");
+            btprint.className = "btn btn-small icon-print";
+            btprint.setAttribute("title","Imprimir capa");
+            var btcolorleg = document.createElement("button");
+            btcolorleg.className = "btn btn-small icon-bar-chart";
+            btcolorleg.setAttribute("title","Ver leyenda");            
+            var elementGroup = document.createElement('div');
+            elementGroup.className = 'btcontrols btn-group';         
+            elementGroup.setAttribute("id","idcontrols");
+            elementGroup.appendChild(btzoomin);
+            elementGroup.appendChild(btzoomout);
+            elementGroup.appendChild(btnorth);
+            elementGroup.appendChild(btfullscreen);
+            elementGroup.appendChild(btpoligono);
+            elementGroup.appendChild(btdistance);
+            elementGroup.appendChild(btpoint);
+            elementGroup.appendChild(btprint);
+            elementGroup.appendChild(btcolorleg);
+            elementGroup.appendChild(element);
             var groupControl = new ol.control.Control({
-                element: element2
+                element: elementGroup
             });
             olMap.addControl(groupControl);  
             var att = new ol.control.Attribution();
             olMap.addControl(att);
-
-
-            
-
-            // Add legend, only if there is at least one index
-            if (indices.length > 0) {                
-                let LegendControl = function (opt_options) {
-                    var options = opt_options || {};
-                    var img = document.createElement('img');
-                    var someIndexLayer = indices[0].getSource().getParams()["LAYERS"];
-                    img.setAttribute("src", window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/styles/gradient.png");
-                    var element = document.createElement('div');
-                    element.className = 'legend ol-unselectable ol-control';
-                    element.appendChild(img);
-                    ol.control.Control.call(this, {
-                        element: element,
-                        target: options.target
-                    });
-                };
-                ol.inherits(LegendControl, ol.control.Control);
-                olMap.addControl(new LegendControl());
-            }
 
             popup = Ext.create('GeoExt.component.Popup', {
                 map: olMap,
@@ -358,58 +263,12 @@ function initApp() {
 
             mapComponent = Ext.create('GeoExt.component.Map', {
                 map: olMap
-            });
-
-            timeSlider = Ext.create('Ext.slider.Single', {
-                //width: 20,
-                height: 350,
-                value: TIMES.length - 1,
-                increment: 1,
-                vertical: true,
-                minValue: 0,
-                maxValue: TIMES.length - 1,
-                useTips: true,
-                tipText: function (thumb) {
-                    return TIMES[thumb.value];
-                },
-                componentCls: "slider-style",
-            });
-
-            const svgUrl = "data:image/svg+xml," + encodeURIComponent(composeSvgTicks(TIMES.length));
-            console.log(svgUrl);
-            setStyle('.slider-style { background-image:url(/mapper/ticks/' + TIMES.length + '); }');
-
-            let dateLabel = Ext.create('Ext.form.Label', {
-                text: "None"
-            });
-
-            timeSlider.on("change", function (slider, newValue, thumb, eOpts) {
-                updateTime(rgbLayer, dateLabel, newValue);
-                for (let index of indices) {
-                    updateTime(index, dateLabel, newValue);
-                }
-            });
-            updateTime(rgbLayer, dateLabel, TIMES.length - 1);
-            for (let index of indices) {
-                updateTime(index, dateLabel, TIMES.length - 1);
-            }
-
-            let timePanel;            
-            timePanel = Ext.create('Ext.panel.Panel', {
-                //bodyPadding: 5,  // Don't want content to crunch against the borders
-                width: 250,
-                align: 'right',
-                //title: 'Línea de tiempo',
-                items: [timeSlider, dateLabel],                    
-                //renderTo: Ext.getBody()
-            });
+            });                      
             
-
             mapPanel = Ext.create('Ext.panel.Panel', {
                 region: 'center',
                 border: false,
                 layout: 'fit',
-                //tbar: [ { type: 'button', text: 'Button 1' } ],
                 items: [mapComponent],
                
             });
@@ -418,7 +277,7 @@ function initApp() {
             let treeLayerGroup = new ol.layer.Group();
             treeLayerGroup.setLayers(new ol.Collection(treeLayers));
             treeStore = Ext.create('GeoExt.data.store.LayersTree', {
-                layerGroup: shapefilesGroup,// treeLayerGroup
+                layerGroup: layersGroup,// treeLayerGroup
             });
 
             let btInicio = Ext.create('Ext.Button', {                
@@ -528,78 +387,15 @@ function initApp() {
                     treePanel.collapseAll();
                 }
             });
-
-           
-
-            let artifact = Ext.create('Ext.data.Store', {
-                fields: ['abbr', 'name'],
-                data : [artifactLayer]
-                
-            });
-            
-            // Create the combo box, attached to the states data store
-            let comboart = new Ext.create('Ext.form.ComboBox', {
-                fieldLabel: 'Seleccionar capa',
-                store: artifact,
-                queryMode: 'local',
-                displayField: 'name',
-                valueField: 'abbr',
-                height: '25',
-                //renderTo: Ext.getBody()
-            });
-            
-            let panelindex = Ext.create('Ext.form.Panel', {                
-                bodyPadding: 5,
-                //width: 350,
-                //url: 'save-form.php',
-                //layout: 'anchor',                
-                //defaultType: 'textfield',
-                items: [
-                    {
-                        xtype: 'label',
-                        forId: 'myFieldId',
-                        text: 'Indice multiespectral (Green / NIR) - 1',
-                        margin: '0 0 0 10'
-                    },
-                    comboart
-                    
-                ],            
-                buttons: [{
-                    text: 'Enviar',
-                    formBind: true, //only enabled once the form is valid
-                    disabled: true,
-                    /*handler: function() {
-                        var form = this.up('form').getForm();
-                        if (form.isValid()) {
-                            form.submit({
-                                success: function(form, action) {
-                                   Ext.Msg.alert('Success', action.result.msg);
-                                },
-                                failure: function(form, action) {
-                                    Ext.Msg.alert('Failed', action.result.msg);
-                                }
-                            });
-                        }
-                    }*/
-                }],
-                //renderTo: Ext.getBody()
-            });
-
-
-
             
             tabMenu = Ext.create('Ext.toolbar.Toolbar', {   
                 style: {
                     backgroundColor: 'white',
                 },         
-                //renderTo: Ext.getBody(),
-                //allowMultiple: true,
                 items: [
                 {
                     text: '➕ Agregar',
                     width: '95px',                    
-                     //active: true,
-                     //tooltip: 'Agregar índices',
                      menu: [
                         {text: 'Geotiff',handler: function() { addWinTif();}},// handler: function(){ top.window.location.href= "/#/projects/" + uuid + "/upload/shapefile" }},
                         {text: 'Vector', handler: function(){}}              // top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                         
@@ -633,16 +429,7 @@ function initApp() {
                 
            });     
 
-           /*var ol3d = new olcs.OLCesium({
-            map: olMap,
-            });
-            ol3d.setEnabled(false);
-            */
-
-
             treePanel = Ext.create('Ext.tree.Panel', {
-                
-                //viewConfig: {plugins: {ptype: 'treeviewdragdrop'}},
                 header:{
                     
                     titlePosition:1,
@@ -657,15 +444,6 @@ function initApp() {
                     xtype: 'segmentedbutton',                
                     items: isDemo ? [] : [tabMenu],                    
                 }],
-                /*fbar:[{ 
-                    //type: 'button', 
-                    text: 'Mapa 3D',                   
-                    handler: function() {
-                        console.log("value"); 
-                        //ol3d.setEnabled(!ol3d.getEnabled());
-                    },
-                    },
-                ],*/
                 tools: [
                     btayuda,
                     btExpand,
@@ -673,8 +451,7 @@ function initApp() {
                 ],
                 listeners: {
                     itemcontextmenu: {
-                        fn:function(tree, record, item, index, e, eOpts ) {
-                          // Optimize : create menu once
+                        fn:function(tree, record, item, index, e, eOpts ) {                          
                           var menu_grid = new Ext.menu.Menu({ items:
                             [
                                 { text: 'Descargar', handler: function() {Ext.Msg.alert('Descargar', 'Función descarga.');} },
@@ -730,35 +507,24 @@ function initApp() {
 }
 
 function indexWin(id, title, width, height){
-    var win = Ext.create('Ext.window.Window', {
-        id: id,
-        name: id,
-        title: title,
-        width: width,
-        height: height,
-        closeAction:'destroy',
-        autoScroll:'true',
-        closable:true,
-        modal: true,
-        bbar:[{
-            text:'Cancelar',
-            handler:function(bt){
-                bt.up('window').close();
+    var url = top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff";                         
+    Ext.widget('container', {           
+        items: [
+            {
+                xtype: 'box',
+                autoEl: {
+                    tag: 'iframe',
+                    src: url,
+                    width: 640,
+                    height: 480
+                }
             }
-        }]
-    })
-    win.show(this); 
+        ]        
+    });
 }
 
 
-function addWinTif(){
-    var dataCamera = Ext.create('Ext.data.Store', {
-        fields: ['id', 'name'],
-        data : [
-            {"id":"1", "name":"Micasense RedEdge-M"},
-            {"id":"2", "name":"Parrot Sequoia"},
-        ]
-    });
+function addWinTif(){    
     var camera = Ext.create('Ext.form.ComboBox', {
         fieldLabel: 'Elegir cámara',
         store: dataCamera,
@@ -869,8 +635,7 @@ function onConfig(){
         items: [  // Let's put an empty grid in just to illustrate fit layout        
         {
             xtype: 'label',
-            text: 'project_notes',
-            
+            text: 'project_notes',            
             margin: '0 0 0 10'
         }       
     ]
@@ -878,18 +643,25 @@ function onConfig(){
 }
 
 
-function fillAnotations(){
-    shapefiles.push(anotationLayer);
-}
-
-function fillShapefiles() {
+function initLayers() {
     return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
         {headers: noCacheHeaders})
         .then(response => response.json())
         .then(data => {            
             for (let art of data.artifacts) {   
                 let layerfile=[];     
-                artifactLayer.push(art.name);            
+                artifactLayer.push(art.name);   
+                console.log("Nombre: "+ art.name);
+                console.log("Tipo: "+art.type);
+                console.log("Fecha: "+art.date);
+                console.log("Fecha: "+art.camera);
+                console.log("Camera MArca: "+ dataCamera.findRecord('id', art.camera).get('name'));
+                console.log("Cuenta filtro antes: "+dataCamera.getCount());
+                dataCamera.filter('id', 'PARROT');
+                console.log("Cuenta filtro despues: "+dataCamera.getCount());
+                console.log("filtro: "+ dataCamera.data.getAt(0).get('name'));
+                const d = new Date(art.date);
+                console.log("fecha: "+d);
                 if (art.type === "SHAPEFILE"){
                     //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
                     layerfile.push(new ol.layer.Vector({
@@ -900,7 +672,7 @@ function fillShapefiles() {
                                 //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
                         })
                 }));}
-                else if (art.type === "ORTHOMOSAIC"){
+                else if (art.type === "MULTIESPECTRAL"){
                     console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
                         //style: falseColor,
@@ -936,7 +708,7 @@ function fillShapefiles() {
                     leaf: true, 
                     layers: layerfile,
                 });
-                shapefiles.push(layerGroup)            
+                layers.push(layerGroup)            
                 }                
             }
             
@@ -945,23 +717,7 @@ function fillShapefiles() {
 
 
 
-function fillRasters() {
-    return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/indices",
-        {headers: noCacheHeaders})
-        .then(response => response.json())
-        .then(data => {
-                for (let index of data.indices) {
-                    indices.push(new ol.layer.Image({
-                        name: index.title,
-                        source: new ol.source.ImageWMS({
-                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",
-                            params: {"LAYERS": index.layer}
-                        })
-                    }));
-                }
-            }
-        );
-}
+var urldd = window.location.protocol + "//" + window.location.host + "/api/uploads/"+ uuid + '/geotiff';
 
 function fitMap(name) {
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ name+"/bbox",
@@ -974,18 +730,11 @@ function fitMap(name) {
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
         });
 }
+
 function fitInit(){    
     olMap.getView().setCenter(ol.proj.transform([-78.58031164977537,-0.394260613241795], 'EPSG:4326', 'EPSG:3857'));
     olMap.getView().setZoom(5);
 }
-
-/*
-//imageSource.once('imageloadend', function(e) {
-function fitMap(){
-    console.info('image loaded');
-    var view = olMap.getView();
-    view.fitExtent(layerImage.getExtent(), map.getSize());   
-};*/
 
 function _createControl(handler, buttonContent, buttonClass, buttonTooltip) {
     let controlClass = function (opt_options) {
@@ -1011,36 +760,6 @@ function _createControl(handler, buttonContent, buttonClass, buttonTooltip) {
     ol.inherits(controlClass, ol.control.Control);
     return controlClass;
 }
-
-function createNorthControl() {
-    return _createControl(() => olMap.getView().setRotation(olMap.getView().getRotation() == 0 ? 45 : 0),
-        "N", "rotate-north", "Rotar mapa");
-}
-
-function createPointControl() {
-    return _createControl(measurePointListener,
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="90%" height="90%" version="1.1">' +
-        '<circle cx="25" cy="25" r="10" stroke="#000" stroke-width="6" fill="#00000000"></circle>' +
-        '</svg>',
-        "measure-point", "Anotar punto");
-}
-
-function createLengthControl() {
-    return _createControl(measureLengthListener,
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 40" width="90%" height="90%">' +
-        '  <path stroke="#000" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="none" d="M5,20H45M12,12 4,20 12,28M38,12 46,20 38,28"/>' +
-        '</svg>',
-        "measure-length", "Medir distancias");
-}
-
-/*function createAreaControl() {
-    return _createControl(measureAreaListener,
-        '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 60 588 417" height="90%" width="90%">' +
-        '  <path stroke="#000" stroke-width="50" stroke-linejoin="round" stroke-linecap="round" fill="none" d="M 246.55624,445.55603 C 130.80587,418.39845 35.513972,395.59161 34.796512,394.87415 C 33.744472,393.82211 33.735832,393.25321 34.751832,391.93421 C 35.444712,391.03469 67.302832,366.53016 105.54765,337.4797 C 143.79247,308.42924 175.07668,284.21068 175.06812,283.66068 C 175.05955,283.11068 137.72969,267.03903 92.112862,247.9459 C 46.496032,228.85277 8.8093816,212.65277 8.3647316,211.9459 C 7.4317416,210.46268 204.30692,12.877091 206.05498,13.542291 C 208.09055,14.316891 577.03254,282.35001 578.28364,283.96311 C 578.98324,284.86521 579.30634,286.25314 579.00154,287.04739 C 577.51514,290.9209 462.03434,492.82834 460.68624,493.91068 C 459.82994,494.59818 458.65284,495.10955 458.07044,495.04706 C 457.48804,494.98458 362.30664,472.71361 246.55624,445.55603 z "/>' +
-        '</svg>',
-        "measure-area", "Medir áreas"
-    );
-}*/
 
 function createSaveControl() {
     return _createControl(saveMeasurementsListener,
@@ -1132,7 +851,7 @@ function saveMeasurementsListener() {
         }),
         style: redStyle
     });
-    shapefiles.push(vectorLayer);
+    layers.push(vectorLayer);
     olMap.addLayer(vectorLayer);
     treePanel.layer.add(vectorLayer);
 
@@ -1321,10 +1040,6 @@ function addMeasureInteraction() {
     olMap.addLayer(interactionLayer);
 }
 
-function updateTime(layer, label, val) {
-    layer.getSource().updateParams({'TIME': TIMES[val]});
-    label.setText(TIMES[val]);
-}
 
 function addIndex(index) {
     fetch(window.location.protocol + "//" + window.location.host + "/api/rastercalcs/" + uuid, {
@@ -1339,36 +1054,3 @@ function addIndex(index) {
         } else throw response.text();
     }).catch((msg) => alert(msg));
 }
-
-function composeSvgTicks(numTicks) {
-    function _tick(pos) {
-        return `<line x1="${pos}" y1="0" x2="${pos}" y2="10" style="stroke:black;stroke-width:1" />`
-    }
-
-    let svg = '<svg height="30px" width="214px">';
-    // Interval [1, 213] must be divided in numTicks spaces, ends are included
-    // Fence post problem! :)
-    const MARGIN = 7;
-    const START = MARGIN, END = 214 - MARGIN;
-    const interval = ((END - START) / (numTicks - 1)).toFixed(); // Place tick every interval pixels
-    for (var i = 0; i < numTicks; i++) {
-        svg += _tick(interval * i + START);
-    }
-    svg += '</svg>';
-    return svg;
-}
-
-// https://stackoverflow.com/a/19613731
-function setStyle(cssText) {
-    var sheet = document.createElement('style');
-    sheet.type = 'text/css';
-    /* Optional */
-    window.customSheet = sheet;
-    (document.head || document.getElementsByTagName('head')[0]).appendChild(sheet);
-    return (setStyle = function (cssText, node) {
-        if (!node || node.parentNode !== sheet)
-            return sheet.appendChild(document.createTextNode(cssText));
-        node.nodeValue = cssText;
-        return node;
-    })(cssText);
-};

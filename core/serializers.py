@@ -68,10 +68,11 @@ class FlightSerializer(serializers.ModelSerializer):
 '''
 
 class ArtifactSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+
     class Meta:
         model = Artifact
-        fields = ["pk", "type", "project", "name", "project"]
-
+        fields = ["pk", "type", "project", "name", "title", "camera", "date"]
 
 class UserProjectSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())

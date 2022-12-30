@@ -457,8 +457,9 @@ def upload_geotiff(request, uuid):
     file: UploadedFile = request.FILES.get("geotiff")  # file is called X.tiff
     geotiff_name = ".".join(file.name.split(
         ".")[:-1])  # Remove extension, get X
+    
     project.artifacts.create(
-        name=geotiff_name, type=ArtifactType.ORTHOMOSAIC.name, title=request.POST["title"])
+        name=geotiff_name, type=ArtifactType(request.POST["type"]).name, title=request.POST["title"], camera=Camera(request.POST["camera"]).name)
 
     # Write file to disk on project folder
     os.makedirs(project.get_disk_path() + "/" + geotiff_name, exist_ok=True)
@@ -581,6 +582,8 @@ def mapper_artifacts(request, uuid):
     return JsonResponse({"artifacts": [
         {"name": art.title,
          "layer": project._get_geoserver_ws_name() + ":" + art.name,
+         "date": art.date,
+         "camera": art.camera,
          "type": art.type}
         for art in project.artifacts.all()
     ]})

@@ -473,11 +473,11 @@ post_delete.connect(delete_on_disk, sender=UserProject)
 
 
 class ArtifactType(Enum):
-    ORTHOMOSAIC = "Orthomosaic"
+    MULTIESPECTRAL = "Multiespectral"
     SHAPEFILE = "Shapefile"
     INDEX = "Index"
     RGB = "Rgb"
-    GEOM = "Geom"
+    KML = "Kml"
 
     @classmethod
     def filename(cls, art):
@@ -488,9 +488,15 @@ class ArtifactType(Enum):
         elif art.type == ArtifactType.RGB.name:
             return art.name + ".tif"
 
+class Camera(Enum):
+    REDEDGE = "Micasense RedEdge-M"
+    PARROT = "Parrot Sequoia"
+
 
 class Artifact(models.Model):
     type = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in ArtifactType])
+    camera = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in Camera])
+    date = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
     project = models.ForeignKey(UserProject, on_delete=models.CASCADE, related_name="artifacts", null=True)

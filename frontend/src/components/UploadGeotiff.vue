@@ -50,6 +50,8 @@ export default {
             var data = new FormData();
             data.append("geotiff", this.file);
             data.append("title", this.title);
+            data.append("type", "RGB");
+            data.append("camera", "REDEDGE");
 
             var that = this;
             this.uploading = true;
