@@ -407,7 +407,7 @@ function createaddPanel(){
                         waitMsg:'Cargando archivo espere por favor...',
                         success: function(fp, o) {
                             Ext.getCmp('formIdAdd').reset();
-                            Ext.Msg.alert('Detalle', 'Capa agregada correcytamente.');                                                   
+                            Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
                         },
                         failure: function(fp, o) {
                             Ext.Msg.alert('Error', 'Error al subir capa.');
