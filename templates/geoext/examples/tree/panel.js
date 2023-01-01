@@ -347,6 +347,7 @@ function createaddPanel(){
         width: '100%', 
         height: '100%',
         bodyPadding: 10,    
+        border:0,
         defaultType: 'textfield',
         items: [{
             xtype: 'textfield',
@@ -370,10 +371,15 @@ function createaddPanel(){
             allowBlank: false,
             blankText: 'Selecciones un archivo en formato .tif',
             anchor: '100%',
-            buttonText: 'Seleccionar...',
+            buttonText: 'Abrir',
             regex     : (/.(tif)$/i),
             regexText : 'Solo se acepta imagenes en formato .tif',
-            msgTarget : 'under'
+            msgTarget : 'under',
+            buttonConfig:{
+                iconCls:'icon-folder-open',
+                cls: 'btnform',
+            }
+            
         },
         
             camera
@@ -385,6 +391,8 @@ function createaddPanel(){
         // Reset and Submit buttons
         buttons: [{
             text: 'Borrar',
+            iconCls: 'icon-eraser',
+            cls: 'btnform',
             handler: function() {
                 this.up('form').getForm().reset();
             }
@@ -392,6 +400,8 @@ function createaddPanel(){
             text: 'Guardar',
             formBind: true, //only enabled once the form is valid
             disabled: true,
+            iconCls: 'icon-save',
+            cls:'btnform',
             handler: function() {
                 var form = this.up('form').getForm();                
                 if (form.isValid()) {
@@ -421,9 +431,11 @@ function createaddPanel(){
 
     var tabMenu = Ext.create('Ext.tab.Panel', {
         width: '100%',        
-        height: '100%',          
+        height: '100%',    
+        border: 0,      
         items: [{
             title: 'GeoTiff',
+            cls:'btnformTab',
             items:[ formaddTiff ]
         }, 
         {
@@ -441,6 +453,7 @@ function createaddPanel(){
         width: '100%',
         autoScroll: true,
         height: '100%',         
+        border:0,
         tbar:[
             {xtype: 'tbtext', html: 'Agregar Capa'},'->',
         ],       
