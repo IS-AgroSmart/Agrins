@@ -2,7 +2,7 @@
     Authors: Danny Ucho - Jeremy Godoy
     Date: 10/10/2022
     Summary: Javascript file for GEOEXT-EXTJS loading layers from geoserver, using openlayers v7
-    JSON.parse(localStorage.getItem('vrs_')).token;
+    
 */
 
 Ext.require([
@@ -22,8 +22,11 @@ let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", visible
 })});           
 
 /* Initial values*/
-let mapComponent, mapPanel, treePanel, selectClick, olMap, popup;
-let layers = [], artifactLayer = [];
+let mapComponent, mapPanel, selectClick, olMap;
+let popup;
+let mainPanel, startPanel, treePanel, addPanel, indexPanel, modelPanel, helpPanel;
+let artifactLayer = [];
+let basemapsGroup, layersGroup;
 let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
 noCacheHeaders.append('pragma', 'no-cache');
@@ -52,45 +55,120 @@ var dataTypeArtefact = Ext.create('Ext.data.Store', {
         {"id":"KML", "name":"Kml"},
     ]
 });
-    
-initLayers();
+
+var dataTypeImage = Ext.create('Ext.data.Store', {
+    storeId: 'dataTypeArtefact',
+    fields: ['id', 'name'],
+    data : [
+        {"id":"MULTIESPECTRAL", "name":"Multiespectral"},        
+        {"id":"RGB", "name":"Rgb"},
+    ]
+});
+
 initApp();
 
 function initApp() {
     Ext.application({
         launch: function () {
-            let basemapsGroup, layersGroup, treeStore;
-
             basemapsGroup = new ol.layer.Group({
                 layers: [omslayer, stamenlayer, satelitelayer],
-            });                        
-            
-            layersGroup = new ol.layer.Group({                
-                layers: layers
-            });
+            });                     
            
             let view = new ol.View({               
-                zoom: 18,
+                zoom: 7,
                 minZoom: 2,
+                maxZoom: 24,
+                center: ol.proj.transform([-78.58031164977537,-0.394260613241795], 'EPSG:4326', 'EPSG:3857'),
             });
             
             olMap = new ol.Map({                
-                layers: [basemapsGroup, layersGroup],
+                layers: [basemapsGroup],
                 view: view,
                 target: 'map',
                 controls: [],
-            });          
+            });
 
-            if(layers.length < 1){
-                fitInit();
-            }
-            else{
-                let layerg = layersGroup.getLayers().getArray().slice(-1); 
-                let namelayer = layerg[0].getLayers().getArray()[0].get('name');
-                fitMap(namelayer);
-            }
+            addControlsMap();
+            
+            popup = Ext.create('GeoExt.component.Popup', {
+                map: olMap,
+                width: 140
+            });
+            selectClick = new ol.interaction.Select({                
+                condition: ol.events.condition.click,
+                layers: (layer) => layer instanceof ol.layer.Vector,
+                hitTolerance: 10,
+            });
+            selectClick.on('select', function (e) {
+                console.log("Select layer");
+                if (delete_handler)
+                    document.removeEventListener("keydown", delete_handler);
+
+                if (e.selected.length === 0) {
+                    popup.hide();
+                    delete_handler = null;
+                    return;
+                }
+                delete_handler = function (evt) {
+                    var charCode = (evt.which) ? evt.which : evt.keyCode;
+                    if (charCode === 46) { // Del key
+                        let feature = e.selected[0];
+                        if (interactionSource.getFeatures().includes(feature)) {
+                            interactionSource.removeFeature(feature);
+                            let id = feature.getId();
+                            olMap.removeOverlay(measureTooltips[id]);
+                            popup.hide();
+                            delete measureTooltips[id];
+                            selectClick.getFeatures().remove(feature);
+                        }
+                    }
+                };
+                document.addEventListener('keydown', delete_handler, false);
+                let coordinate = e.mapBrowserEvent.coordinate;
+
+                let message = "<p>";
+                for (const [key, value] of Object.entries(e.selected[0].getProperties())) {
+                    if (["bbox", "geometry"].includes(key)) continue;
+                    message += key + " ⟶ " + value + "<br>";
+                }
+                message += "</p>";
+                popup.setHtml(message);
+                popup.position(coordinate);
+                if (message !== "<p></p>") popup.show();
+                else popup.hide();
+            });
+            olMap.addInteraction(selectClick);
 
 
+            mapComponent = Ext.create('GeoExt.component.Map', {
+                map: olMap
+            });                      
+            
+            mapPanel = Ext.create('Ext.panel.Panel', {
+                region: 'center',
+                border: false,
+                layout: 'fit',
+                items: [mapComponent],
+               
+            });            
+
+            var elem = document. getElementById("spiner"); 
+            elem. parentNode. removeChild(elem);
+
+            mainPanel = Ext.create('Ext.panel.Panel', {
+                id: 'mainPanelId',
+                border: 0,
+            });
+
+            initLayers();             
+            createViewPort();
+            
+        },
+        name: 'BasicTree'
+    });
+}
+
+function addControlsMap(){
             addMeasureInteraction();
             let SaveMeasurementsControl = createSaveControl();
             olMap.addControl(new SaveMeasurementsControl());
@@ -210,300 +288,6 @@ function initApp() {
             olMap.addControl(groupControl);  
             var att = new ol.control.Attribution();
             olMap.addControl(att);
-
-            popup = Ext.create('GeoExt.component.Popup', {
-                map: olMap,
-                width: 140
-            });
-            selectClick = new ol.interaction.Select({                
-                condition: ol.events.condition.click,
-                layers: (layer) => layer instanceof ol.layer.Vector,
-                hitTolerance: 10,
-            });
-            selectClick.on('select', function (e) {
-                console.log("Select layer");
-                if (delete_handler)
-                    document.removeEventListener("keydown", delete_handler);
-
-                if (e.selected.length === 0) {
-                    popup.hide();
-                    delete_handler = null;
-                    return;
-                }
-                delete_handler = function (evt) {
-                    var charCode = (evt.which) ? evt.which : evt.keyCode;
-                    if (charCode === 46) { // Del key
-                        let feature = e.selected[0];
-                        if (interactionSource.getFeatures().includes(feature)) {
-                            interactionSource.removeFeature(feature);
-                            let id = feature.getId();
-                            olMap.removeOverlay(measureTooltips[id]);
-                            popup.hide();
-                            delete measureTooltips[id];
-                            selectClick.getFeatures().remove(feature);
-                        }
-                    }
-                };
-                document.addEventListener('keydown', delete_handler, false);
-                let coordinate = e.mapBrowserEvent.coordinate;
-
-                let message = "<p>";
-                for (const [key, value] of Object.entries(e.selected[0].getProperties())) {
-                    if (["bbox", "geometry"].includes(key)) continue;
-                    message += key + " ⟶ " + value + "<br>";
-                }
-                message += "</p>";
-                popup.setHtml(message);
-                popup.position(coordinate);
-                if (message !== "<p></p>") popup.show();
-                else popup.hide();
-            });
-            olMap.addInteraction(selectClick);
-
-
-            mapComponent = Ext.create('GeoExt.component.Map', {
-                map: olMap
-            });                      
-            
-            mapPanel = Ext.create('Ext.panel.Panel', {
-                region: 'center',
-                border: false,
-                layout: 'fit',
-                items: [mapComponent],
-               
-            });
-
-            let treeLayers = olMap.getLayers().getArray().filter(layer => layer != interactionLayer);
-            let treeLayerGroup = new ol.layer.Group();
-            treeLayerGroup.setLayers(new ol.Collection(treeLayers));
-            treeStore = Ext.create('GeoExt.data.store.LayersTree', {
-                layerGroup: layersGroup,// treeLayerGroup
-            });
-
-            let btInicio = Ext.create('Ext.Button', {                
-                text: '🏠 Cerrar',  
-                tooltip: 'Cerrar visualizador',
-                handler: function() {
-                    Ext.Msg.show({
-                        title:'Salir',
-                        message: 'Desea salir del visualizador?',
-                        buttons: Ext.Msg.YESNO,
-                        icon: Ext.Msg.QUESTION,
-                        fn: function(btn) {
-                            if (btn === 'yes') {
-                                top.window.location.href='/#/projects/'                            
-                            } else {
-                                console.log('Cancel pressed');
-                            } 
-                        }
-                    });                    
-                }
-            });
-
-            let btayuda = Ext.create('Ext.Button', {
-                text: '？',  
-                tooltip: 'Ayuda',
-                handler: function(){
-                    var navigate = function(panel, direction){
-                        var layout = panel.getLayout();
-                        layout[direction]();
-                        Ext.getCmp('move-prev').setDisabled(!layout.getPrev());
-                        Ext.getCmp('move-next').setDisabled(!layout.getNext());
-                    };    
-                    let cardHelp = new Ext.create('Ext.panel.Panel', {       
-                        width: 500,
-                        height: 200,
-                        layout: 'card',
-                        bodyStyle: 'padding:5px',        
-                        bbar: [
-                            {
-                                id: 'move-prev',
-                                text: 'Anterior',
-                                handler: function(btn) {
-                                    navigate(btn.up("panel"), "prev");
-                                },
-                                disabled: true
-                            },
-                            '->', // greedy spacer so that the buttons are aligned to each side
-                            {
-                                id: 'move-next',
-                                text: 'Siguiente',
-                                handler: function(btn) {
-                                    navigate(btn.up("panel"), "next");
-                                }
-                            }
-                        ],
-                        // the panels (or "cards") within the layout
-                        items: [{
-                            id: 'card-0',
-                            html: '<h1> Geoportal Agrins</h1>'+
-                                    '<p> A continuación encontrará una guía para el uso de la plataforma.</p>'+
-                                    '<ol><li>Agregar capas</li><li>Obtener índices</li><li>Modelo</li>'+
-                                    '<li>Mediciones</li><li>Áreas</li><li>Puntos</li><li>Mapa bases</li></ol'+
-                                    '<ol><li>Eliminar capa</li><li>Detalle de capa</li><li>Salir del visualizador</li>'
-                                    
-                        },{
-                            id: 'card-1',
-                            html:'<h5> Agregar Capa</h5>'+
-                                    '<p> En la plataforma puede agregar archivos (multiespectrales, RGB) .tiff deberá especificad el modelo de la cámara para poder obtener los índices así como ejeccutar el modelo.</p>'+
-                                    '<p> Además podrá agregar archivos kml y shapefile </p>'+
-                                '<h5> Obtener índices</h5>'+
-                                    '<p> Seleccione el índice requerido de la lista disponible (GCI, GRRI, MGRVI, NDRE, NDVI, NGRDI)</p>'+
-                                '<h5> Modelo</h5>'+
-                                    '<p> En el geoportal podrá obtener dos modelos uno para determinar la altura y otro para clorofila.</p>'
-                                    
-                        },{
-                            id: 'card-2',
-                            html: '<h3> Continuar..</h3>'+            
-                            '<p> Continuar agregando </p>'
-                        }],
-                    });
-                    
-                    Ext.create('Ext.window.Window', {
-                        title: 'Ayuda',
-                        height: 500,
-                        width: 310,
-                        layout: 'fit',
-                        items: [  // Let's put an empty grid in just to illustrate fit layout
-                           cardHelp,            
-                    ]
-                    }).show();
-                }
-                
-            });
-
-            let btExpand = Ext.create('Ext.Button', {
-                text: '☰',  
-                tooltip: 'Expandir',
-                handler: function(){
-                    treePanel.expandAll();
-                }
-            });
-
-            let btColapse = Ext.create('Ext.Button', {
-                text: '┇',  
-                tooltip: 'Contraer',
-                handler: function(){
-                    treePanel.collapseAll();
-                }
-            });
-            
-            tabMenu = Ext.create('Ext.toolbar.Toolbar', {   
-                style: {
-                    backgroundColor: 'white',
-                },         
-                items: [
-                {
-                    text: '➕ Agregar',
-                    width: '95px',                    
-                     menu: [
-                        {text: 'Geotiff',handler: function() { addWinTif();}},// handler: function(){ top.window.location.href= "/#/projects/" + uuid + "/upload/shapefile" }},
-                        {text: 'Vector', handler: function(){}}              // top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff" }},                         
-                     ]
-                },
-                {
-                     text: '📊 Índices',
-                     width: '88px',
-                     menu: [
-                        {text: 'GCI', handler: function() {
-                            indexWin('gci',"Ïndice GCI",400, 200);
-                        }
-                        
-                         },
-                        {text: 'GRRI', handler: function(){ alert("Índice: GRRI \nTipo: Visible \nFunción: \nEstado: En desarrollo..."); }},
-                        {text: 'MGRVI', handler: function(){ alert("Índice: MGRVI \nTipo: Visible \nFunción: Captura la diferencia de reflectancia por la absorción de la clorofila a y la clorofila b.\nEstado: En desarrollo..."); }},
-                        {text: 'NDRE', handler: function(){ alert("Índice: NDRE \nTipo: Multiespectral \nFunción: Utilizado para identificar las áreas con plantas saludables mediante el monitoreo de la clorofila. Puede detectar el estrés en la planta aún cuando no sea visible en la superficie.\nEstado: En desarrollo..."); }},
-                        {text: 'NDVI', handler: function(){ alert("Índice: NDVI \nTipo: Multiespectral \nFunción: Identifica densidad y vitalidad de la vegetación de un área. La vegetación densa y sana tiene valores cercanos al 1 positivo, el suelo tiene valores cercanos a 0 y las nubes, nieve y el agua tienen valores negativos.\nEstado: En desarrollo..."); }},
-                        {text: 'NGRDI', handler: function(){ alert("Índice: NGRDI \nTipo: Visible \nFunción: Permite diferenciar entre vegetación (positivos), suelo (negativos) y agua (cero).\nEstado: En desarrollo..."); }},
-
-                     ]
-                },
-                {
-                     text: '🔗 Modelo',
-                     width: '90px',
-                     menu: [
-                        {text: 'Altura', handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo...")}},
-                        {text: 'Clorofila',handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la clorofila de cultivos.\nEstado: En desarrollo...")}}
-                     ]
-                }],
-                
-           });     
-
-            treePanel = Ext.create('Ext.tree.Panel', {
-                header:{
-                    
-                    titlePosition:1,
-                    defaults:{ type:'tool'},
-                    items:[btInicio]
-                },
-                store: treeStore,
-                rootVisible: false,                
-                flex: 1,
-                border: false,
-                tbar: [{
-                    xtype: 'segmentedbutton',                
-                    items: isDemo ? [] : [tabMenu],                    
-                }],
-                tools: [
-                    btayuda,
-                    btExpand,
-                    btColapse,
-                ],
-                listeners: {
-                    itemcontextmenu: {
-                        fn:function(tree, record, item, index, e, eOpts ) {                          
-                          var menu_grid = new Ext.menu.Menu({ items:
-                            [
-                                { text: 'Descargar', handler: function() {Ext.Msg.alert('Descargar', 'Función descarga.');} },
-                                { text: 'Eliminar', handler: function() {Ext.Msg.alert('Eliminar', 'Función eliminar.');} },
-                                { text: 'Detalle', handler: function() {Ext.Msg.alert('Detalle', 'Función detalle.');} },
-                            ]
-                            });
-                          // HERE IS THE MAIN CHANGE
-                          var position = [e.getX()-10, e.getY()-10];
-                          e.stopEvent();
-                          menu_grid.showAt(position);
-                       }
-                    },
-
-                    itemclick: {
-                        fn: function(view, record, item, index, event) {
-                            if (record.data.text.substring(0, 5) !='Grupo'){
-                                fitMap(record.data.text);                            
-                            }
-                        }
-                    }
-                
-                }
-               
-            });     
-
-            var elem = document. getElementById("spiner"); 
-            elem. parentNode. removeChild(elem);
-  
-            Ext.create('Ext.Viewport', {                
-                layout: 'border',
-                items: [
-                    mapPanel,                    
-                    {                   
-                        xtype: 'panel',
-                        region: 'west',
-                        title: project_name,
-                        collapsible: true,                        
-                        width: 285,
-                        split: true,
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        items: [treePanel],
-                        
-                    },
-                ]
-            });
-        },
-        name: 'BasicTree'
-    });
 }
 
 function indexWin(id, title, width, height){
@@ -523,107 +307,148 @@ function indexWin(id, title, width, height){
     });
 }
 
-
-function addWinTif(){    
+function createaddPanel(){    
     var camera = Ext.create('Ext.form.ComboBox', {
         fieldLabel: 'Elegir cámara',
+        name: 'camera',
+        id: 'camera',
+        msgTarget: 'under' ,
         store: dataCamera,
         width: '100%',
         queryMode: 'local',
         allowBlank : false,
+        blankText: 'Seleccione el modelo de la cámara',
         forceSelection: true,
         displayField: 'name',
-        valueField: 'id',
-        value:'1'
+        valueField: 'name',
+        value:'1',
+        labelAlign: 'top'
         //renderTo: Ext.getBody()
     });
-    var win = Ext.create('Ext.window.Window', {
-        //id: id,
-        name: id,
-        title: 'Agregar Capa TIF',
-        //width: '80%',
-        height: 220,
-        maxWidth : 500,
-        style:{
-            backgroundColor: 'white'
-        },
-        closeAction:'destroy',
-        autoScroll:'true',
-        closable:true,
-        bodyStyle: {
-            background: '#fff',
-            padding: '10px'
-        },
-        modal: true,
-        items:[
-            {
-                xtype: 'textfield',
-                name: 'name',
-                width:'100%',      
-                labelWidth: 60,
-                fieldLabel: 'Nombre',
-                allowBlank: false  // requires a non-empty value
-            },
-            {
-                xtype: 'filefield',
-                name: 'photo',
-                fieldLabel: 'Archivo .tif',
-                labelWidth: 60,
-                width:'100%',                                
-                msgTarget: 'side',
-                allowBlank: false,
-                anchor: '100%',
-                buttonText: 'Seleccionar...'
-            },
-            
-                camera
-            ,
-            {
-                xtype      : 'fieldcontainer',
-                fieldLabel : 'Tipo Imagen',
-                width:'100%',             
-                defaultType: 'radiofield',                
-                layout: 'hbox',                
-                items: [
-                    {
-                        boxLabel  : 'RGB/BGR',
-                        name      : 'size',
-                        inputValue: 'r',
-                        id        : 'radioRGB',
-                        checked: true
-                    }, 
-                    {xtype: 'tbspacer', width: 10},
-                    {
-                        boxLabel  : 'Multiespectral',
-                        name      : 'size',
-                        inputValue: 'm',
-                        id        : 'radioMultiespectral'
-                    }, 
-                ]
-            },
-        ],
-        bbar:['->',{
-            text:'Cancelar',
-            style:{
-                backgroundColor: 'white'
-            },
-            handler:function(bt){
-                bt.up('window').close();
-            }
+    var typeImage = Ext.create('Ext.form.ComboBox', {
+        fieldLabel: 'Tipo de imagen',
+        name: 'type',
+        id: 'type',
+        store: dataTypeImage,
+        width: '100%',
+        msgTarget: 'under' ,
+        queryMode: 'local',
+        allowBlank : false,
+        blankText: 'Seleccione el tipo de Imagen',
+        forceSelection: true,
+        displayField: 'name',
+        valueField: 'name',
+        labelAlign: 'top'
+        //value:'1'
+        //renderTo: Ext.getBody()
+    });
+    var formaddTiff = Ext.create('Ext.form.Panel', {                
+        id: 'formIdAdd',
+        width: '100%', 
+        height: '100%',
+        bodyPadding: 10,    
+        defaultType: 'textfield',
+        items: [{
+            xtype: 'textfield',
+            name: 'title',
+            id: 'title',
+            width:'100%',     
+            fieldLabel: 'Nombre',
+            labelAlign: 'top',
+            allowBlank: false,  // requires a non-empty value            
+            blankText: 'El campo nombre es necesario',
+            msgTarget: 'under' 
         },
         {
-            text:'Guardar',
-            style:{
-                backgroundColor: 'white'
-            },
+            xtype: 'filefield',
+            name: 'geotiff',
+            id: 'geotiff',
+            fieldLabel: 'Archivo .tif',
+            width:'100%',                                
+            msgTarget: 'side',
+            labelAlign: 'top',
+            allowBlank: false,
+            blankText: 'Selecciones un archivo en formato .tif',
+            anchor: '100%',
+            buttonText: 'Seleccionar...',
+            regex     : (/.(tif)$/i),
+            regexText : 'Solo se acepta imagenes en formato .tif',
+            msgTarget : 'under'
+        },
+        
+            camera
+        ,
+            typeImage
+        ,
+    ],
+    
+        // Reset and Submit buttons
+        buttons: [{
+            text: 'Borrar',
             handler: function() {
-                Ext.Msg.alert('Success', 'Your photo  has been uploaded.');
+                this.up('form').getForm().reset();
+            }
+        }, {
+            text: 'Guardar',
+            formBind: true, //only enabled once the form is valid
+            disabled: true,
+            handler: function() {
+                var form = this.up('form').getForm();                
+                if (form.isValid()) {
+                    form.submit({
+                        method: 'POST',
+                        url : '/api/uploads/' + uuid + '/geotiff',
+                        params: {
+                            data: form.getValues(),
+                        },
+                        headers: {
+                            Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                        },
+                        waitMsg:'Cargando archivo espere por favor...',
+                        success: function(fp, o) {
+                            Ext.getCmp('formIdAdd').reset();
+                            Ext.Msg.alert('Detalle', 'Capa agregada correcytamente.');                                                   
+                        },
+                        failure: function(fp, o) {
+                            Ext.Msg.alert('Error', 'Error al subir capa.');
+                        }
+                    });
+                }
                 
             }
-        }
+        }],        
+    });
+
+    var tabMenu = Ext.create('Ext.tab.Panel', {
+        width: '100%',        
+        height: '100%',          
+        items: [{
+            title: 'GeoTiff',
+            items:[ formaddTiff ]
+        }, 
+        {
+            title: 'ShapeFile',
+            //items:[ formaddTiff ]
+        },
+        {
+            title: 'KML',
+            //items:[ formaddTiff ]
+        },
     ]
-    })
-    win.show(this); 
+    });
+
+    addPanel = new Ext.create('Ext.panel.Panel', {                
+        width: '100%',
+        autoScroll: true,
+        height: '100%',         
+        tbar:[
+            {xtype: 'tbtext', html: 'Agregar Capa'},'->',
+        ],       
+        items:[
+            tabMenu
+        ],
+        
+    });
 }
 
 function onConfig(){
@@ -642,9 +467,313 @@ function onConfig(){
     }).show();
 }
 
+function createTree(){   
 
+    tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
+        border: 0,
+        items: [
+            {xtype: 'tbtext', html: 'Capas Disponibles'},
+            ' ',
+            {
+                iconCls: 'fa-folder-tree',   
+                cls:'fa-solid',
+                tooltip: 'Expandir',
+                handler: function(){
+                    treePanel.expandAll();
+                }
+            },
+            {
+                iconCls: 'fa-table-list',   
+                cls: 'fa-solid',
+                tooltip: 'Contraer',
+                handler: function(){
+                    treePanel.collapseAll();
+                }
+            },
+            {
+                iconCls: ' fa-rotate',   
+                cls: 'fa-solid',
+                tooltip: 'Recargar',
+                handler: function(){
+                    initLayers();
+                }
+            }   
+        ]});
+
+    treePanel = Ext.create('Ext.tree.Panel', {
+        id:'treePanelId',
+        /*header:{                    
+            titlePosition:1,
+            defaults:{ type:'tool'},
+            items:[btInicio]
+        },*/
+        //store: treeStore,
+        rootVisible: false,                
+        flex: 1,
+        border: 0,
+        tbarCfg:{
+            buttonAlign:'right' 
+        },
+        tbar: [
+            tablbar,
+        ],
+        style: {
+            backgroundColor: 'white',
+        },        
+        
+        listeners: {
+            itemcontextmenu: {
+                fn:function(tree, record, item, index, e, eOpts ) {                          
+                    var menu_grid = new Ext.menu.Menu({ items:
+                    [
+                        { text: 'Descargar',iconCls: 'icon-download-alt', cls:'btn-small', handler: function() {Ext.Msg.alert('Descargar', 'Función descarga.');} },
+                        { text: 'Eliminar', iconCls: 'icon-trash', cls:'btn-small', handler: function() {Ext.Msg.alert('Eliminar', 'Función eliminar.');} },
+                        { text: 'Detalle', iconCls: 'icon-folder-open', cls:'btn-small', handler: function() {Ext.Msg.alert('Detalle', 'Función detalle.');} },
+                    ]
+                    });
+                    // HERE IS THE MAIN CHANGE
+                    var position = [e.getX()-10, e.getY()-10];
+                    e.stopEvent();
+                    menu_grid.showAt(position);
+                }
+            },
+            itemclick: {
+                fn: function(view, record, item, index, event) {
+                    if (record.data.text.substring(0, 5) !='Grupo'){
+                        fitMap(record.data.text);                            
+                    }
+                }
+            }               
+        }               
+    });
+}
+
+function createhelpPanel(){
+    var navigate = function(panel, direction){
+        var layout = panel.getLayout();
+        layout[direction]();
+        Ext.getCmp('move-prev').setDisabled(!layout.getPrev());
+        Ext.getCmp('move-next').setDisabled(!layout.getNext());
+    };    
+    helpPanel = new Ext.create('Ext.panel.Panel', {       
+        width:'100%',
+        border:0,
+        height: '100%',        
+        layout: 'card',
+        bodyStyle: 'padding:5px',        
+        autoScroll: true,
+        bbar: [
+            {
+                id: 'move-prev',
+                text: 'Anterior',
+                handler: function(btn) {
+                    navigate(btn.up("panel"), "prev");
+                },
+                disabled: true
+            },
+            '->', // greedy spacer so that the buttons are aligned to each side
+            {
+                id: 'move-next',
+                text: 'Siguiente',
+                handler: function(btn) {
+                    navigate(btn.up("panel"), "next");
+                }
+            }
+        ],
+        // the panels (or "cards") within the layout
+        items: [{
+            id: 'card-0',
+            border:0,
+            padding:10,
+            autoScroll: true,
+            html: '<h2> Geoportal Agrins</h2>'+
+                    '<p> A continuación encontrará una guía para el uso de la plataforma.</p>'+
+                    '<ol><li>Agregar capas</li><li>Obtener índices</li><li>Modelo</li>'+
+                    '<li>Mediciones</li><li>Áreas</li><li>Puntos</li><li>Mapa bases</li></ol'+
+                    '<ol><li>Eliminar capa</li><li>Detalle de capa</li><li>Salir del visualizador</li>'
+                    
+        },{
+            id: 'card-1',
+            border:0,
+            padding:10,
+            autoScroll: true,
+            html:'<h5> Agregar Capa</h5>'+
+                    '<p> En la plataforma puede agregar archivos (multiespectrales, RGB) .tiff deberá especificad el modelo de la cámara para poder obtener los índices así como ejeccutar el modelo.</p>'+
+                    '<p> Además podrá agregar archivos kml y shapefile </p>'+
+                '<h5> Obtener índices</h5>'+
+                    '<p> Seleccione el índice requerido de la lista disponible (GCI, GRRI, MGRVI, NDRE, NDVI, NGRDI)</p>'+
+                '<h5> Modelo</h5>'+
+                    '<p> En el geoportal podrá obtener dos modelos uno para determinar la altura y otro para clorofila.</p>'
+                    
+        },{
+            id: 'card-2',
+            border:0,
+            padding:10,
+            autoScroll: true,
+            html: '<h3> Continuar..</h3>'+            
+            '<p> Continuar agregando </p>'
+        }],
+    });    
+}
+
+function createViewPort(){    
+    createTree();
+    let btInicio = Ext.create('Ext.Button', {  
+        iconCls:'fa-house-chimney',
+        cls: 'fa-solid',
+        tooltip: 'Cerrar visualizador',
+        handler: function() {
+            Ext.Msg.show({
+                title:'Salir',
+                message: 'Desea salir del visualizador?',
+                buttons: Ext.Msg.YESNO,
+                icon: Ext.Msg.QUESTION,
+                fn: function(btn) {
+                    if (btn === 'yes') {
+                        top.window.location.href='/#/projects/'                            
+                    } else {
+                        console.log('Cancel pressed');
+                    } 
+                }
+            });                    
+        }
+    });
+
+    let btayuda = Ext.create('Ext.Button', {
+        //text: '？', 
+        iconCls: 'fa-circle-question',         
+        cls:'fa-solid ',
+        tooltip: 'Ayuda',
+        handler: function(){
+            createhelpPanel();
+            var p = Ext.getCmp('viewportPanelId');
+            p.removeAll();
+            p.updateLayout();
+            p.add(helpPanel);
+        }
+        
+    });
+
+    let btagregar = Ext.create('Ext.Button', {        
+            //text: 'Agregar',
+            iconCls: 'fa-file-circle-plus',
+            cls: 'fa-solid ',
+            tooltip: 'Agregar nueva capa',
+            handler: function(){
+                createaddPanel();
+                var p = Ext.getCmp('viewportPanelId');
+                p.removeAll();
+                p.updateLayout();
+                p.add(addPanel);
+            }
+    });
+
+    let btindice = Ext.create('Ext.Button', {        
+        //text: 'Índices',
+        iconCls: 'fa-images',
+        cls: 'fa-solid ',
+        tooltip: 'Crear Índices de vegetas'
+        /*width: '88px',
+        menu: [
+           {text: 'GCI', handler: function() {
+               indexWin('gci',"Ïndice GCI",400, 200);
+           }
+           
+            },
+           {text: 'GRRI', handler: function(){ alert("Índice: GRRI \nTipo: Visible \nFunción: \nEstado: En desarrollo..."); }},
+           {text: 'MGRVI', handler: function(){ alert("Índice: MGRVI \nTipo: Visible \nFunción: Captura la diferencia de reflectancia por la absorción de la clorofila a y la clorofila b.\nEstado: En desarrollo..."); }},
+           {text: 'NDRE', handler: function(){ alert("Índice: NDRE \nTipo: Multiespectral \nFunción: Utilizado para identificar las áreas con plantas saludables mediante el monitoreo de la clorofila. Puede detectar el estrés en la planta aún cuando no sea visible en la superficie.\nEstado: En desarrollo..."); }},
+           {text: 'NDVI', handler: function(){ alert("Índice: NDVI \nTipo: Multiespectral \nFunción: Identifica densidad y vitalidad de la vegetación de un área. La vegetación densa y sana tiene valores cercanos al 1 positivo, el suelo tiene valores cercanos a 0 y las nubes, nieve y el agua tienen valores negativos.\nEstado: En desarrollo..."); }},
+           {text: 'NGRDI', handler: function(){ alert("Índice: NGRDI \nTipo: Visible \nFunción: Permite diferenciar entre vegetación (positivos), suelo (negativos) y agua (cero).\nEstado: En desarrollo..."); }},
+
+        ]*/
+    });
+
+    let btModelo  = Ext.create('Ext.Button', {
+        //text: 'Modelo',
+        iconCls: 'fa-kaaba',
+        cls: 'fa-solid',
+        tooltip: 'Modelos deep learning'
+        /*/width: '90px',
+        menu: [
+           {text: 'Altura', handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la altura de cultivos.\nEstado: En desarrollo...")}},
+           {text: 'Clorofila',handler: function(){ alert("Modelo: Deep Learning \nFunción: Mediante deep learning detectar la clorofila de cultivos.\nEstado: En desarrollo...")}}
+        ]*/
+    });
+
+    let btcapas  = Ext.create('Ext.Button', {
+            //text: 'Modelo',
+            iconCls: 'fa-layer-group',
+            cls: 'fa-solid ',
+            tooltip: 'Capas',
+            //width: '90px',
+            handler: function() {
+                var p = Ext.getCmp('viewportPanelId');
+                p.removeAll();
+                //mainPanel.updateLayout();
+                initLayers();              
+                createTree();
+                p.add(treePanel);
+            },
+    });
+    
+    tabMenu = Ext.create('Ext.toolbar.Toolbar', {   
+        style: {
+            backgroundColor: 'white',
+        },         
+        layout: 'vbox',
+        items: [
+            btInicio,
+            btcapas,            
+            btagregar,
+            btindice,
+            btModelo,
+            btayuda,
+    ],
+        
+    });     
+    
+    var p = Ext.getCmp('mainPanelId');
+    p.add(treePanel);
+
+    Ext.create('Ext.Viewport', {                
+        id: 'mainWin',
+        layout: 'border',
+        items: [
+            mapPanel,                    
+            {                   
+                xtype: 'panel',
+                id: 'viewportPanelId',
+                region: 'west',
+                title: project_name,
+                autoScroll: true,
+                border:0,
+                
+                lbar:[                    
+                    {
+                        xtype: 'segmentedbutton',                
+                        items: isDemo ? [] : [tabMenu],                    
+                    }
+                ],
+                collapsible: true,                        
+                width: 320,
+                split: true,
+                layout:'fit',
+                /*layout: {
+                    type: 'vbox',
+                    align: 'stretch'
+                },*/
+                //items: [treePanel],                
+            },
+        ]
+    });
+    var p = Ext.getCmp('viewportPanelId')
+    p.add(mainPanel);
+}
 function initLayers() {
-    return fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
+    let layers = [];    
+    olMap.removeLayer(layersGroup);
+    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
         {headers: noCacheHeaders})
         .then(response => response.json())
         .then(data => {            
@@ -673,7 +802,7 @@ function initLayers() {
                         })
                 }));}
                 else if (art.type === "MULTIESPECTRAL"){
-                    console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                    //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
                         //style: falseColor,
                         name: art.name,
@@ -708,16 +837,33 @@ function initLayers() {
                     leaf: true, 
                     layers: layerfile,
                 });
-                layers.push(layerGroup)            
-                }                
-            }
+                layers.push(layerGroup);            
+                }
+            layersGroup = new ol.layer.Group({                
+                layers: layers
+            });
+            olMap.addLayer(layersGroup);
+    
+            if(layers.length > 0){
+                let layerg = layersGroup.getLayers().getArray().slice(-1); 
+                let namelayer = layerg[0].getLayers().getArray()[0].get('name');
+                fitMap(namelayer);
+            };
+            console.log("layers: " +layers.length);                
+            }            
+        ).finally(() => { 
+            console.log('layersgroup: '+ layersGroup.getLayers().getLength());
+            console.log('olMap: ' +olMap.getLayers().getLength());           
             
-        );
+            var treeStore = Ext.create('GeoExt.data.store.LayersTree', {
+                layerGroup: layersGroup,
+            });
+            //id:'treePanelId',            
+            Ext.getCmp('treePanelId').setStore(treeStore);
+            //treePanel.setStore(treeStore);
+            
+        });
 }
-
-
-
-var urldd = window.location.protocol + "//" + window.location.host + "/api/uploads/"+ uuid + '/geotiff';
 
 function fitMap(name) {
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ name+"/bbox",
@@ -729,11 +875,6 @@ function fitMap(name) {
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
         });
-}
-
-function fitInit(){    
-    olMap.getView().setCenter(ol.proj.transform([-78.58031164977537,-0.394260613241795], 'EPSG:4326', 'EPSG:3857'));
-    olMap.getView().setZoom(5);
 }
 
 function _createControl(handler, buttonContent, buttonClass, buttonTooltip) {
@@ -1039,7 +1180,6 @@ function addMeasureInteraction() {
     });
     olMap.addLayer(interactionLayer);
 }
-
 
 function addIndex(index) {
     fetch(window.location.protocol + "//" + window.location.host + "/api/rastercalcs/" + uuid, {

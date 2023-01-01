@@ -477,7 +477,7 @@ class ArtifactType(Enum):
     SHAPEFILE = "Shapefile"
     INDEX = "Index"
     RGB = "Rgb"
-    KML = "Kml"
+    KML = "Kml"    
 
     @classmethod
     def filename(cls, art):
@@ -491,11 +491,13 @@ class ArtifactType(Enum):
 class Camera(Enum):
     REDEDGE = "Micasense RedEdge-M"
     PARROT = "Parrot Sequoia"
+    VECTOR = 'Vector'
+    
 
 
 class Artifact(models.Model):
     type = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in ArtifactType])
-    camera = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in Camera])
+    camera = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in Camera] )
     date = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=256)
     title = models.CharField(max_length=256)

@@ -19,6 +19,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from django.http import JsonResponse
 
 from core.models import *
 from core.parser import FormulaParser
@@ -444,16 +445,16 @@ def upload_vectorfile(request, uuid):
     project.user.update_disk_space()
     return HttpResponse(status=201)
 
+from django.views.decorators.clickjacking import xframe_options_exempt
 
+@xframe_options_exempt 
 @csrf_exempt
 def upload_geotiff(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
-
     project = UserProject.objects.get(pk=uuid)
-
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
-
+    
     file: UploadedFile = request.FILES.get("geotiff")  # file is called X.tiff
     geotiff_name = ".".join(file.name.split(
         ".")[:-1])  # Remove extension, get X
@@ -493,7 +494,10 @@ def upload_geotiff(request, uuid):
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
-    return HttpResponse(status=201)
+    #return HttpResponse(status=200)
+    return JsonResponse({'success':True, "msg":"Archivo cargado"})
+
+
 
 '''
 def preview_flight_url(request, uuid):
