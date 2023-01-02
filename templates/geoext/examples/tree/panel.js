@@ -44,6 +44,24 @@ var dataCamera = Ext.create('Ext.data.Store', {
     ]
 });
 
+var dataIndex = Ext.create('Ext.data.Store', {
+    storeId: 'dataIndex',
+    fields: ['id', 'index'],
+    data : [
+        {"id":"GCI", "name":"GCI"},
+        {"id":"GRRI", "name":"GRRI"},
+        {"id":"MGRVI", "name":"MGRVI"},
+        {"id":"NDRE", "name":"NDRE"},
+        {"id":"NDVI", "name":"NDVI"},
+        {"id":"NGRDI", "name":"NGRDI"},        
+    ]
+});
+
+var dataLayers = Ext.create('Ext.data.Store', {
+    storeId: 'dataCamera',
+    fields: ['title', 'name', "type","camera", "date"],    
+});
+
 var dataTypeArtefact = Ext.create('Ext.data.Store', {
     storeId: 'dataTypeArtefact',
     fields: ['id', 'name'],
@@ -158,9 +176,7 @@ function initApp() {
             mainPanel = Ext.create('Ext.panel.Panel', {
                 id: 'mainPanelId',
                 border: 0,
-            });
-
-            initLayers();             
+            });            
             createViewPort();
             
         },
@@ -358,7 +374,7 @@ function createaddPanel(){
             labelAlign: 'top',
             allowBlank: false,  // requires a non-empty value            
             blankText: 'El campo nombre es necesario',
-            msgTarget: 'under' 
+            msgTarget: 'under' ,
         },
         {
             xtype: 'filefield',
@@ -480,8 +496,125 @@ function onConfig(){
     }).show();
 }
 
-function createTree(){   
+function createindexPanel(){   
+    var indice = Ext.create('Ext.form.ComboBox', {
+        fieldLabel: 'Seleccionar índice',
+        name: 'index',
+        id: 'index',
+        msgTarget: 'under' ,
+        store: dataIndex,
+        width: '100%',
+        queryMode: 'local',
+        allowBlank : false,
+        blankText: 'Seleccione el modelo de la cámara',
+        forceSelection: true,
+        displayField: 'name',
+        valueField: 'name',
+        value:'1',
+        labelAlign: 'top'
+        //renderTo: Ext.getBody()
+    });
+    var capa = Ext.create('Ext.form.ComboBox', {
+        fieldLabel: 'Seleccionar capa',
+        name: 'layer',
+        id: 'layer',
+        store: dataLayers,
+        width: '100%',
+        msgTarget: 'under' ,
+        queryMode: 'local',
+        allowBlank : false,
+        blankText: 'Seleccione el tipo de Imagen',
+        forceSelection: true,
+        displayField: 'title',
+        valueField: 'name',
+        labelAlign: 'top'
+        //value:'1'
+        //renderTo: Ext.getBody()
+    });
+    /* filtro
 
+                artifactLayer.push(art.title);   
+                console.log("Nombre: "+ art.name);
+                console.log("Tipo: "+art.type);
+                console.log("Fecha: "+art.date);
+                console.log("Fecha: "+art.camera);
+                console.log("Camera MArca: "+ dataCamera.findRecord('id', art.camera).get('name'));
+                console.log("Cuenta filtro antes: "+dataCamera.getCount());
+                dataCamera.filter('id', 'PARROT');
+                console.log("Cuenta filtro despues: "+dataCamera.getCount());
+                console.log("filtro: "+ dataCamera.data.getAt(0).get('name'));
+                const d = new Date(art.date);
+                console.log("fecha: "+d);
+    */
+    var formSelectIndex = Ext.create('Ext.form.Panel', {                
+        id: 'formIdIndex',
+        width: '100%', 
+        height: '100%',
+        bodyPadding: 10,    
+        border:0,
+        defaultType: 'textfield',
+        items: [
+            indice,
+            capa,
+    ],
+    
+        // Reset and Submit buttons
+        buttons: [{
+            text: 'Borrar',
+            iconCls: 'icon-eraser',
+            cls: 'btnform',
+            handler: function() {
+                this.up('form').getForm().reset();
+            }
+        }, {
+            text: 'Crear índice',
+            formBind: true, //only enabled once the form is valid
+            disabled: true,
+            iconCls: 'icon-save',
+            cls:'btnform',
+            handler: function() {
+                var form = this.up('form').getForm();                
+                if (form.isValid()) {
+                    form.submit({
+                        method: 'POST',
+                        url : '/api/rastercalcs/' + uuid ,
+                        params: {
+                            data: form.getValues(),
+                        },
+                        headers: {
+                            Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                        },
+                        waitMsg:'Creando índice espere por favor...',
+                        success: function(fp, o) {
+                            Ext.getCmp('formIdIndex').reset();
+                            Ext.Msg.alert('Detalle', 'Índice creado correctamente.');                                                   
+                        },
+                        failure: function(fp, o) {
+                            Ext.Msg.alert('Error', 'Error al subir capa.');
+                        }
+                    });
+                }
+                
+            }
+        }],        
+    });
+
+    indexPanel = new Ext.create('Ext.panel.Panel', {                
+        width: '100%',
+        autoScroll: true,
+        height: '100%',         
+        border:0,
+        tbar:[
+            {xtype: 'tbtext', html: 'Crear Índice'},'->',
+        ],       
+        items:[
+            formSelectIndex,
+        ],
+        
+    });
+}
+
+function createTree(){   
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
         border: 0,
         items: [
@@ -510,7 +643,7 @@ function createTree(){
                 handler: function(){
                     initLayers();
                 }
-            }   
+            }
         ]});
 
     treePanel = Ext.create('Ext.tree.Panel', {
@@ -523,7 +656,7 @@ function createTree(){
         //store: treeStore,
         rootVisible: false,                
         flex: 1,
-        border: 0,
+        border: 0,        
         tbarCfg:{
             buttonAlign:'right' 
         },
@@ -631,6 +764,7 @@ function createhelpPanel(){
 
 function createViewPort(){    
     createTree();
+    initLayers();             
     let btInicio = Ext.create('Ext.Button', {  
         iconCls:'fa-house-chimney',
         cls: 'fa-solid',
@@ -685,7 +819,15 @@ function createViewPort(){
         //text: 'Índices',
         iconCls: 'fa-images',
         cls: 'fa-solid ',
-        tooltip: 'Crear Índices de vegetas'
+        tooltip: 'Crear Índices de vegetas',        
+        handler: function(){ 
+            createindexPanel();
+            var p = Ext.getCmp('viewportPanelId');
+            p.removeAll();
+            p.updateLayout();
+            p.add(indexPanel);
+
+        },
         /*width: '88px',
         menu: [
            {text: 'GCI', handler: function() {
@@ -693,12 +835,7 @@ function createViewPort(){
            }
            
             },
-           {text: 'GRRI', handler: function(){ alert("Índice: GRRI \nTipo: Visible \nFunción: \nEstado: En desarrollo..."); }},
-           {text: 'MGRVI', handler: function(){ alert("Índice: MGRVI \nTipo: Visible \nFunción: Captura la diferencia de reflectancia por la absorción de la clorofila a y la clorofila b.\nEstado: En desarrollo..."); }},
-           {text: 'NDRE', handler: function(){ alert("Índice: NDRE \nTipo: Multiespectral \nFunción: Utilizado para identificar las áreas con plantas saludables mediante el monitoreo de la clorofila. Puede detectar el estrés en la planta aún cuando no sea visible en la superficie.\nEstado: En desarrollo..."); }},
-           {text: 'NDVI', handler: function(){ alert("Índice: NDVI \nTipo: Multiespectral \nFunción: Identifica densidad y vitalidad de la vegetación de un área. La vegetación densa y sana tiene valores cercanos al 1 positivo, el suelo tiene valores cercanos a 0 y las nubes, nieve y el agua tienen valores negativos.\nEstado: En desarrollo..."); }},
-           {text: 'NGRDI', handler: function(){ alert("Índice: NGRDI \nTipo: Visible \nFunción: Permite diferenciar entre vegetación (positivos), suelo (negativos) y agua (cero).\nEstado: En desarrollo..."); }},
-
+          
         ]*/
     });
 
@@ -746,8 +883,8 @@ function createViewPort(){
         
     });     
     
-    var p = Ext.getCmp('mainPanelId');
-    p.add(treePanel);
+    //var p = Ext.getCmp('mainPanelId');
+    //p.add(treePanel);
 
     Ext.create('Ext.Viewport', {                
         id: 'mainWin',
@@ -781,8 +918,9 @@ function createViewPort(){
         ]
     });
     var p = Ext.getCmp('viewportPanelId')
-    p.add(mainPanel);
+    p.add(treePanel);
 }
+
 function initLayers() {
     let layers = [];    
     olMap.removeLayer(layersGroup);
@@ -792,22 +930,19 @@ function initLayers() {
         .then(data => {            
             for (let art of data.artifacts) {   
                 let layerfile=[];     
-                artifactLayer.push(art.name);   
-                console.log("Nombre: "+ art.name);
-                console.log("Tipo: "+art.type);
-                console.log("Fecha: "+art.date);
-                console.log("Fecha: "+art.camera);
-                console.log("Camera MArca: "+ dataCamera.findRecord('id', art.camera).get('name'));
-                console.log("Cuenta filtro antes: "+dataCamera.getCount());
-                dataCamera.filter('id', 'PARROT');
-                console.log("Cuenta filtro despues: "+dataCamera.getCount());
-                console.log("filtro: "+ dataCamera.data.getAt(0).get('name'));
-                const d = new Date(art.date);
-                console.log("fecha: "+d);
+                var layerart = {
+                    'title' : art.title, 
+                    'name': art.name, 
+                    "type": art.type,
+                    "camera": art.camera, 
+                    "date": new Date(art.date),
+                };                
+                dataLayers.add(layerart);
+
                 if (art.type === "SHAPEFILE"){
                     //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
                     layerfile.push(new ol.layer.Vector({
-                        name: art.name,
+                        name: art.title,
                         source: new ol.source.Vector({
                             format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
@@ -818,7 +953,7 @@ function initLayers() {
                     //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
                         //style: falseColor,
-                        name: art.name,
+                        name: art.title,
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
@@ -828,7 +963,7 @@ function initLayers() {
                 else if (art.type === "RGB"){
                     console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
-                        name: art.name,
+                        name: art.title,
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
@@ -838,7 +973,7 @@ function initLayers() {
                 else if (art.type === "INDEX"){
                     console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                     layerfile.push(new ol.layer.Image({
-                        name: art.name,
+                        name: art.title,
                         source: new ol.source.ImageWMS({
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
@@ -846,12 +981,12 @@ function initLayers() {
                         })                            
                 }));}
                 let layerGroup = new ol.layer.Group({
-                    name: 'Grupo '+art.name,
+                    name: 'Grupo '+art.title,
                     leaf: true, 
                     layers: layerfile,
                 });
                 layers.push(layerGroup);            
-                }
+            }
             layersGroup = new ol.layer.Group({                
                 layers: layers
             });
@@ -862,17 +997,18 @@ function initLayers() {
                 let namelayer = layerg[0].getLayers().getArray()[0].get('name');
                 fitMap(namelayer);
             };
+            var treeStore = Ext.create('GeoExt.data.store.LayersTree', {
+                layerGroup: layersGroup,
+            });
+            //id:'treePanelId',            
+            Ext.getCmp('treePanelId').setStore(treeStore);
             console.log("layers: " +layers.length);                
             }            
         ).finally(() => { 
             console.log('layersgroup: '+ layersGroup.getLayers().getLength());
             console.log('olMap: ' +olMap.getLayers().getLength());           
             
-            var treeStore = Ext.create('GeoExt.data.store.LayersTree', {
-                layerGroup: layersGroup,
-            });
-            //id:'treePanelId',            
-            Ext.getCmp('treePanelId').setStore(treeStore);
+            
             //treePanel.setStore(treeStore);
             
         });

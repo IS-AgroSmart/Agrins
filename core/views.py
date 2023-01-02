@@ -40,6 +40,9 @@ from push_notifications.models import APNSDevice, GCMDevice
 
 from django_rest_passwordreset.signals import reset_password_token_created
 from .utils.token import  TokenGenerator
+from django.views.decorators.clickjacking import xframe_options_exempt
+#from geo.Geoserver import Geoserver #sudo apt-get install libgdal-dev
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -445,7 +448,7 @@ def upload_vectorfile(request, uuid):
     project.user.update_disk_space()
     return HttpResponse(status=201)
 
-from django.views.decorators.clickjacking import xframe_options_exempt
+
 
 @xframe_options_exempt 
 @csrf_exempt
@@ -527,10 +530,16 @@ def create_raster_index(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
+    
+    print("typo indice: ", request.POST["index"])
+    print("nombre capa: ", request.POST["layer"])
 
+    return JsonResponse({'success':True, "msg":"Archivo cargado"})
+    '''
+    project.get
     if not project.all_flights_multispectral():
         return HttpResponse("Not all flights are multispectral!", status=400)
-
+    
     data = json.loads(request.body.decode('utf-8'))
     print(data)
 
@@ -548,7 +557,7 @@ def create_raster_index(request, uuid):
     project.artifacts.create(
         name=clean_index, type=ArtifactType.INDEX.name, title=clean_index.upper())
     return HttpResponse(status=200)
-
+    '''
 
 @xframe_options_exempt
 def mapper(request, uuid):
@@ -584,7 +593,8 @@ def mapper_artifacts(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
 
     return JsonResponse({"artifacts": [
-        {"name": art.title,
+        {"title": art.title,
+         "name" : art.name,
          "layer": project._get_geoserver_ws_name() + ":" + art.name,
          "date": art.date,
          "camera": art.camera,

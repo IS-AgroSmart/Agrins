@@ -7,43 +7,15 @@
     <link rel="stylesheet" type="text/css" href="ol/ol.css">
     <link rel="stylesheet" type="text/css"98
     href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/classic/theme-crisp/resources/theme-crisp-all.css"/>
-    
- 
-
-    <!--Geocoder  /theme-gray/resources/theme-gray-all.css"/>    theme-crisp/resources/theme-crisp-all.css"/>
-    <link href="https://unpkg.com/ol-geocoder/dist/ol-geocoder.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/ol-geocoder"></script>-->
 
     <!-- Openlayers latest    -->
     <link rel="stylesheet" href="https://openlayers.org/en/latest/legacy/ol.css" />
     <script type="text/javascript" src="https://openlayers.org/en/latest/legacy/ol.js"></script>
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL,Object.assign"></script>
-    
-
-    <!-- Openlayers 
-    <link rel="stylesheet" href="https://openlayers.org/en/latest/css/ol.css" />
-    <script type="text/javascript" src="https://openlayers.org/en/latest/build/ol.js"></script>
-    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL,Object.assign"></script>
-    -->
-
-    <!-- ol-ext cdn 
-    <link rel="stylesheet" href="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.css" />
-    <script type="text/javascript" src="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.js"></script>
-        -->
-    
 
     <!-- font-awesome is an iconic font, which means we can draw resolution-independent icons -->
     <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
-    
     <script src="https://kit.fontawesome.com/e0ae52ec67.js" crossorigin="anonymous"></script>
-
-
-    
-
-    <!--ol-geocoder 
-    <link href="https://unpkg.com/ol-geocoder/dist/ol-geocoder.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/ol-geocoder.js"></script>    
-    -->
 
     <!--Spiner-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
@@ -53,19 +25,10 @@
 
     <!--Cesium
     <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/build/ol.js"></script>
-    <script src="https://openlayers.org/ol-cesium/olcesium.js"></script>-->
-    <!--<script src="https://cesiumjs.org/releases/1.62/Build/CesiumUnminified/Cesium.js"></script>
+    <script src="https://openlayers.org/ol-cesium/olcesium.js"></script>
+    <script src="https://cesiumjs.org/releases/1.62/Build/CesiumUnminified/Cesium.js"></script>
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.62/Build/CesiumUnminified/Cesium.js"></script>
-    <script src="https://cesiumjs.org/releases/1.53/Build/Cesium/Cesium.js" charset="UTF-8"></script>
-
-
-    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/build/ol.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.70/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.70/Build/Cesium/Cesium.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol-cesium@2.10.0/css/olcs.css">
-    <script src="https://cdn.jsdelivr.net/npm/ol-cesium@2.10.0/dist/olcesium.js"></script>-->
-
-
+    <script src="https://cesiumjs.org/releases/1.53/Build/Cesium/Cesium.js" charset="UTF-8"></script>-->
 
 
 </head>
@@ -119,12 +82,12 @@
 
     .btnform{
         border: none;
-        background-color: #024e69 !important;
+        background-color: rgb(88, 97, 100) !important;
     } 
     
     .btnform:hover{
         border: none;
-        background-color: #4b5c78 !important;
+        background-color: #828d9f !important;
     }
     
     .btn {
@@ -145,9 +108,6 @@
     }
 
 
-    /* Darker background on mouse-over */
-    
-
     .container {        
         text-align: center;
         position: absolute;
@@ -155,6 +115,7 @@
         left: 50%;
         transform: translate(-50%, -50%);
     }
+
     .controls {
         position: absolute;
         top: 20px;
@@ -363,11 +324,14 @@
 
     
     const project_name = "{{ project_name }}";
+    const project_notes = "{{ project_notes }}";
     const uuid = "{{ uuid }}";
     const project_path = "{{ project_geoserver_path }}";
-    const moreThanOneFlight = true; //{{ flights|length|gt:1|yesno:"true,false" }};
-    const isMultispectral = {{ is_multispectral|yesno:"true,false" }};
     const isDemo = {{ is_demo|yesno:"true,false" }};
+
+    //const moreThanOneFlight = true; //{{ flights|length|gt:1|yesno:"true,false" }};
+    //const isMultispectral = {{ is_multispectral|yesno:"true,false" }};
+    
     
 </script>
 <script src="panel.js"></script>
