@@ -506,7 +506,7 @@ function createindexPanel(){
         width: '100%',
         queryMode: 'local',
         allowBlank : false,
-        blankText: 'Seleccione el modelo de la cámara',
+        blankText: 'Seleccione el índice que desea crear',
         forceSelection: true,
         displayField: 'name',
         valueField: 'name',
@@ -523,7 +523,7 @@ function createindexPanel(){
         msgTarget: 'under' ,
         queryMode: 'local',
         allowBlank : false,
-        blankText: 'Seleccione el tipo de Imagen',
+        blankText: 'Seleccione la capa',
         forceSelection: true,
         displayField: 'title',
         valueField: 'name',
@@ -590,6 +590,7 @@ function createindexPanel(){
                             Ext.Msg.alert('Detalle', 'Índice creado correctamente.');                                                   
                         },
                         failure: function(fp, o) {
+                            Ext.getCmp('formIdIndex').reset();
                             Ext.Msg.alert('Error', 'Error al subir capa.');
                         }
                     });
@@ -978,7 +979,7 @@ function initLayers() {
                             url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
                             params: {"LAYERS": art.layer}
 
-                        })                            
+                        }),                           
                 }));}
                 let layerGroup = new ol.layer.Group({
                     name: 'Grupo '+art.title,

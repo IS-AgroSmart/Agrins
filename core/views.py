@@ -41,7 +41,7 @@ from push_notifications.models import APNSDevice, GCMDevice
 from django_rest_passwordreset.signals import reset_password_token_created
 from .utils.token import  TokenGenerator
 from django.views.decorators.clickjacking import xframe_options_exempt
-#from geo.Geoserver import Geoserver #sudo apt-get install libgdal-dev
+
 
 
 
@@ -533,7 +533,23 @@ def create_raster_index(request, uuid):
     
     print("typo indice: ", request.POST["index"])
     print("nombre capa: ", request.POST["layer"])
+    path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
 
+
+    COMMANDS = 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=1 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile='+request.POST["index"]+'.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=0' 
+
+    with cd(path):    
+        command = COMMANDS
+        os.system(command)  # Create raster, save it to <index>.tif on folder <flight_uuid>/odm_orthophoto
+        print('entre comandos')
+        os.system('gdalwarp -dstalpha -overwrite '+request.POST["index"]+'.tiff  NDVIdata.tiff')
+        print('fin comandos')
+
+    project._create_index_datastore(request.POST["layer"],'NDVIdata')
+    project.update_disk_space()
+    project.user.update_disk_space()
+    project.artifacts.create(
+        name='NDVIdata', type=ArtifactType.INDEX.name, title='NDVIdata', camera=Camera.VECTOR.name)
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
     '''
     project.get

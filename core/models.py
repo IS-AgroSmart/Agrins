@@ -127,40 +127,37 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
                  '"OutputTransparentColor", "#000000" ] } ] } }} ',
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
 
-    def _create_index_datastore(self, index):
-        index_folder = self.get_disk_path() + "/" + index
-        os.makedirs(index_folder)
-        #for flight in self.flights.all():
-            # Copy all TIFFs to project folder, rename them
-        #    ortho_name = index + ".tif"
-        #    shutil.copy(flight.get_disk_path() + "/odm_orthophoto/" + ortho_name,
-        #                index_folder)
-        #    os.rename(index_folder + "/" + ortho_name,
-        #              index_folder + "/" + "ortho_{:04d}{:02d}{:02d}.tif".format(flight.date.year,
-        #                                                                         flight.date.month,
-        #                                                                         flight.date.day))
+    def _create_index_datastore(self, indexpath, index):
+        index_folder = self.get_disk_path() + "/" + indexpath
+        #os.makedirs(index_folder)
+       
         with open(index_folder + "/indexer.properties", "w") as f:
             f.write("""TimeAttribute=ingestion
         Schema=*the_geom:Polygon,location:String,ingestion:java.util.Date
         PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
         with open(index_folder + "/timeregex.properties", "w") as f:
-            f.write("regex=[0-9]{8},format=yyyyMMdd")
+            f.write("regex=[0-9]{8},format=yyyyMMdd")           
 
         GEOSERVER_API_ENTRYPOINT = "http://container-geoserver:8080/geoserver/rest/"
         GEOSERVER_BASE_URL = GEOSERVER_API_ENTRYPOINT + "workspaces/"
         requests.put(
-            GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/" + index + "/external.imagemosaic",
+            GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/" + index + "/external.geotiff",
             headers={"Content-Type": "text/plain"},
-            data="file:///media/USB/" + str(self.uuid) + "/" + index + "/",
+            data="file:///media/USB/" + str(self.uuid) + "/" + indexpath + "/"+ index + ".tiff",
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
         # Enable time dimension
         requests.put(
             GEOSERVER_BASE_URL + self._get_geoserver_ws_name() + "/coveragestores/" + index + "/coverages/" + index + ".json",
             headers={"Content-Type": "application/json"},
             data='{"coverage": { "enabled": true, "metadata": { "entry": [ { "@key": "time", ' +
-                 '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
-                 '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
-                 '"OutputTransparentColor", "#000000" ] } ] } }} ',
+                '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
+                '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
+                '"InputTransparentColor", "#000000" ] } ] } }} ', 
+            #data='{"coverage": { "enabled": true, "metadata": { "entry": [ { "@key": "time", ' +
+             #    '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
+              #   '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
+               #  '"OutputTransparentColor", "#000000" ] } ] } }} ',
+
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
         # Enable gradient (is on a different URL because... reasons???)
         requests.put(
