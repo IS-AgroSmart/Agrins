@@ -590,7 +590,7 @@ function createindexPanel(){
                             Ext.Msg.alert('Detalle', 'Índice creado correctamente.');                                                   
                         },
                         failure: function(fp, o) {
-                            Ext.getCmp('formIdIndex').reset();
+                            
                             Ext.Msg.alert('Error', 'Error al subir capa.');
                         }
                     });
@@ -925,6 +925,7 @@ function createViewPort(){
 function initLayers() {
     let layers = [];    
     olMap.removeLayer(layersGroup);
+    dataLayers.removeAll();
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
         {headers: noCacheHeaders})
         .then(response => response.json())

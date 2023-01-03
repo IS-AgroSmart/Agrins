@@ -536,20 +536,23 @@ def create_raster_index(request, uuid):
     path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
 
 
-    COMMANDS = 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=1 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile='+request.POST["index"]+'.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=0' 
+    COMMANDS = 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=1 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile='+request.POST["index"]+'.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999' 
 
     with cd(path):    
         command = COMMANDS
         os.system(command)  # Create raster, save it to <index>.tif on folder <flight_uuid>/odm_orthophoto
         print('entre comandos')
-        os.system('gdalwarp -dstalpha -overwrite '+request.POST["index"]+'.tiff  NDVIdata.tiff')
+        os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff hill.tif -z 10 -s 111120')
+        os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff hillmulti.tif -z 10 -s 111120 -multidirectional')
+        os.system('gdalwarp -dstalpha -overwrite  hill.tif  hill1.tif')
+        os.system('gdalwarp -dstalpha -overwrite  hillmulti.tif hillmulti1.tif')
         print('fin comandos')
 
-    project._create_index_datastore(request.POST["layer"],'NDVIdata')
+    project._create_index_datastore(request.POST["layer"],request.POST["index"])
     project.update_disk_space()
     project.user.update_disk_space()
     project.artifacts.create(
-        name='NDVIdata', type=ArtifactType.INDEX.name, title='NDVIdata', camera=Camera.VECTOR.name)
+        name=request.POST["index"], type=ArtifactType.INDEX.name, title=request.POST["index"], camera=Camera.VECTOR.name)
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
     '''
     project.get

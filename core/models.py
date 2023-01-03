@@ -161,7 +161,7 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
         # Enable gradient (is on a different URL because... reasons???)
         requests.put(
-            GEOSERVER_API_ENTRYPOINT + "layers/" + self._get_geoserver_ws_name() + ":" + index + ".json",
+            GEOSERVER_API_ENTRYPOINT + "layers/" + self._get_geoserver_ws_name() + ":" + index ,
             headers={"Content-Type": "application/json"},
             data='{"layer": {"defaultStyle": {"name": "gradient"}}}',
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
