@@ -68,23 +68,30 @@ class FlightSerializer(serializers.ModelSerializer):
 '''
 
 class ArtifactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Artifact
+        fields = ["pk", "type", "layer", "name", "title", "camera", "date"]
+
+class LayerSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
 
     class Meta:
         model = Artifact
-        fields = ["pk", "type", "project", "name", "title", "camera", "date"]
+        fields = ["pk","project", "name", "date"]
+
 
 class UserProjectSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())
     #flights = serializers.PrimaryKeyRelatedField(many=True,queryset=Flight.objects.all())
-    artifacts = serializers.PrimaryKeyRelatedField(many=True,queryset=Artifact.objects.all())
+    layers = serializers.PrimaryKeyRelatedField(many=True,queryset=Artifact.objects.all())
 
     def create(self, validated_data):
         #flights = validated_data.pop("flights")
-        artifacts = validated_data.pop("artifacts")
+        layers = validated_data.pop("layers")
         proj = UserProject.objects.create(**validated_data)
         #proj.flights.set(flights)
-        proj.artifacts.set(artifacts)
+        proj.layers.set(layers)
         proj._create_geoserver_proj_workspace()
         proj.update_disk_space()
         proj.user.update_disk_space()
@@ -92,7 +99,7 @@ class UserProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProject
-        fields = ['uuid', 'user', 'artifacts', "name", "description", "is_demo", "used_space", "deleted"]
+        fields = ['uuid', 'user', 'layers', "name", "description", "is_demo", "used_space", "deleted"]
 
 
 class BlockCriteriaSerializer(serializers.ModelSerializer):

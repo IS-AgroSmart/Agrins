@@ -158,6 +158,12 @@ class ArtifactViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Artifact.objects.all()
 
+class LayerViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LayerSerializer
+
+    def get_queryset(self):
+        return Layer.objects.all()
 
 class UserProjectViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -455,15 +461,21 @@ def upload_vectorfile(request, uuid):
 def upload_geotiff(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
     project = UserProject.objects.get(pk=uuid)
+    
+
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
     
     file: UploadedFile = request.FILES.get("geotiff")  # file is called X.tiff
     geotiff_name = ".".join(file.name.split(
         ".")[:-1])  # Remove extension, get X
-    
-    project.artifacts.create(
-        name=geotiff_name, type=ArtifactType(request.POST["type"]).name, title=request.POST["title"], camera=Camera(request.POST["camera"]).name)
+        
+    layer = project.layers.create(
+        name=geotiff_name, title=request.POST["title"])
+
+    layer.artifacts.create(
+        name=geotiff_name, type=ArtifactType(request.POST["type"]).name, title=request.POST["title"], camera=Camera(request.POST["camera"]).name
+    )
 
     # Write file to disk on project folder
     os.makedirs(project.get_disk_path() + "/" + geotiff_name, exist_ok=True)
@@ -529,28 +541,47 @@ def check_formula(request):
 def create_raster_index(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
     if project.user.used_space >= project.user.maximum_space:
-        return HttpResponse(status=402)
+        return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
+    
     
     print("typo indice: ", request.POST["index"])
     print("nombre capa: ", request.POST["layer"])
+    
     path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
 
-
-    COMMANDS = 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=1 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile='+request.POST["index"]+'.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999' 
+    COMMANDS = {
+        'NDVI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=3 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'GCI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=3 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'GRRI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=3 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'MGRVI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=3 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'NDRE':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=3 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'NGRDI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band=3 -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+    }
+    COLORTXT ={
+        'NDVI':'../../../app/core/utils/color_ndvi.txt',
+    }
 
     with cd(path):    
-        command = COMMANDS
+        command = COMMANDS.get(request.POST["index"])
+        color = COLORTXT.get(request.POST["index"])
+
         os.system(command)  # Create raster, save it to <index>.tif on folder <flight_uuid>/odm_orthophoto
         print('entre comandos')
-        os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff hill.tif -z 10 -s 111120')
-        os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff hillmulti.tif -z 10 -s 111120 -multidirectional')
-        os.system('gdalwarp -dstalpha -overwrite  hill.tif  hill1.tif')
-        os.system('gdalwarp -dstalpha -overwrite  hillmulti.tif hillmulti1.tif')
-        print('fin comandos')
+        #os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff hill.tif -z 10 -s 111120')
+        #os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff hillmulti.tif -z 10 -s 111120 -multidirectional')
+        #os.system('gdalwarp -dstalpha -overwrite  hill.tif  hill1.tif')
+        #os.system('gdalwarp -dstalpha -overwrite  hillmulti.tif hillmulti1.tif')
+        #os.system(command+' --color-table '+txt)
+        #os.system('gdalwarp -dstalpha -overwrite NDVI.tiff outA.tiff')
+        os.system('gdaldem color-relief temp.tiff '+color+' out.tif -alpha')
+        #os.system('gdalwarp -dstnodata "0 0 0 0" out.tif outFin.tif')
+        #os.system('gdalwarp -dstalpha -overwrite  outA.tif  ndvifinally.tif')
+       # print('fin comandos')
 
     project._create_index_datastore(request.POST["layer"],request.POST["index"])
     project.update_disk_space()
     project.user.update_disk_space()
+    
     project.artifacts.create(
         name=request.POST["index"], type=ArtifactType.INDEX.name, title=request.POST["index"], camera=Camera.VECTOR.name)
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
@@ -598,7 +629,8 @@ def mapper(request, uuid):
 
 def mapper_bbox(request, uuid, name):    
     project = UserProject.objects.get(uuid=uuid)    
-    for art in project.artifacts.all():
+
+    for art in project.layers.all():
         if (art.title == name):
             ans = requests.get(
             "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
@@ -607,18 +639,28 @@ def mapper_bbox(request, uuid, name):
             return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
     return JsonResponse({"data":"not found"})
 
-
-def mapper_artifacts(request, uuid):
-    project = UserProject.objects.get(uuid=uuid)
-
+def mapper_artifacts(request,index):
+    layer = Layer.objects.get(pk=index)
     return JsonResponse({"artifacts": [
         {"title": art.title,
          "name" : art.name,
-         "layer": project._get_geoserver_ws_name() + ":" + art.name,
-         "date": art.date,
+         "layer": layer.project._get_geoserver_ws_name() + ":" + art.name,         
          "camera": art.camera,
-         "type": art.type}
-        for art in project.artifacts.all()
+         "type": art.type
+         }
+        for art in layer.artifacts.all()
+    ]})
+
+def mapper_layers(request, uuid):
+    project = UserProject.objects.get(uuid=uuid)
+    return JsonResponse({"layers": [
+        {
+         "pk": lyr.pk,
+         "name" : lyr.name,
+         "title" : lyr.title,
+         "date": lyr.date,
+        }
+        for lyr in project.layers.all()
     ]})
 
 

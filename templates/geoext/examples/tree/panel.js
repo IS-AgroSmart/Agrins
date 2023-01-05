@@ -59,7 +59,7 @@ var dataIndex = Ext.create('Ext.data.Store', {
 
 var dataLayers = Ext.create('Ext.data.Store', {
     storeId: 'dataCamera',
-    fields: ['title', 'name', "type","camera", "date"],    
+    fields: ['title', 'name', "type","camera"],    
 });
 
 var dataTypeArtefact = Ext.create('Ext.data.Store', {
@@ -231,6 +231,7 @@ function addControlsMap(){
             var element = document.createElement('div');
             element.className = 'btn btn-small';
             element.appendChild(selectbase);
+            
             var btfullscreen = document.createElement('button');
             btfullscreen.className = "btn btn-small icon-resize-full";
             btfullscreen.setAttribute("title","Pantalla completa");                                  
@@ -290,14 +291,14 @@ function addControlsMap(){
             elementGroup.setAttribute("id","idcontrols");
             elementGroup.appendChild(btzoomin);
             elementGroup.appendChild(btzoomout);
+            elementGroup.appendChild(element);
             elementGroup.appendChild(btnorth);
             elementGroup.appendChild(btfullscreen);
             elementGroup.appendChild(btpoligono);
             elementGroup.appendChild(btdistance);
             elementGroup.appendChild(btpoint);
             elementGroup.appendChild(btprint);
-            elementGroup.appendChild(btcolorleg);
-            elementGroup.appendChild(element);
+            elementGroup.appendChild(btcolorleg);            
             var groupControl = new ol.control.Control({
                 element: elementGroup
             });
@@ -527,7 +528,9 @@ function createindexPanel(){
         forceSelection: true,
         displayField: 'title',
         valueField: 'name',
-        labelAlign: 'top'
+        labelAlign: 'top',
+        
+        
         //value:'1'
         //renderTo: Ext.getBody()
     });
@@ -544,6 +547,12 @@ function createindexPanel(){
                 console.log("Cuenta filtro despues: "+dataCamera.getCount());
                 console.log("filtro: "+ dataCamera.data.getAt(0).get('name'));
                 const d = new Date(art.date);
+                var i = simpleCombo.getValue();-------------
+
+                var stateId = 1; // your value
+                cityStore.clearFilter(true);
+                cityStore.filter('StateId', stateId);
+                --------
                 console.log("fecha: "+d);
     */
     var formSelectIndex = Ext.create('Ext.form.Panel', {                
@@ -554,8 +563,9 @@ function createindexPanel(){
         border:0,
         defaultType: 'textfield',
         items: [
-            indice,
             capa,
+            indice,
+            
     ],
     
         // Reset and Submit buttons
@@ -578,9 +588,9 @@ function createindexPanel(){
                     form.submit({
                         method: 'POST',
                         url : '/api/rastercalcs/' + uuid ,
-                        params: {
+                        /*params: {
                             data: form.getValues(),
-                        },
+                        },*/
                         headers: {
                             Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
                         },
@@ -591,7 +601,7 @@ function createindexPanel(){
                         },
                         failure: function(fp, o) {
                             
-                            Ext.Msg.alert('Error', 'Error al subir capa.');
+                            Ext.Msg.alert('Error', 'Error al crear el índice.');
                         }
                     });
                 }
@@ -605,11 +615,16 @@ function createindexPanel(){
         autoScroll: true,
         height: '100%',         
         border:0,
-        tbar:[
-            {xtype: 'tbtext', html: 'Crear Índice'},'->',
-        ],       
-        items:[
+        
+        items:[            
+            {
+                padding: 5,                    
+                border:0,
+                html: '<h6><center>Crear índice de vegetación</center></h6'+
+                        '<img src="https://sp.depositphotos.com/173808586/stock-photo-panoramic-view-of-green-field.html"/>'
+            },
             formSelectIndex,
+            
         ],
         
     });
@@ -619,7 +634,7 @@ function createTree(){
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
         border: 0,
         items: [
-            {xtype: 'tbtext', html: 'Capas Disponibles'},
+            {xtype: 'tbtext', html: 'Capas'},
             ' ',
             {
                 iconCls: 'fa-folder-tree',   
@@ -627,6 +642,8 @@ function createTree(){
                 tooltip: 'Expandir',
                 handler: function(){
                     treePanel.expandAll();
+                    Ext.getCmp('btdeletelayer').setVisible(false);
+                    Ext.getCmp('btinfolayer').setVisible(false);
                 }
             },
             {
@@ -635,6 +652,8 @@ function createTree(){
                 tooltip: 'Contraer',
                 handler: function(){
                     treePanel.collapseAll();
+                    Ext.getCmp('btdeletelayer').setVisible(false);
+                    Ext.getCmp('btinfolayer').setVisible(false);
                 }
             },
             {
@@ -642,7 +661,29 @@ function createTree(){
                 cls: 'fa-solid',
                 tooltip: 'Recargar',
                 handler: function(){
+                    Ext.getCmp('btdeletelayer').setVisible(false);
+                    Ext.getCmp('btinfolayer').setVisible(false);
                     initLayers();
+                }
+            },
+            {
+                id: 'btdeletelayer',
+                iconCls: 'fa-trash-can',   
+                cls: 'fa-solid',
+                hidden: true,
+                tooltip: 'Eliminar capa',
+                handler: function(){
+                    
+                }
+            },
+            {
+                id: 'btinfolayer',
+                iconCls: 'fa-circle-info',   
+                cls: 'fa-solid',
+                hidden: true,
+                tooltip: 'Información capa',
+                handler: function(){
+                    
                 }
             }
         ]});
@@ -669,26 +710,23 @@ function createTree(){
         },        
         
         listeners: {
+            render: function(){
+                Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});
+            },
             itemcontextmenu: {
-                fn:function(tree, record, item, index, e, eOpts ) {                          
-                    var menu_grid = new Ext.menu.Menu({ items:
-                    [
-                        { text: 'Descargar',iconCls: 'icon-download-alt', cls:'btn-small', handler: function() {Ext.Msg.alert('Descargar', 'Función descarga.');} },
-                        { text: 'Eliminar', iconCls: 'icon-trash', cls:'btn-small', handler: function() {Ext.Msg.alert('Eliminar', 'Función eliminar.');} },
-                        { text: 'Detalle', iconCls: 'icon-folder-open', cls:'btn-small', handler: function() {Ext.Msg.alert('Detalle', 'Función detalle.');} },
-                    ]
-                    });
-                    // HERE IS THE MAIN CHANGE
-                    var position = [e.getX()-10, e.getY()-10];
-                    e.stopEvent();
-                    menu_grid.showAt(position);
-                }
             },
             itemclick: {
                 fn: function(view, record, item, index, event) {
-                    if (record.data.text.substring(0, 5) !='Grupo'){
+                    if(record.data.leaf){
                         fitMap(record.data.text);                            
+                        Ext.getCmp('btdeletelayer').setVisible(true);
+                        Ext.getCmp('btinfolayer').setVisible(true);
                     }
+                    else{
+                        Ext.getCmp('btdeletelayer').setVisible(false);
+                        Ext.getCmp('btinfolayer').setVisible(false);
+                    }
+                    
                 }
             }               
         }               
@@ -764,7 +802,7 @@ function createhelpPanel(){
 }
 
 function createViewPort(){    
-    createTree();
+    createTree();    
     initLayers();             
     let btInicio = Ext.create('Ext.Button', {  
         iconCls:'fa-house-chimney',
@@ -896,10 +934,21 @@ function createViewPort(){
                 xtype: 'panel',
                 id: 'viewportPanelId',
                 region: 'west',
-                title: project_name,
                 autoScroll: true,
                 border:0,
-                
+                title: project_name,
+                header: {
+                    style: {
+                        border:0,
+                    },
+                    //customize title in the header
+                    title: {
+                        text: project_name,
+                        style: {                            
+                            Color: 'black'
+                        }
+                    }
+                },                
                 lbar:[                    
                     {
                         xtype: 'segmentedbutton',                
@@ -922,98 +971,103 @@ function createViewPort(){
     p.add(treePanel);
 }
 
-function initLayers() {
+function initLayers() {    
     let layers = [];    
     olMap.removeLayer(layersGroup);
     dataLayers.removeAll();
-    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/artifacts",
+    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/layers",
         {headers: noCacheHeaders})
         .then(response => response.json())
-        .then(data => {            
-            for (let art of data.artifacts) {   
-                let layerfile=[];     
-                var layerart = {
-                    'title' : art.title, 
-                    'name': art.name, 
-                    "type": art.type,
-                    "camera": art.camera, 
-                    "date": new Date(art.date),
-                };                
-                dataLayers.add(layerart);
+        .then(value => {                           
+            for (let lyr of value.layers){
+                console.log('codigo capa: '+ lyr)
+                fetch(window.location.protocol + "//" + window.location.host + "/mapper/"+lyr.pk+"/artifacts",
+                    {headers: noCacheHeaders})
+                    .then(respons => respons.json())
+                    .then(data => {                   
+                        let layerfiles=[];     
+                        for (let art of data.artifacts) {                               
+                            var layerart = {
+                                'title' : art.title, 
+                                'name': art.name, 
+                                "type": art.type,
+                                "camera": art.camera, 
+                            };                
+                            dataLayers.add(layerart);
+                            if (art.type === "SHAPEFILE"){
+                                //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
+                                layerfiles.push(new ol.layer.Vector({
+                                    name: art.title,
+                                    source: new ol.source.Vector({
+                                        format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
+                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
+                                            //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
+                                    })
+                            }));}
+                            else if (art.type === "MULTIESPECTRAL"){
+                                //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                                layerfiles.push(new ol.layer.Image({
+                                    //style: falseColor,
+                                    name: art.title,
+                                    source: new ol.source.ImageWMS({
+                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
+                                        params: {"LAYERS": art.layer}
 
-                if (art.type === "SHAPEFILE"){
-                    //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
-                    layerfile.push(new ol.layer.Vector({
-                        name: art.title,
-                        source: new ol.source.Vector({
-                            format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
-                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
-                                //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
-                        })
-                }));}
-                else if (art.type === "MULTIESPECTRAL"){
-                    //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
-                    layerfile.push(new ol.layer.Image({
-                        //style: falseColor,
-                        name: art.title,
-                        source: new ol.source.ImageWMS({
-                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
-                            params: {"LAYERS": art.layer}
+                                    })                            
+                            }));}
+                            else if (art.type === "RGB"){
+                                console.log('prueba RGBw'+window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                                layerfiles.push(new ol.layer.Image({
+                                    name: art.title,
+                                    source: new ol.source.ImageWMS({
+                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
+                                        params: {"LAYERS": art.layer}
+                                    })                            
+                            }));}
+                            else if (art.type === "INDEX"){
+                                console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                                layerfiles.push(new ol.layer.Image({
+                                    name: art.title,
+                                    source: new ol.source.ImageWMS({
+                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
+                                        params: {"LAYERS": art.layer}
 
-                        })                            
-                }));}
-                else if (art.type === "RGB"){
-                    console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
-                    layerfile.push(new ol.layer.Image({
-                        name: art.title,
-                        source: new ol.source.ImageWMS({
-                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
-                            params: {"LAYERS": art.layer}
+                                    }),                           
+                            }));}
+                        }
+                        //console.log('capa geo '+art.layer)                     
+                        let layerGroup = new ol.layer.Group({
+                            name: lyr.title,
+                            leaf: true, 
+                            layers: layerfiles,
+                        });
+                        layers.push(layerGroup); 
+                        console.log("layers valores: " +layers.length);
+                    })
+                    .finally(() => { 
 
-                        })                            
-                }));}
-                else if (art.type === "INDEX"){
-                    console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
-                    layerfile.push(new ol.layer.Image({
-                        name: art.title,
-                        source: new ol.source.ImageWMS({
-                            url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
-                            params: {"LAYERS": art.layer}
+                        layersGroup = new ol.layer.Group({                
+                            layers: layers
+                        });
+                        olMap.addLayer(layersGroup);
+                
+                        if(layers.length > 0){
+                            let layerg = layersGroup.getLayers().getArray().slice(-1); 
+                            let namelayer = layerg[0].getLayers().getArray()[0].get('name');
+                            fitMap(namelayer);
+                        };
+                        var treeStore = Ext.create('GeoExt.data.store.LayersTree', {
+                            layerGroup: layersGroup,
+                        });
+                        //id:'treePanelId',            
+                        Ext.getCmp('treePanelId').setStore(treeStore);
+                        console.log("layers: " +layers.length);                
+            
+                    })
 
-                        }),                           
-                }));}
-                let layerGroup = new ol.layer.Group({
-                    name: 'Grupo '+art.title,
-                    leaf: true, 
-                    layers: layerfile,
-                });
-                layers.push(layerGroup);            
             }
-            layersGroup = new ol.layer.Group({                
-                layers: layers
-            });
-            olMap.addLayer(layersGroup);
-    
-            if(layers.length > 0){
-                let layerg = layersGroup.getLayers().getArray().slice(-1); 
-                let namelayer = layerg[0].getLayers().getArray()[0].get('name');
-                fitMap(namelayer);
-            };
-            var treeStore = Ext.create('GeoExt.data.store.LayersTree', {
-                layerGroup: layersGroup,
-            });
-            //id:'treePanelId',            
-            Ext.getCmp('treePanelId').setStore(treeStore);
-            console.log("layers: " +layers.length);                
             }            
-        ).finally(() => { 
-            console.log('layersgroup: '+ layersGroup.getLayers().getLength());
-            console.log('olMap: ' +olMap.getLayers().getLength());           
-            
-            
-            //treePanel.setStore(treeStore);
-            
-        });
+        )
 }
 
 function fitMap(name) {

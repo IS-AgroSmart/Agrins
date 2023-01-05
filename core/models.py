@@ -490,26 +490,30 @@ class Camera(Enum):
     PARROT = "Parrot Sequoia"
     VECTOR = 'Vector'
     
+class Layer(models.Model):
+    name = models.CharField(max_length=256)
+    title = models.CharField(max_length=256)
+    date = models.DateTimeField(auto_now_add=True)
+    project = models.ForeignKey(UserProject, on_delete=models.CASCADE, related_name="layers", null=True)
 
+    def get_disk_path(self):
+        return self.project.get_disk_path() + "/" + self.name + "/"
 
 class Artifact(models.Model):
     type = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in ArtifactType])
-    camera = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in Camera] )
-    date = models.DateTimeField(auto_now_add=True)
+    camera = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in Camera] )    
     name = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
-    project = models.ForeignKey(UserProject, on_delete=models.CASCADE, related_name="artifacts", null=True)
-
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE, related_name="artifacts", null=True)
+    
     def get_disk_path(self):
-        return self.project.get_disk_path() + "/" + self.name + "/" + ArtifactType.filename(self)
-
+        return ArtifactType.filename(self)
 
 class BlockType(Enum):
     USER_NAME = "UserName"
     IP = "Ip"
     EMAIL = "Email"
     DOMAIN = "Domain"
-
 
 class BlockCriteria(models.Model):
     type = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in BlockType])
