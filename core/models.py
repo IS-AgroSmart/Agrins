@@ -473,6 +473,7 @@ class ArtifactType(Enum):
     MULTIESPECTRAL = "Multiespectral"
     SHAPEFILE = "Shapefile"
     INDEX = "Index"
+    MODEL = "Model"
     RGB = "Rgb"
     KML = "Kml"    
 
@@ -489,6 +490,7 @@ class Camera(Enum):
     REDEDGE = "Micasense RedEdge-M"
     PARROT = "Parrot Sequoia"
     VECTOR = 'Vector'
+    NONE ='none'
     
 class Layer(models.Model):
     name = models.CharField(max_length=256)
