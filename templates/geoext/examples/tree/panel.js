@@ -68,7 +68,7 @@ var dataModel = Ext.create('Ext.data.Store', {
 
 var dataLayers = Ext.create('Ext.data.Store', {
     storeId: 'dataCamera',
-    fields: ['title', 'name', "type","camera"],    
+    fields: ['title', 'name', "type","camera","date"],    
 });
 
 var dataTypeArtefact = Ext.create('Ext.data.Store', {
@@ -299,14 +299,14 @@ function addControlsMap(){
             elementGroup.className = 'btcontrols btn-group';         
             elementGroup.setAttribute("id","idcontrols");
             elementGroup.appendChild(btzoomin);
-            elementGroup.appendChild(btzoomout);
-            elementGroup.appendChild(element);
+            elementGroup.appendChild(btzoomout);            
             elementGroup.appendChild(btnorth);
-            elementGroup.appendChild(btfullscreen);
+            elementGroup.appendChild(element);
+            //elementGroup.appendChild(btfullscreen);
             elementGroup.appendChild(btpoligono);
             elementGroup.appendChild(btdistance);
             elementGroup.appendChild(btpoint);
-            elementGroup.appendChild(btprint);
+            //elementGroup.appendChild(btprint);
             elementGroup.appendChild(btcolorleg);            
             var groupControl = new ol.control.Control({
                 element: elementGroup
@@ -590,7 +590,7 @@ function createindexPanel(){
             iconCls: 'icon-save',
             cls:'btnform',
             handler: function() {
-                var form = this.up('form').getForm();                
+                var form = Ext.getCmp('formIdIndex').getForm();                
                 console.log('camara capa: '+dataLayers.findRecord('title', Ext.getCmp('layer').getRawValue()).get('camera'));  
                 console.log('tipo capa: '+dataLayers.findRecord('title', Ext.getCmp('layer').getRawValue()).get('type'));
                 if (form.isValid()) {
@@ -643,32 +643,40 @@ function createindexPanel(){
 }
 
 function createTree(){   
+    var layerSelect;
+    var isCollapse = true;
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
         border: 0,
+        layout: 'hbox',
+        defaults: {
+            flex: 1
+        },
         items: [
-            {xtype: 'tbtext', html: 'Capas'},
-            ' ',
             {
-                iconCls: 'fa-folder-tree',   
+                xtype: 'button',
+                iconCls: 'fa-arrow-down-short-wide',   
+                id:"expandButton",
                 cls:'fa-solid',
                 tooltip: 'Expandir',
                 handler: function(){
-                    treePanel.expandAll();
+                    if (isCollapse){
+                        treePanel.expandAll();
+                        Ext.getCmp('expandButton').setIconCls('fa-arrow-up-short-wide');
+                        Ext.getCmp('expandButton').setTooltip('Contraer'); 
+                        isCollapse=false;
+                    }
+                    else{
+                        treePanel.collapseAll();
+                        Ext.getCmp('expandButton').setIconCls('fa-arrow-down-short-wide')
+                        Ext.getCmp('expandButton').setTooltip('Expandir');
+                        isCollapse=true;
+                    }
                     Ext.getCmp('btdeletelayer').setVisible(false);
                     Ext.getCmp('btinfolayer').setVisible(false);
                 }
             },
             {
-                iconCls: 'fa-table-list',   
-                cls: 'fa-solid',
-                tooltip: 'Contraer',
-                handler: function(){
-                    treePanel.collapseAll();
-                    Ext.getCmp('btdeletelayer').setVisible(false);
-                    Ext.getCmp('btinfolayer').setVisible(false);
-                }
-            },
-            {
+                xtype: 'button',
                 iconCls: ' fa-rotate',   
                 cls: 'fa-solid',
                 tooltip: 'Recargar',
@@ -679,6 +687,7 @@ function createTree(){
                 }
             },
             {
+                xtype: 'button',
                 id: 'btdeletelayer',
                 iconCls: 'fa-trash-can',   
                 cls: 'fa-solid',
@@ -689,38 +698,41 @@ function createTree(){
                 }
             },
             {
+                xtype: 'button',
                 id: 'btinfolayer',
                 iconCls: 'fa-circle-info',   
                 cls: 'fa-solid',
                 hidden: true,
                 tooltip: 'Información capa',
                 handler: function(){
+                    var lname= layerSelect.data.text;
+                    var lcamera= dataLayers.findRecord('title', layerSelect.data.text).get('camera');
+                    var ltype= dataLayers.findRecord('title', layerSelect.data.text).get('type');
+                    var ldate =  new Date(dataLayers.findRecord('title', layerSelect.data.text).get('date'));
+                        
                     
+
+                    Ext.Msg.alert(lname,
+                     'Cámara: '+lcamera+
+                     '<br/>Tipo:   '+ltype+
+                     '<br/>Fecha:  '+ldate
+                     , Ext.emptyFn);
+
                 }
             }
         ]});
 
     treePanel = Ext.create('Ext.tree.Panel', {
         id:'treePanelId',
-        /*header:{                    
-            titlePosition:1,
-            defaults:{ type:'tool'},
-            items:[btInicio]
-        },*/
-        //store: treeStore,
         rootVisible: false,                
         flex: 1,
-        border: 0,        
-        tbarCfg:{
-            buttonAlign:'right' 
-        },
+        border: 0,               
         tbar: [
             tablbar,
         ],
         style: {
             backgroundColor: 'white',
-        },        
-        
+        },                
         listeners: {
             render: function(){
                 Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});
@@ -730,8 +742,9 @@ function createTree(){
             itemclick: {
                 fn: function(view, record, item, index, event) {
                     if(record.data.leaf){
-                        fitMap(record.data.text);                            
-                        Ext.getCmp('btdeletelayer').setVisible(true);
+                        fitMap(record.data.text);
+                        layerSelect = record;        
+                        Ext.getCmp('btdeletelayer').setVisible(true);                        
                         Ext.getCmp('btinfolayer').setVisible(true);
                     }
                     else{
@@ -816,44 +829,9 @@ function createhelpPanel(){
 function createViewPort(){    
     createTree();    
     initLayers();             
-    let btInicio = Ext.create('Ext.Button', {  
-        iconCls:'fa-house-chimney',
-        cls: 'fa-solid',
-        tooltip: 'Cerrar visualizador',
-        handler: function() {
-            Ext.Msg.show({
-                title:'Salir',
-                message: 'Desea salir del visualizador?',
-                buttons: Ext.Msg.YESNO,
-                icon: Ext.Msg.QUESTION,
-                fn: function(btn) {
-                    if (btn === 'yes') {
-                        top.window.location.href='/#/projects/'                            
-                    } else {
-                        console.log('Cancel pressed');
-                    } 
-                }
-            });                    
-        }
-    });
-
-    let btayuda = Ext.create('Ext.Button', {
-        //text: '？', 
-        iconCls: 'fa-circle-question',         
-        cls:'fa-solid ',
-        tooltip: 'Ayuda',
-        handler: function(){
-            createhelpPanel();
-            var p = Ext.getCmp('viewportPanelId');
-            p.removeAll();
-            p.updateLayout();
-            p.add(helpPanel);
-        }
-        
-    });
-
+    
     let btagregar = Ext.create('Ext.Button', {        
-            //text: 'Agregar',
+            text: 'Agregar',
             iconCls: 'fa-file-circle-plus',
             cls: 'fa-solid ',
             tooltip: 'Agregar nueva capa',
@@ -867,10 +845,10 @@ function createViewPort(){
     });
 
     let btindice = Ext.create('Ext.Button', {        
-        //text: 'Índices',
+        text: 'Índices',
         iconCls: 'fa-images',
         cls: 'fa-solid ',
-        tooltip: 'Crear Índices de vegetas',        
+        tooltip: 'Crear Índices de vegetación',        
         handler: function(){ 
             createindexPanel();
             var p = Ext.getCmp('viewportPanelId');
@@ -879,19 +857,10 @@ function createViewPort(){
             p.add(indexPanel);
 
         },
-        /*width: '88px',
-        menu: [
-           {text: 'GCI', handler: function() {
-               indexWin('gci',"Ïndice GCI",400, 200);
-           }
-           
-            },
-          
-        ]*/
     });
 
     let btModelo  = Ext.create('Ext.Button', {
-        //text: 'Modelo',
+        text: 'Modelo',
         iconCls: 'fa-kaaba',
         cls: 'fa-solid',
         tooltip: 'Modelos deep learning',
@@ -905,9 +874,9 @@ function createViewPort(){
     });
 
     let btcapas  = Ext.create('Ext.Button', {
-            //text: 'Modelo',
+            text: 'Capas',
             iconCls: 'fa-layer-group',
-            cls: 'fa-solid ',
+            cls: 'fa-solid',
             tooltip: 'Capas',
             //width: '90px',
             handler: function() {
@@ -923,15 +892,17 @@ function createViewPort(){
     tabMenu = Ext.create('Ext.toolbar.Toolbar', {   
         style: {
             backgroundColor: 'white',
+        },
+        layout: {
+            pack:'middle',
+            align:'middle'
         },         
-        layout: 'vbox',
         items: [
-            btInicio,
             btcapas,            
             btagregar,
             btindice,
             btModelo,
-            btayuda,
+            
     ],
         
     });     
@@ -952,18 +923,53 @@ function createViewPort(){
                 border:0,
                 title: project_name,
                 header: {
-                    style: {
-                        border:0,
-                    },
-                    //customize title in the header
+                    titlePosition: 1,
                     title: {
                         text: project_name,
                         style: {                            
-                            Color: 'black'
+                                Color: 'black'
+                            }
+                        },
+                    items: [
+                        {
+                            iconCls:'fa-delete-left',
+                            cls: 'fa-solid',
+                            tooltip: 'Cerrar',
+                            handler: function() {
+                                Ext.Msg.show({
+                                    title:'Salir',
+                                    message: 'Desea salir del visualizador?',
+                                    buttonText: {
+                                        yes: 'Si',
+                                        no: 'No'
+                                    },
+                                    buttons: Ext.Msg.YESNO,
+                                    icon: Ext.Msg.QUESTION,
+                                    fn: function(btn) {
+                                        if (btn === 'yes') {
+                                            top.window.location.href='/#/projects/'                            
+                                        } else {
+                                            console.log('Cancel pressed');
+                                        } 
+                                    }
+                                });                    
+                            }
+                        },
+                        {
+                        iconCls: 'fa-circle-question',         
+                        cls:'fa-regular',
+                        tooltip: 'Ayuda',
+                        handler: function(){
+                            createhelpPanel();
+                            var p = Ext.getCmp('viewportPanelId');
+                            p.removeAll();
+                            p.updateLayout();
+                            p.add(helpPanel);
                         }
-                    }
-                },                
-                lbar:[                    
+                    },                    
+                ]
+                  },
+                tbar:[                    
                     {
                         xtype: 'segmentedbutton',                
                         items: isDemo ? [] : [tabMenu],                    
@@ -981,6 +987,7 @@ function createViewPort(){
             },
         ]
     });
+   
     var p = Ext.getCmp('viewportPanelId')
     p.add(treePanel);
 }
@@ -1118,6 +1125,7 @@ function initLayers() {
                                 'name': art.name, 
                                 "type": art.type,
                                 "camera": art.camera, 
+                                "date":lyr.date,
                             };                
                             dataLayers.add(layerart);
                             if (art.type === "SHAPEFILE"){

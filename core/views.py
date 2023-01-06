@@ -555,7 +555,7 @@ def create_raster_index(request, uuid):
         else: bands = ['3','2','1']
     elif request.POST["camera"] == Camera.PARROT.name:
         if request.POST["type"] == ArtifactType.MULTIESPECTRAL.name:
-            bands = ['1','2','3','5','4']
+            bands = ['1','2','3','4','5']
         else: bands = ['1','2','3']
 
     print(bands)
@@ -605,7 +605,6 @@ def create_raster_index(request, uuid):
     layer.artifacts.create(
         name=file_name, type=ArtifactType.INDEX.name, title=file_title, camera=Camera.NONE.name
     )
-
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
 
 @csrf_exempt
@@ -637,7 +636,6 @@ def create_raster_model(request, uuid):
     layer.artifacts.create(
         name=file_name, type=ArtifactType.INDEX.name, title=file_title, camera=Camera.NONE.name
     )
-
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
 
 
