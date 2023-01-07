@@ -681,6 +681,9 @@ function createTree(){
                 cls: 'fa-solid',
                 tooltip: 'Recargar',
                 handler: function(){
+                    Ext.getCmp('expandButton').setIconCls('fa-arrow-down-short-wide')
+                    Ext.getCmp('expandButton').setTooltip('Expandir');
+                    isCollapse=true;
                     Ext.getCmp('btdeletelayer').setVisible(false);
                     Ext.getCmp('btinfolayer').setVisible(false);
                     initLayers();
@@ -708,8 +711,7 @@ function createTree(){
                     var lname= layerSelect.data.text;
                     var lcamera= dataLayers.findRecord('title', layerSelect.data.text).get('camera');
                     var ltype= dataLayers.findRecord('title', layerSelect.data.text).get('type');
-                    var ldate =  new Date(dataLayers.findRecord('title', layerSelect.data.text).get('date'));
-                        
+                    var ldate =  new Date(dataLayers.findRecord('title', layerSelect.data.text).get('date'));                  
                     
 
                     Ext.Msg.alert(lname,
@@ -834,7 +836,7 @@ function createViewPort(){
             text: 'Agregar',
             iconCls: 'fa-file-circle-plus',
             cls: 'fa-solid ',
-            tooltip: 'Agregar nueva capa',
+            tooltip: 'Agregar capa',
             handler: function(){
                 createaddPanel();
                 var p = Ext.getCmp('viewportPanelId');
@@ -848,7 +850,7 @@ function createViewPort(){
         text: 'Índices',
         iconCls: 'fa-images',
         cls: 'fa-solid ',
-        tooltip: 'Crear Índices de vegetación',        
+        tooltip: 'Índices de vegetación',        
         handler: function(){ 
             createindexPanel();
             var p = Ext.getCmp('viewportPanelId');
@@ -932,7 +934,7 @@ function createViewPort(){
                         },
                     items: [
                         {
-                            iconCls:'fa-delete-left',
+                            iconCls:'fa-rectangle-xmark',
                             cls: 'fa-solid',
                             tooltip: 'Cerrar',
                             handler: function() {

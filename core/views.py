@@ -542,33 +542,42 @@ def create_raster_index(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
     if project.user.used_space >= project.user.maximum_space:
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
-    bands = [] #1r 2g 3b 4nir 5rdg
-    print("typo indice: ", request.POST["index"])
-    print("nombre capa: ", request.POST["layer"])
-    print("nombre capa: ", request.POST["title"])
-    print("nombre capa: ", request.POST["type"])
-    print("nombre capa: ", request.POST["camera"])
+    bands = {
+        'R':'',
+        'G':'',
+        'B':'',
+        'NIR':'',
+        'RDG':''
+    }    
     
     if request.POST["camera"] == Camera.REDEDGE.name:
         if request.POST["type"] == ArtifactType.MULTIESPECTRAL.name:
-            bands = ['3','2','1','4','5']
+            bands['R']= '3'
+            bands['G']='2'
+            bands['B']='1'
+            bands['NIR']='4'
+            bands['RDG']='5'                
         else: bands = ['3','2','1']
     elif request.POST["camera"] == Camera.PARROT.name:
         if request.POST["type"] == ArtifactType.MULTIESPECTRAL.name:
-            bands = ['1','2','3','4','5']
-        else: bands = ['1','2','3']
+            bands['R']= '2'
+            bands['G']='1'
+            #bands['B']='1' no aplica 
+            bands['NIR']='4'
+            bands['RDG']='3'
+        
 
     print(bands)
     
     path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
 
     COMMANDS = {
-        'NDVI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands[3]+' -B '+request.POST["layer"]+'.tiff --B_band='+bands[0]+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'GCI':  'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands[3]+' -B '+request.POST["layer"]+'.tiff --B_band='+bands[1]+' --calc="((asarray(A, dtype=float32))/(asarray(B, dtype=float32))) - 1" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'GRRI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands[1]+' -B '+request.POST["layer"]+'.tiff --B_band='+bands[0]+' --calc="(asarray(A, dtype=float32))/(asarray(B, dtype=float32))" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'MGRVI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands[1]+' -B '+request.POST["layer"]+'.tiff --B_band='+bands[0]+' --calc="(power(asarray(A,dtype=float32),2)-power(asarray(B, dtype=float32),2))/(power(asarray(A, dtype=float32),2)+power(asarray(B, dtype=float32),2))" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'NDRE': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands[1]+' -B '+request.POST["layer"]+'.tiff --B_band=4 --calc="((asarray(B,dtype=float32)-asarray(A, dtype=float32))/(asarray(B, dtype=float32)+asarray(A, dtype=float32)) + 1.) * 127." --outfile=ndre.tif --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'NGRDI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands[3]+' -B '+request.POST["layer"]+'.tiff --B_band='+bands[4]+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'NDVI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'GCI':  'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['G']+' --calc="((asarray(A, dtype=float32))/(asarray(B, dtype=float32))) - 1" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'GRRI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="(asarray(A, dtype=float32))/(asarray(B, dtype=float32))" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'MGRVI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="(power(asarray(A,dtype=float32),2)-power(asarray(B, dtype=float32),2))/(power(asarray(A, dtype=float32),2)+power(asarray(B, dtype=float32),2))" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'NDRE': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['RDG']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=ndre.tif --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'NGRDI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
     }
     COLORTXT ={
         'NDVI':'../../../app/core/utils/color_ndvi.txt',
