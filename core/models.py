@@ -491,10 +491,15 @@ class Camera(Enum):
     PARROT = "Parrot Sequoia"
     VECTOR = 'Vector'
     NONE ='none'
+
+class LayerType(Enum):
+    IMAGE = "IMAGE"
+    VECTOR= "VECTOR"
     
 class Layer(models.Model):
     name = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
+    type = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in LayerType])
     date = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(UserProject, on_delete=models.CASCADE, related_name="layers", null=True)
 

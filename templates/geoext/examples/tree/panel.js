@@ -104,7 +104,7 @@ function initApp() {
             let view = new ol.View({               
                 zoom: 7,
                 minZoom: 2,
-                maxZoom: 24,
+                maxZoom: 22,
                 center: ol.proj.transform([-78.58031164977537,-0.394260613241795], 'EPSG:4326', 'EPSG:3857'),
             });
             
@@ -175,6 +175,75 @@ function initApp() {
                 region: 'center',
                 border: false,
                 layout: 'fit',
+                /*tbar:[
+                    {
+                        iconCls:'fa-magnifying-glass-plus',
+                        cls: 'fa-solid',
+                        handler: function(e) {
+                            olMap.getView().animate({
+                                zoom: olMap.getView().getZoom() + 1,
+                                duration: 250
+                              })    
+                        }
+                    },
+                    {
+                        iconCls:'fa-magnifying-glass-minus',
+                        cls: 'fa-solid',
+                        handler: function(e) {
+                            olMap.getView().animate({
+                                zoom: olMap.getView().getZoom() - 1,
+                                duration: 250
+                              })    
+                        }
+                    },
+                    '-',
+                    {
+                        iconCls:'fa-draw-polygon',
+                        cls: 'fa-solid',
+                        handler: function(e){
+                            measureAreaListener();
+                        }
+                    },
+                    {
+                        iconCls:'fa-ruler-combined',
+                        cls: 'fa-solid',
+                        handler: function(e){
+                            measureLengthListener();
+                        }
+                    },
+                    {
+                        iconCls:'fa-location-dot',
+                        cls: 'fa-solid',
+                        handler: function(e){
+                            measurePointListener();
+                        }
+                    },
+                    '-',
+                    {
+                        iconCls:'fa-compass',
+                        cls: 'fa-solid',
+                        handler: function(e) {
+                            olMap.getView().setRotation(0);
+                        }
+                    },
+                    {
+                        iconCls:'fa-maximize',
+                        cls: 'fa-solid'
+                    },
+                    '-',
+                    {
+                        iconCls:'fa-print',
+                        cls: 'fa-solid'
+                    },
+                    {
+                        iconCls:'fa-file-pdf',
+                        cls: 'fa-solid'
+                    },
+                    {
+                        iconCls:'fa-square-poll-horizontal',
+                        cls: 'fa-solid'
+                    },
+                ],*/
                 items: [mapComponent],
                
             });            
@@ -454,6 +523,206 @@ function createaddPanel(){
             }
         }],        
     });
+    
+    var labelFile = {
+        xtype: 'label',
+        id: 'labelfileid',
+
+    };
+
+    var formaddshapefile = Ext.create('Ext.form.Panel', {                
+        id: 'formIdAddshp',
+        width: '100%', 
+        height: '100%',
+        bodyPadding: 10,    
+        border:0,
+        defaultType: 'textfield',
+        items: [{
+            xtype: 'textfield',
+            name: 'title',
+            id: 'titleshp',
+            width:'100%',     
+            fieldLabel: 'Nombre',
+            labelAlign: 'top',
+            allowBlank: false,  // requires a non-empty value            
+            blankText: 'El campo nombre es necesario',
+            msgTarget: 'under' ,
+        },
+        {
+            xtype: 'filefield',
+            name: 'file',
+            buttonOnly: true,
+            fieldLabel: 'Shapefile (cpg, dbf, prj, shp, shx)',                       
+            msgTarget: 'side',
+            labelAlign: 'top',
+            allowBlank: false,
+            blankText: 'Selecciones el conjunto de archivos shapefile',
+            anchor: '100%',        
+            buttonText: 'Seleccionar archivos',
+            regex     : (/.(cpg|dbf|prj|shp|shx)$/i),
+            regexText : 'Solo se acepta archivos shapefile',
+            msgTarget : 'under',  
+            buttonConfig:{
+                iconCls:'icon-folder-open',
+                cls: 'btnform',
+            },
+            listeners: {
+                change: function(fld, value) {
+                    //var newValue = value.replace(/C:\\fakepath\\/g, '');
+                    //fld.setRawValue(newValue);
+                    var upload = fld.fileInputEl.dom;
+                    var files = upload.files;
+                    var names = [];                    
+                    if (files) {
+                        for (var i = 0; i < files.length; i++){                            
+                            names.push(files[i].name)
+                            console.log('posible archivo: '+files[i].name);
+                        }
+                    }
+                    Ext.getCmp('labelfileid').setHtml(names.join("<br/>"))
+                    
+                },
+                /*render:function(field, eOpts){
+                    field.fileInputEl.set({ multiple: true });
+                }*/
+                afterrender:function(cmp){
+                    cmp.fileInputEl.set({
+                        multiple:'multiple'
+                    });
+                }
+            }
+
+
+        },
+        labelFile
+    ],
+    
+        // Reset and Submit buttons
+        buttons: [{
+            text: 'Borrar',
+            iconCls: 'icon-eraser',
+            cls: 'btnform',
+            handler: function() {
+                this.up('form').getForm().reset();
+                Ext.getCmp('labelfileid').setHtml('');
+            }
+        }, {
+            text: 'Guardar',
+            formBind: true, //only enabled once the form is valid
+            disabled: true,
+            iconCls: 'icon-save',
+            cls:'btnform',
+            handler: function() {
+                var form = this.up('form').getForm();                
+                if (form.isValid()) {
+                    form.submit({
+                        method: 'POST',
+                        url : '/api/uploads/' + uuid + '/vectorfile',
+                        params: {
+                            'datatype': 'shp',
+                        },
+                        headers: {
+                            Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                        },
+                        waitMsg:'Cargando archivo espere por favor...',
+                        success: function(fp, o) {
+                            Ext.getCmp('formIdAddshp').reset();
+                            Ext.getCmp('labelfileid').setHtml('');
+                            Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
+                        },
+                        failure: function(fp, o) {                            
+                            Ext.Msg.alert('Error', 'Error al subir capa.');
+                        }
+                    });
+                }
+                
+            }
+        }],        
+    });
+
+    var formaddkml = Ext.create('Ext.form.Panel', {                
+        id: 'formIdAddkml',
+        width: '100%', 
+        height: '100%',
+        bodyPadding: 10,    
+        border:0,
+        defaultType: 'textfield',
+        items: [{
+            xtype: 'textfield',
+            name: 'title',
+            id: 'titlekml',
+            width:'100%',     
+            fieldLabel: 'Nombre',
+            labelAlign: 'top',
+            allowBlank: false,  // requires a non-empty value            
+            blankText: 'El campo nombre es necesario',
+            msgTarget: 'under' ,
+        },
+        {
+            xtype: 'filefield',
+            name: 'file',
+            id: 'filekml',
+            fieldLabel: 'Archivo .kml',
+            width:'100%',                                
+            msgTarget: 'side',
+            labelAlign: 'top',
+            allowBlank: false,
+            blankText: 'Selecciones un archivo en formato .kml',
+            anchor: '100%',
+            buttonText: 'Abrir',
+            regex     : (/.(kml)$/i),
+            regexText : 'Solo se acepta archivos en formato .kml',
+            msgTarget : 'under',
+            buttonConfig:{
+                iconCls:'icon-folder-open',
+                cls: 'btnform',
+            }
+            
+        },
+    ],
+    
+        // Reset and Submit buttons
+        buttons: [{
+            text: 'Borrar',
+            iconCls: 'icon-eraser',
+            cls: 'btnform',
+            handler: function() {
+                this.up('form').getForm().reset();
+            }
+        }, {
+            text: 'Guardar',
+            formBind: true, //only enabled once the form is valid
+            disabled: true,
+            iconCls: 'icon-save',
+            cls:'btnform',
+            handler: function() {
+                var form = this.up('form').getForm();                
+                if (form.isValid()) {
+                    form.submit({
+                        method: 'POST',
+                        url : '/api/uploads/' + uuid + '/vectorfile',
+                        params: {
+                            'datatype': 'kml',
+                        },
+                        headers: {
+                            Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                        },
+                        waitMsg:'Cargando archivo espere por favor...',
+                        success: function(fp, o) {
+                            Ext.getCmp('formIdAddkml').reset();
+                            Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
+                        },
+                        failure: function(fp, o) {
+                            Ext.Msg.alert('Error', 'Error al subir capa.');
+                        }
+                    });
+                }
+                
+            }
+        }],        
+    });
+
+
 
     var tabMenu = Ext.create('Ext.tab.Panel', {
         width: '100%',        
@@ -466,11 +735,11 @@ function createaddPanel(){
         }, 
         {
             title: 'ShapeFile',
-            //items:[ formaddTiff ]
+            items:[ formaddshapefile ]
         },
         {
             title: 'KML',
-            //items:[ formaddTiff ]
+            items:[ formaddkml ]
         },
     ]
     });
@@ -675,7 +944,7 @@ function createTree(){
                     Ext.getCmp('btinfolayer').setVisible(false);
                 }
             },
-            {
+            /*{
                 xtype: 'button',
                 iconCls: ' fa-rotate',   
                 cls: 'fa-solid',
@@ -688,7 +957,7 @@ function createTree(){
                     Ext.getCmp('btinfolayer').setVisible(false);
                     initLayers();
                 }
-            },
+            },*/
             {
                 xtype: 'button',
                 id: 'btdeletelayer',
@@ -833,8 +1102,8 @@ function createViewPort(){
     initLayers();             
     
     let btagregar = Ext.create('Ext.Button', {        
-            text: 'Agregar',
-            iconCls: 'fa-file-circle-plus',
+            //text: 'Agregar',
+            iconCls: 'fa-circle-plus',
             cls: 'fa-solid ',
             tooltip: 'Agregar capa',
             handler: function(){
@@ -846,8 +1115,20 @@ function createViewPort(){
             }
     });
 
+    let btreload = Ext.create('Ext.Button',{
+            xtype: 'button',
+            iconCls: ' fa-rotate',   
+            cls: 'fa-solid',
+            tooltip: 'Recargar',
+            handler: function(){            
+                Ext.getCmp('btdeletelayer').setVisible(false);
+                Ext.getCmp('btinfolayer').setVisible(false);
+                initLayers();
+            }
+    })
+
     let btindice = Ext.create('Ext.Button', {        
-        text: 'Índices',
+        //text: 'Índices',
         iconCls: 'fa-images',
         cls: 'fa-solid ',
         tooltip: 'Índices de vegetación',        
@@ -862,7 +1143,7 @@ function createViewPort(){
     });
 
     let btModelo  = Ext.create('Ext.Button', {
-        text: 'Modelo',
+        //text: 'Modelo',
         iconCls: 'fa-kaaba',
         cls: 'fa-solid',
         tooltip: 'Modelos deep learning',
@@ -876,7 +1157,7 @@ function createViewPort(){
     });
 
     let btcapas  = Ext.create('Ext.Button', {
-            text: 'Capas',
+            //text: 'Capas',
             iconCls: 'fa-layer-group',
             cls: 'fa-solid',
             tooltip: 'Capas',
@@ -900,8 +1181,8 @@ function createViewPort(){
             align:'middle'
         },         
         items: [
-            btcapas,            
-            btagregar,
+            
+            
             btindice,
             btModelo,
             
@@ -917,12 +1198,10 @@ function createViewPort(){
         layout: 'border',
         items: [
             mapPanel,                    
-            {                   
+            {
                 xtype: 'panel',
-                id: 'viewportPanelId',
-                region: 'west',
-                autoScroll: true,
-                border:0,
+                id: 'titlePanelId',
+                region: 'north',
                 title: project_name,
                 header: {
                     titlePosition: 1,
@@ -934,7 +1213,7 @@ function createViewPort(){
                         },
                     items: [
                         {
-                            iconCls:'fa-rectangle-xmark',
+                            iconCls:'fa-circle-left',
                             cls: 'fa-solid',
                             tooltip: 'Cerrar',
                             handler: function() {
@@ -971,12 +1250,40 @@ function createViewPort(){
                     },                    
                 ]
                   },
-                tbar:[                    
+            },
+            {                   
+                xtype: 'panel',
+                id: 'viewportPanelId',
+                region: 'west',
+                autoScroll: true,
+                border:0,
+                title: 'Capas',
+                header: {
+                    titlePosition: 0,
+                    title: {
+                        text: 'Capas',
+                        style: {                            
+                                Color: 'black'
+                            }
+                        },
+                    items: [
+                        {
+                            //xtype: 'tab',                
+                            border: 0,
+                            items: isDemo ? [] : [tabMenu],                    
+                        },
+                        
+                        btcapas, 
+                        btagregar,
+                    ]
+                    },
+                
+                /*tbar:[                    
                     {
                         xtype: 'segmentedbutton',                
                         items: isDemo ? [] : [tabMenu],                    
                     }
-                ],
+                ],*/
                 collapsible: true,                        
                 width: 320,
                 split: true,
@@ -1170,6 +1477,16 @@ function initLayers() {
 
                                     }),                           
                             }));}
+                            else if (art.type === "KML"){
+                                //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
+                                layerfiles.push(new ol.layer.Vector({
+                                    name: art.title,
+                                    source: new ol.source.Vector({
+                                        format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
+                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
+                                            //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
+                                    })
+                            }));}
                         }
                         //console.log('capa geo '+art.layer)                     
                         let layerGroup = new ol.layer.Group({
@@ -1208,6 +1525,7 @@ function initLayers() {
 }
 
 function fitMap(name) {
+    console.log('consulta: '+ name);
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ name+"/bbox",
         {headers: noCacheHeaders,})
         .then(response => response.json())

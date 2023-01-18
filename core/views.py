@@ -400,6 +400,7 @@ def download_artifact_movil(request, uuid, options, artifact):
     return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
 '''
 
+@xframe_options_exempt 
 @csrf_exempt
 def upload_vectorfile(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
@@ -407,6 +408,11 @@ def upload_vectorfile(request, uuid):
     datatype = request.POST.get("datatype", "shp")
     project = UserProject.objects.get(pk=uuid)
 
+    print('archivos: ', request.FILES["file"])
+    for file in request.FILES.getlist("file"):
+        print('archivos lista: ', file.name)
+    return JsonResponse({'success':True, "msg":"Archivo cargado"})
+'''
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
 
@@ -418,8 +424,18 @@ def upload_vectorfile(request, uuid):
         file: UploadedFile = request.FILES["file"]
     # remove extension to get only X
     file_name = ".".join(file.name.split(".")[:-1]).replace(" ", "")
-    project.artifacts.create(
-        name=file_name, type=ArtifactType.SHAPEFILE.name, title=request.POST["title"])
+
+    layer = project.layers.create(
+        name=file_name, title=request.POST["title"], type=LayerType.VECTOR.name)
+
+    if datatype == "shp":
+        layer.artifacts.create(
+        name=file_name, type=ArtifactType.SHAPEFILE.name, title=request.POST["title"], camera=Camera.NONE.name)
+        
+    elif datatype == "kml":
+        layer.artifacts.create(
+        name=file_name, type=ArtifactType.KML.name, title=request.POST["title"], camera=Camera.NONE.name)   
+
 
     # Write file(s) to disk on project folder
     os.makedirs(project.get_disk_path() + "/" + file_name, exist_ok=True)
@@ -444,15 +460,16 @@ def upload_vectorfile(request, uuid):
              str(project.uuid) + "/" + file_name + "/" + file_name + ".shp",
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
 
-    requests.put(
+    requests.put(    
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/datastores/" +
         file_name + "/featuretypes/" + file_name + ".json",
         headers={"Content-Type": "application/json"},
+        
         data='{"featureType": {"enabled": true, "srs": "EPSG:4326" }}',
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
-    return HttpResponse(status=201)
+    return JsonResponse({'success':True, "msg":"Archivo cargado"})'''
 
 
 
@@ -461,8 +478,6 @@ def upload_vectorfile(request, uuid):
 def upload_geotiff(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
     project = UserProject.objects.get(pk=uuid)
-    
-
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
     
@@ -471,7 +486,7 @@ def upload_geotiff(request, uuid):
         ".")[:-1])  # Remove extension, get X
         
     layer = project.layers.create(
-        name=geotiff_name, title=request.POST["title"])
+        name=geotiff_name, title=request.POST["title"], type= LayerType.IMAGE.name)
 
     layer.artifacts.create(
         name=geotiff_name, type=ArtifactType(request.POST["type"]).name, title=request.POST["title"], camera=Camera(request.POST["camera"]).name
@@ -571,14 +586,9 @@ def create_raster_index(request, uuid):
     
     path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
 
-    COMMANDS = {
-        'NDVI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'GCI':  'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['G']+' --calc="((asarray(A, dtype=float32))/(asarray(B, dtype=float32))) - 1" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'GRRI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="(asarray(A, dtype=float32))/(asarray(B, dtype=float32))" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'MGRVI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="(power(asarray(A,dtype=float32),2)-power(asarray(B, dtype=float32),2))/(power(asarray(A, dtype=float32),2)+power(asarray(B, dtype=float32),2))" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'NDRE': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['RDG']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=ndre.tif --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'NGRDI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-    }
+    file_title = request.POST["title"]+'-'+request.POST["index"]
+    file_name = request.POST["layer"]+'-'+request.POST["index"]
+
     COLORTXT ={
         'NDVI':'../../../app/core/utils/color_ndvi.txt',
         'GCI':'../../../app/core/utils/color_ndvi.txt',
@@ -587,11 +597,20 @@ def create_raster_index(request, uuid):
         'MGRVI':'../../../app/core/utils/color_ndvi.txt',
         'NDRE':'../../../app/core/utils/color_ndvi.txt',
     }
-    file_title = request.POST["title"]+'-'+request.POST["index"]
-    file_name = request.POST["layer"]+'-'+request.POST["index"]
+    color = COLORTXT.get(request.POST["index"])
+    COMMANDS = {
+        'NDVI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'GCI':  'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['G']+' --calc="((((asarray(A, dtype=float32))/(asarray(B, dtype=float32))) - 1)+1.)*127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'GRRI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A, dtype=float32))/(asarray(B, dtype=float32)))*127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'MGRVI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="(power(asarray(A,dtype=float32),2)-power(asarray(B, dtype=float32),2))/(power(asarray(A, dtype=float32),2)+power(asarray(B, dtype=float32),2))" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'NDRE': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['RDG']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=ndre.tif --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'NGRDI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+    }
+    
+    
     with cd(path):    
         command = COMMANDS.get(request.POST["index"])
-        color = COLORTXT.get(request.POST["index"])
+        
 
         os.system(command)  # Create raster, save it to <index>.tif on folder <flight_uuid>/odm_orthophoto
         print('entre comandos')
@@ -693,16 +712,26 @@ def mapper(request, uuid):
 
 
 def mapper_bbox(request, uuid, name):    
+
     project = UserProject.objects.get(uuid=uuid)    
     if(name.endswith(('-NDVI','-GCI','-GRRI','-MGRVI','-NDRE','-NGRDI'))):
         name = "-".join((name).split('-')[0:-1])
     for art in project.layers.all():
-        if (art.title == name):
-            ans = requests.get(
-            "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
-            "/coveragestores/"+art.name+"/coverages/"+art.name+".json",
-            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
-            return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
+        print('titulo: ',art.title)
+        print('nombre: ',art.name)
+        if (art.title == name):             
+            if (art.type == 'IMAGE'):
+                ans = requests.get(
+                "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
+                "/coveragestores/"+art.name+"/coverages/"+art.name+".json",
+                auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()                
+                return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
+            elif (art.type == 'VECTOR'):
+                ans = requests.get(
+                "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
+                "/datastores/"+art.name+"/featuretypes/"+art.name+".json",
+                auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
+                return JsonResponse({"bbox": ans["featureType"]["nativeBoundingBox"], "srs": ans["featureType"]["srs"]})
     return JsonResponse({"data":"not found"})
 
 def mapper_artifacts(request,index):
