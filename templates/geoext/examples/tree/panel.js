@@ -35,6 +35,7 @@ proj4.defs('EPSG:32617', '+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs');
 proj4.defs('EPSG:32717', '+proj=utm +zone=17 +south +datum=WGS84 +units=m +no_defs');
 proj4.defs('EPSG:32634', '+proj=utm +zone=34 +datum=WGS84 +units=m +no_defs')
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
+
 var dataCamera = Ext.create('Ext.data.Store', {
     storeId: 'dataCamera',
     fields: ['id', 'name'],
@@ -522,13 +523,7 @@ function createaddPanel(){
                 
             }
         }],        
-    });
-    
-    var labelFile = {
-        xtype: 'label',
-        id: 'labelfileid',
-
-    };
+    });    
 
     var formaddshapefile = Ext.create('Ext.form.Panel', {                
         id: 'formIdAddshp',
@@ -551,50 +546,69 @@ function createaddPanel(){
         {
             xtype: 'filefield',
             name: 'file',
-            buttonOnly: true,
-            fieldLabel: 'Shapefile (cpg, dbf, prj, shp, shx)',                       
-            msgTarget: 'side',
-            labelAlign: 'top',
+            //buttonOnly: true,
+            fieldLabel: 'Shapefile (dbf,shp, shx)',                                               
+            labelAlign: 'top',            
             allowBlank: false,
-            blankText: 'Selecciones el conjunto de archivos shapefile',
+            blankText: 'Seleccione el conjunto de archivos shapefile',
             anchor: '100%',        
-            buttonText: 'Seleccionar archivos',
-            regex     : (/.(cpg|dbf|prj|shp|shx)$/i),
-            regexText : 'Solo se acepta archivos shapefile',
+            //buttonText: 'Seleccionar archivos',
+            //regex     : (/.(cpg|dbf|prj|shp|shx)$/i),
+            //regexText : 'Solo se acepta archivos shapefile',
             msgTarget : 'under',  
             buttonConfig:{
                 iconCls:'icon-folder-open',
                 cls: 'btnform',
             },
+            /*validator: function(value){
+                if (value == '')
+                    return 'Seleccione el conjunto de archivos shapefile';
+                console.log('ingeso validator: '+ value);
+                return 'error en el archivo';
+            },*/
             listeners: {
                 change: function(fld, value) {
                     //var newValue = value.replace(/C:\\fakepath\\/g, '');
                     //fld.setRawValue(newValue);
+                    var extension = ['shp', 'dbf', 'shx'];
                     var upload = fld.fileInputEl.dom;
                     var files = upload.files;
                     var names = [];                    
-                    if (files) {
+                    if (files) {                        
                         for (var i = 0; i < files.length; i++){                            
+                            var namfile = files[i].name.split('.').shift();
+                            var extention = files[i].name.split('.').pop();
+                            if(extension.indexOf(extention) != -1){
+                                extension=extension.filter(function (letter) {
+                                    return letter !== extention;
+                                });
+                            }
+                            else{
+                                fld.setRawValue('');
+                                return;
+                            }                          
                             names.push(files[i].name)
-                            console.log('posible archivo: '+files[i].name);
                         }
+                        if(extension.length == 0){
+                            fld.setRawValue(names);return;
+                        }                            
+                        else{
+                            fld.setRawValue('');return
+                        }                      
+
                     }
-                    Ext.getCmp('labelfileid').setHtml(names.join("<br/>"))
+                    fld.setRawValue('');return;
                     
                 },
-                /*render:function(field, eOpts){
-                    field.fileInputEl.set({ multiple: true });
-                }*/
                 afterrender:function(cmp){
                     cmp.fileInputEl.set({
-                        multiple:'multiple'
+                        multiple:'multiple',
+                        regex     : (/.(cpg|dbf|prj|shp|shx)$/i),
+                        regexText : 'Solo se acepta archivos shapefile',
                     });
                 }
             }
-
-
         },
-        labelFile
     ],
     
         // Reset and Submit buttons
@@ -603,8 +617,7 @@ function createaddPanel(){
             iconCls: 'icon-eraser',
             cls: 'btnform',
             handler: function() {
-                this.up('form').getForm().reset();
-                Ext.getCmp('labelfileid').setHtml('');
+                this.up('form').getForm().reset();                
             }
         }, {
             text: 'Guardar',
@@ -626,8 +639,7 @@ function createaddPanel(){
                         },
                         waitMsg:'Cargando archivo espere por favor...',
                         success: function(fp, o) {
-                            Ext.getCmp('formIdAddshp').reset();
-                            Ext.getCmp('labelfileid').setHtml('');
+                            Ext.getCmp('formIdAddshp').reset();                            
                             Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
                         },
                         failure: function(fp, o) {                            
@@ -1443,8 +1455,18 @@ function initLayers() {
                                     name: art.title,
                                     source: new ol.source.Vector({
                                         format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
+                                        projection: 'EPSG:4326',
                                         url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
                                             //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
+                                    }),
+                                    
+                                    style: new ol.style.Style({
+                                        fill: new ol.style.Fill({
+                                            color:'orange'
+                                        }),
+                                        stroke: new ol.style.Stroke({
+                                            color:'black'
+                                        })
                                     })
                             }));}
                             else if (art.type === "MULTIESPECTRAL"){
@@ -1485,6 +1507,14 @@ function initLayers() {
                                         format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
                                         url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
                                             //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
+                                    }),
+                                    style: new ol.style.Style({
+                                        fill: new ol.style.Fill({
+                                            color:'orange'
+                                        }),
+                                        stroke: new ol.style.Stroke({
+                                            color:'black'
+                                        })
                                     })
                             }));}
                         }

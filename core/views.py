@@ -42,7 +42,7 @@ from django_rest_passwordreset.signals import reset_password_token_created
 from .utils.token import  TokenGenerator
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-
+import geopandas as gpd
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -408,11 +408,7 @@ def upload_vectorfile(request, uuid):
     datatype = request.POST.get("datatype", "shp")
     project = UserProject.objects.get(pk=uuid)
 
-    print('archivos: ', request.FILES["file"])
-    for file in request.FILES.getlist("file"):
-        print('archivos lista: ', file.name)
-    return JsonResponse({'success':True, "msg":"Archivo cargado"})
-'''
+    
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
 
@@ -449,6 +445,12 @@ def upload_vectorfile(request, uuid):
         with cd(project.get_disk_path() + "/" + file_name):
             os.system('ogr2ogr -f "ESRI Shapefile" "{0}.shp" "{0}.kml"'.format(file_name))
 
+    if datatype == 'shp':
+        filein = project.get_disk_path() + "/" + file_name+"/" + file_name +'.shp'
+        data = gpd.read_file(filein)
+        data = data.to_crs(epsg=4326)
+        data.to_file(filein)
+
     GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
 
     requests.put(
@@ -463,13 +465,12 @@ def upload_vectorfile(request, uuid):
     requests.put(    
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/datastores/" +
         file_name + "/featuretypes/" + file_name + ".json",
-        headers={"Content-Type": "application/json"},
-        
-        data='{"featureType": {"enabled": true, "srs": "EPSG:4326" }}',
+        headers={"Content-Type": "application/json"},        
+        data='{"featureType": {"enabled": true,  }}',
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
-    return JsonResponse({'success':True, "msg":"Archivo cargado"})'''
+    return JsonResponse({'success':True, "msg":"Archivo cargado"})
 
 
 
@@ -731,6 +732,7 @@ def mapper_bbox(request, uuid, name):
                 "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
                 "/datastores/"+art.name+"/featuretypes/"+art.name+".json",
                 auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
+                print('valores: ',ans["featureType"]["nativeBoundingBox"], 'srs: ',ans["featureType"]["srs"])
                 return JsonResponse({"bbox": ans["featureType"]["nativeBoundingBox"], "srs": ans["featureType"]["srs"]})
     return JsonResponse({"data":"not found"})
 
