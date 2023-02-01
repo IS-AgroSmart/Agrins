@@ -1045,13 +1045,37 @@ function createTree(){
                 Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});
             },
             itemcontextmenu: function(tree, record, item, index, e, eOpts ) {
+
+                var lname= layerSelect.data.text;
+                var lcamera= dataLayers.findRecord('title', layerSelect.data.text).get('camera');
+                var ltype= dataLayers.findRecord('title', layerSelect.data.text).get('type');
+                var ldate =  new Date(dataLayers.findRecord('title', layerSelect.data.text).get('date'));                  
+                var m_item = [];
+                if(record.data.leaf){
+                    if (ltype == 'MULTIESPECTRAL '){
+                        m_item = [
+                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down', handler: function() {console.log("More details");} },
+                            { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },
+                            { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
+                            { text: 'Modelo', iconCls:'fa-solid fa-kaaba', handler: function() {console.log("Delete");} },
+                            { text: 'Índice', iconCls:'fa-solid fa-images', handler: function() {console.log("Delete");} }
+                        ]
+                    }
+                    else{
+                        m_item = [
+                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down', handler: function() {console.log("More details");} },
+                            { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },
+                            { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
+                        ]
+                    }
+                    
+                }
+                else{
+                    m_item =[{ text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },]
+                }
+
                 // Optimize : create menu once
-                var menu_grid = new Ext.menu.Menu({ items:
-                  [
-                      { text: 'More details', handler: function() {console.log("More details");} },
-                      { text: 'Delete', handler: function() {console.log("Delete");} }
-                  ]
-                  });
+                var menu_grid = new Ext.menu.Menu({ items:m_item });
                 var position = e.getXY();
                 e.stopEvent();
                 menu_grid.showAt(position);
