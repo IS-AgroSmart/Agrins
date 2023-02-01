@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="ol/ol.css">
     <link rel="stylesheet" type="text/css"98
-    href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/classic/theme-crisp/resources/theme-crisp-all.css"/>
+    href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/classic/theme-triton/resources/theme-triton-all.css"/>
 
     <!-- Openlayers latest    -->
     <link rel="stylesheet" href="https://openlayers.org/en/latest/legacy/ol.css" />
@@ -78,12 +78,57 @@
     
 <style>  
 
+    .x-btn-inner-default-small{
+        color:black !important;
+    }
+    .x-tab-bar-plain .x-tab-icon-el-default {
+        color: white !important;
+    }
+
+    .x-tab-bar-plain .x-tab.x-tab-active.x-tab-default .x-tab-icon-el {
+        color: #5fa2dd !important;
+    }
+
+    .x-panel-header-title-default{
+        color: white !important;
+    }
+
+
+    .x-grid-cell-inner-treecolumn{
+        background-color: white !important;
+    }
+
     .x-tab-active{
-        background-color: rgba(19, 71, 87, 0.589) !important;
+        background-color: rgb(255, 255, 255) !important;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;;
         
     }
-    .x-tab-bar-body{
-        background-color: rgb(245, 245, 245) !important;
+    .x-tab-bar-body {
+        background-color:#8b9e9b !important;
+    }
+
+    .x-window-header-default{
+        background-color: rgb(245, 245, 245) !important;  
+        border: none !important;      
+    }
+
+    .x-window-header-title-default{
+        color: black !important;
+    }
+
+    .x-tool-tool-el{
+        color: rgb(255, 255, 255) !important;
+        background-color: #8b9e9b !important;  
+    }
+
+    .x-panel-header-default-vertical{
+        color: black !important;
+        background-color: #8b9e9b !important;  
+    }
+
+    .x-panel-body-default{
+        border: none !important;
     }
 
     .btn-white-back{
@@ -93,12 +138,16 @@
     
     /*.x-tree-icon { display: none !important; }*/
     .myCls .x-panel-header-default {
-        background-color: rgb(245, 245, 245) !important;
+        background-color: #8b9e9b !important;
+    }
+    .x-toolbar-item{
+        background-color: rgb(255, 255, 255) !important;
     }
 
 
     .fa-solid, .fa-brands, .fa-regular {
-        border: none;        
+        border: none;      
+        background-color: none !important;  
     }
 
     .fa-solid:hover{
@@ -128,7 +177,7 @@
         color:rgba(1, 112, 197, 0.611)
     }
     .fa-circle-xmark{
-        color:rgba(81, 146, 196)
+        color:rgb(255, 255, 255)
     }
     .fa-file-circle-plus {
         color:rgba(60, 100, 50, 0.875)

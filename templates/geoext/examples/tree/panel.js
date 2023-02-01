@@ -782,11 +782,11 @@ function createaddPanel(){
         autoScroll: true,
         overflowY: 'scroll',
         height: '100%',         
-        border:0,
-
-        /*tbar:[
+        border:false,
+        padding:'5 0 0 0',
+        tbar:[
             {xtype: 'tbtext', html: 'Agregar Capa'},'->',
-        ],*/       
+        ],
         items:[
             tabMenu
         ],
@@ -950,9 +950,9 @@ function createTree(){
     var layerSelect;
     var isCollapse = true;
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
-        border: 0,
-        layout: 'hbox',
-        items: [
+        border: false,    
+        //cls: 'tbar-menu',          
+        items: [ 
             {
                 xtype: 'button',
                 iconCls: 'fa-arrow-down-short-wide',   
@@ -1031,12 +1031,12 @@ function createTree(){
         autoScroll: true,
         rootVisible: false,                
         flex: 1,
-        border: 0,               
+        border: false,               
+        padding:6,
         height:'100%',
-        
-        tbar: [
+        /*tbar: [
             tablbar,
-        ],
+        ],*/
         style: {
             backgroundColor: 'white',
         },                
@@ -1044,7 +1044,19 @@ function createTree(){
             render: function(){
                 Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});
             },
-            itemcontextmenu:{},
+            itemcontextmenu: function(tree, record, item, index, e, eOpts ) {
+                // Optimize : create menu once
+                var menu_grid = new Ext.menu.Menu({ items:
+                  [
+                      { text: 'More details', handler: function() {console.log("More details");} },
+                      { text: 'Delete', handler: function() {console.log("Delete");} }
+                  ]
+                  });
+                var position = e.getXY();
+                e.stopEvent();
+                menu_grid.showAt(position);
+             },
+            
             itemclick: {
                 fn: function(view, record, item, index, event) {
                     if(record.data.leaf){
@@ -1248,12 +1260,13 @@ function createViewPort(){
                 width: 300,                
                 collapsible: true,
                 cls:'myCls',
+                height: '100%',
                 header: {                    
                     titlePosition: 1,
                     title: {
                         text: project_name,
                         style: {                            
-                                Color: 'black'
+                                color: 'white'
                             }
                         },
                     //height:30,
@@ -1306,47 +1319,52 @@ function createViewPort(){
                     id: 'tabPanel',   
                     layout : 'vbox',
                     plain: true,
+                    border: false,
                     region: 'center',
-                                       
+                    height:'100%',
                     tabBar: {
                             defaults: {
                                 flex: 1, // if you want them to stretch all the way
-                                //height: 20, // set the height
+                                //height: 50, // set the height
                                 //padding: 6 // set the padding
                             },
-                            dock: 'top'
+                            //dock: 'top'
+                            //items:[{text:'datos'}]
+                            
                         },
 
 
 
                     //headerCls:'myCls',
                     items: [{
-                            title:'Capas',
+                            //title:'Capas',
                             tooltip:'Capas',
                             iconCls: "fa-solid fa-layer-group btn-white-back",
                             iconAlign: 'top',
                             items: [{
                                 xtype: 'panel',
+                                height:'100%',
                                 id: 'viewportPanelId',
                             }]
                         }, 
                         {
-                            title: 'Agregar',
+                            //title: 'Agregar',
                             tooltip: 'Agregar',
                             iconCls: 'fa-solid fa-file-circle-plus btn-white-back',                                                  
                             iconAlign: 'top',
+                            height:'100%',
                             items: [addPanel]
                         },
-                        /*{
+                        {
                             //title: 'Configuración',
                             tooltip: 'Configuración',
                             iconCls: 'fa-solid fa-gears btn-white-back',                                                  
                             iconAlign: 'top',
                             //items: [addPanel]
                         }
-                        ,*/
+                        ,
                         {
-                            title: 'Ayuda',
+                            //title: 'Ayuda',
                             tooltip: 'Ayuda',
                             iconCls: 'fa-solid fa-circle-question btn-white-back',                                                  
                             iconAlign: 'top',
