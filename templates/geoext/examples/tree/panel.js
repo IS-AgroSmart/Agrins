@@ -178,7 +178,7 @@ function initApp() {
                 layout: 'fit',
                 /*tbar:[
                     {
-                        iconCls:'fa-magnifying-glass-plus',
+                        iconCls:'fa-magnifying-glass-plus ',
                         cls: 'fa-solid',
                         handler: function(e) {
                             olMap.getView().animate({
@@ -186,7 +186,7 @@ function initApp() {
                                 duration: 250
                               })    
                         }
-                    },
+                    },'-',
                     {
                         iconCls:'fa-magnifying-glass-minus',
                         cls: 'fa-solid',
@@ -206,8 +206,8 @@ function initApp() {
                         }
                     },
                     {
-                        iconCls:'fa-ruler-combined',
-                        cls: 'fa-solid',
+                        iconCls:'fa-solid fa-ruler-combined',
+                        //cls: 'btnmenu',
                         handler: function(e){
                             measureLengthListener();
                         }
@@ -513,6 +513,7 @@ function createaddPanel(){
                         waitMsg:'Cargando archivo espere por favor...',
                         success: function(fp, o) {
                             Ext.getCmp('formIdAdd').reset();
+                            initLayers();
                             Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
                         },
                         failure: function(fp, o) {
@@ -547,12 +548,12 @@ function createaddPanel(){
             xtype: 'filefield',
             name: 'file',
             //buttonOnly: true,
-            fieldLabel: 'Shapefile (dbf,shp, shx)',                                               
+            fieldLabel: 'Shapefile (dbf,shp, shx, prj)',                                   
             labelAlign: 'top',            
             allowBlank: false,
             blankText: 'Seleccione el conjunto de archivos shapefile',
             anchor: '100%',        
-            //buttonText: 'Seleccionar archivos',
+            buttonText: 'Abrir',
             //regex     : (/.(cpg|dbf|prj|shp|shx)$/i),
             //regexText : 'Solo se acepta archivos shapefile',
             msgTarget : 'under',  
@@ -570,7 +571,7 @@ function createaddPanel(){
                 change: function(fld, value) {
                     //var newValue = value.replace(/C:\\fakepath\\/g, '');
                     //fld.setRawValue(newValue);
-                    var extension = ['shp', 'dbf', 'shx'];
+                    var extension = ['shp', 'dbf', 'shx', 'prj'];
                     var upload = fld.fileInputEl.dom;
                     var files = upload.files;
                     var names = [];                    
@@ -640,6 +641,7 @@ function createaddPanel(){
                         waitMsg:'Cargando archivo espere por favor...',
                         success: function(fp, o) {
                             Ext.getCmp('formIdAddshp').reset();                            
+                            initLayers();
                             Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
                         },
                         failure: function(fp, o) {                            
@@ -722,6 +724,7 @@ function createaddPanel(){
                         waitMsg:'Cargando archivo espere por favor...',
                         success: function(fp, o) {
                             Ext.getCmp('formIdAddkml').reset();
+                            initLayers();
                             Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
                         },
                         failure: function(fp, o) {
@@ -739,18 +742,36 @@ function createaddPanel(){
     var tabMenu = Ext.create('Ext.tab.Panel', {
         width: '100%',        
         height: '100%',    
-        border: 0,      
+        border: 0,    
+        cls:'myCls',
+        layout : 'vbox',
+        plain: true,
+        region: 'center',
+        tabBar: {
+            defaults: {
+            flex: 1, // if you want them to stretch all the way
+            //height: 20, // set the height
+            //padding: 6 // set the padding
+            },
+            dock: 'top'
+        },
+
+
+
         items: [{
-            title: 'GeoTiff',
-            cls:'btnformTab',
+            title: 'GeoTiff',            
+            
+            
             items:[ formaddTiff ]
         }, 
         {
             title: 'ShapeFile',
+            flex: 2,
             items:[ formaddshapefile ]
         },
         {
             title: 'KML',
+            flex: 2,
             items:[ formaddkml ]
         },
     ]
@@ -759,11 +780,13 @@ function createaddPanel(){
     addPanel = new Ext.create('Ext.panel.Panel', {                
         width: '100%',
         autoScroll: true,
+        overflowY: 'scroll',
         height: '100%',         
         border:0,
-        tbar:[
+
+        /*tbar:[
             {xtype: 'tbtext', html: 'Agregar Capa'},'->',
-        ],       
+        ],*/       
         items:[
             tabMenu
         ],
@@ -929,9 +952,6 @@ function createTree(){
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
         border: 0,
         layout: 'hbox',
-        defaults: {
-            flex: 1
-        },
         items: [
             {
                 xtype: 'button',
@@ -956,7 +976,7 @@ function createTree(){
                     Ext.getCmp('btinfolayer').setVisible(false);
                 }
             },
-            /*{
+            {
                 xtype: 'button',
                 iconCls: ' fa-rotate',   
                 cls: 'fa-solid',
@@ -969,7 +989,7 @@ function createTree(){
                     Ext.getCmp('btinfolayer').setVisible(false);
                     initLayers();
                 }
-            },*/
+            },
             {
                 xtype: 'button',
                 id: 'btdeletelayer',
@@ -1004,12 +1024,16 @@ function createTree(){
                 }
             }
         ]});
+        
 
     treePanel = Ext.create('Ext.tree.Panel', {
         id:'treePanelId',
+        autoScroll: true,
         rootVisible: false,                
         flex: 1,
         border: 0,               
+        height:'100%',
+        
         tbar: [
             tablbar,
         ],
@@ -1020,8 +1044,7 @@ function createTree(){
             render: function(){
                 Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});
             },
-            itemcontextmenu: {
-            },
+            itemcontextmenu:{},
             itemclick: {
                 fn: function(view, record, item, index, event) {
                     if(record.data.leaf){
@@ -1050,6 +1073,7 @@ function createhelpPanel(){
     };    
     helpPanel = new Ext.create('Ext.panel.Panel', {       
         width:'100%',
+        autoScroll: true,
         border:0,
         height: '100%',        
         layout: 'card',
@@ -1110,10 +1134,12 @@ function createhelpPanel(){
 }
 
 function createViewPort(){    
+    createaddPanel();
+    createhelpPanel();
     createTree();    
     initLayers();             
     
-    let btagregar = Ext.create('Ext.Button', {        
+    /*let btagregar = Ext.create('Ext.Button', {        
             //text: 'Agregar',
             iconCls: 'fa-circle-plus',
             cls: 'fa-solid ',
@@ -1125,7 +1151,7 @@ function createViewPort(){
                 p.updateLayout();
                 p.add(addPanel);
             }
-    });
+    });*/
 
     let btreload = Ext.create('Ext.Button',{
             xtype: 'button',
@@ -1168,7 +1194,7 @@ function createViewPort(){
         }
     });
 
-    let btcapas  = Ext.create('Ext.Button', {
+    /*let btcapas  = Ext.create('Ext.Button', {
             //text: 'Capas',
             iconCls: 'fa-layer-group',
             cls: 'fa-solid',
@@ -1182,7 +1208,7 @@ function createViewPort(){
                 createTree();
                 p.add(treePanel);
             },
-    });
+    });*/
     
     tabMenu = Ext.create('Ext.toolbar.Toolbar', {   
         style: {
@@ -1209,13 +1235,20 @@ function createViewPort(){
         id: 'mainWin',
         layout: 'border',
         items: [
-            mapPanel,                    
-            {
+            mapPanel,       
+            {                   
                 xtype: 'panel',
-                id: 'titlePanelId',
-                region: 'north',
+                //id: 'viewportPanelId',
+                id:'viewpanel',
+                region: 'west',
+                autoScroll: true,
+                border:0,
                 title: project_name,
-                header: {
+                titleAlign: 'center',
+                width: 300,                
+                collapsible: true,
+                cls:'myCls',
+                header: {                    
                     titlePosition: 1,
                     title: {
                         text: project_name,
@@ -1223,10 +1256,12 @@ function createViewPort(){
                                 Color: 'black'
                             }
                         },
+                    //height:30,
+                    //cls:'myCls',                
                     items: [
                         {
-                            iconCls:'fa-circle-left',
-                            cls: 'fa-solid',
+                            iconCls:'fa-circle-xmark',
+                            cls: 'fa-regular',
                             tooltip: 'Cerrar',
                             handler: function() {
                                 Ext.Msg.show({
@@ -1248,47 +1283,8 @@ function createViewPort(){
                                 });                    
                             }
                         },
-                        {
-                        iconCls: 'fa-circle-question',         
-                        cls:'fa-regular',
-                        tooltip: 'Ayuda',
-                        handler: function(){
-                            createhelpPanel();
-                            var p = Ext.getCmp('viewportPanelId');
-                            p.removeAll();
-                            p.updateLayout();
-                            p.add(helpPanel);
-                        }
-                    },                    
                 ]
-                  },
-            },
-            {                   
-                xtype: 'panel',
-                id: 'viewportPanelId',
-                region: 'west',
-                autoScroll: true,
-                border:0,
-                title: 'Capas',
-                header: {
-                    titlePosition: 0,
-                    title: {
-                        text: 'Capas',
-                        style: {                            
-                                Color: 'black'
-                            }
-                        },
-                    items: [
-                        {
-                            //xtype: 'tab',                
-                            border: 0,
-                            items: isDemo ? [] : [tabMenu],                    
-                        },
-                        
-                        btcapas, 
-                        btagregar,
-                    ]
-                    },
+                  },                                
                 
                 /*tbar:[                    
                     {
@@ -1296,15 +1292,71 @@ function createViewPort(){
                         items: isDemo ? [] : [tabMenu],                    
                     }
                 ],*/
-                collapsible: true,                        
-                width: 320,
+                collapsible: true,                                        
                 split: true,
                 layout:'fit',
                 /*layout: {
                     type: 'vbox',
                     align: 'stretch'
                 },*/
-                //items: [treePanel],                
+
+                items: [{
+                    xtype: 'tabpanel',
+                    cls:'myCls',
+                    id: 'tabPanel',   
+                    layout : 'vbox',
+                    plain: true,
+                    region: 'center',
+                                       
+                    tabBar: {
+                            defaults: {
+                                flex: 1, // if you want them to stretch all the way
+                                //height: 20, // set the height
+                                //padding: 6 // set the padding
+                            },
+                            dock: 'top'
+                        },
+
+
+
+                    //headerCls:'myCls',
+                    items: [{
+                            title:'Capas',
+                            tooltip:'Capas',
+                            iconCls: "fa-solid fa-layer-group btn-white-back",
+                            iconAlign: 'top',
+                            items: [{
+                                xtype: 'panel',
+                                id: 'viewportPanelId',
+                            }]
+                        }, 
+                        {
+                            title: 'Agregar',
+                            tooltip: 'Agregar',
+                            iconCls: 'fa-solid fa-file-circle-plus btn-white-back',                                                  
+                            iconAlign: 'top',
+                            items: [addPanel]
+                        },
+                        /*{
+                            //title: 'Configuración',
+                            tooltip: 'Configuración',
+                            iconCls: 'fa-solid fa-gears btn-white-back',                                                  
+                            iconAlign: 'top',
+                            //items: [addPanel]
+                        }
+                        ,*/
+                        {
+                            title: 'Ayuda',
+                            tooltip: 'Ayuda',
+                            iconCls: 'fa-solid fa-circle-question btn-white-back',                                                  
+                            iconAlign: 'top',
+                            height:'100%',
+                            items: [helpPanel]
+                        }
+                    ]
+                }],
+
+                
             },
         ]
     });
@@ -1454,8 +1506,8 @@ function initLayers() {
                                 layerfiles.push(new ol.layer.Vector({
                                     name: art.title,
                                     source: new ol.source.Vector({
-                                        format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
-                                        projection: 'EPSG:4326',
+                                        format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),
+                                        
                                         url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
                                             //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
                                     }),

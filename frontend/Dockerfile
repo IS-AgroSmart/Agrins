@@ -1,7 +1,7 @@
 FROM node:10.9-slim
 
-RUN apt-get -y update \
-	&& apt-get install -y git
+RUN apt-get -y --force-yes update \
+	&& apt-get install -y --force-yes git
 
 COPY ./package.json ./package-lock.json /app/
 
