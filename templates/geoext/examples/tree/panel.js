@@ -24,7 +24,7 @@ let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", visible
 /* Initial values*/
 let mapComponent, mapPanel, selectClick, olMap;
 let popup;
-let mainPanel, startPanel, treePanel, addPanel, indexPanel, modelPanel, helpPanel;
+let mainPanel, startPanel, treePanel, addPanel, indexPanel, modelPanel, helpPanel, configPanel;
 let artifactLayer = [];
 let basemapsGroup, layersGroup;
 let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
@@ -659,7 +659,7 @@ function createaddPanel(){
         width: '100%', 
         height: '100%',
         bodyPadding: 10,    
-        border:0,
+        border:false,
         defaultType: 'textfield',
         items: [{
             xtype: 'textfield',
@@ -742,8 +742,7 @@ function createaddPanel(){
     var tabMenu = Ext.create('Ext.tab.Panel', {
         width: '100%',        
         height: '100%',    
-        border: 0,    
-        cls:'myCls',
+        border: false,            
         layout : 'vbox',
         plain: true,
         region: 'center',
@@ -783,10 +782,11 @@ function createaddPanel(){
         overflowY: 'scroll',
         height: '100%',         
         border:false,
-        padding:'5 0 0 0',
-        tbar:[
+        cls:'myWhiteCls',
+        //padding:'5 5 5 5',
+        /*tbar:[
             {xtype: 'tbtext', html: 'Agregar Capa'},'->',
-        ],
+        ],*/
         items:[
             tabMenu
         ],
@@ -946,61 +946,11 @@ function createindexPanel(){
     });
 }
 
-function createTree(){   
-    var layerSelect;
-    var isCollapse = true;
+function createTree(){    
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
         border: false,    
         //cls: 'tbar-menu',          
         items: [ 
-            {
-                xtype: 'button',
-                iconCls: 'fa-arrow-down-short-wide',   
-                id:"expandButton",
-                cls:'fa-solid',
-                tooltip: 'Expandir',
-                handler: function(){
-                    if (isCollapse){
-                        treePanel.expandAll();
-                        Ext.getCmp('expandButton').setIconCls('fa-arrow-up-short-wide');
-                        Ext.getCmp('expandButton').setTooltip('Contraer'); 
-                        isCollapse=false;
-                    }
-                    else{
-                        treePanel.collapseAll();
-                        Ext.getCmp('expandButton').setIconCls('fa-arrow-down-short-wide')
-                        Ext.getCmp('expandButton').setTooltip('Expandir');
-                        isCollapse=true;
-                    }
-                    Ext.getCmp('btdeletelayer').setVisible(false);
-                    Ext.getCmp('btinfolayer').setVisible(false);
-                }
-            },
-            {
-                xtype: 'button',
-                iconCls: ' fa-rotate',   
-                cls: 'fa-solid',
-                tooltip: 'Recargar',
-                handler: function(){
-                    Ext.getCmp('expandButton').setIconCls('fa-arrow-down-short-wide')
-                    Ext.getCmp('expandButton').setTooltip('Expandir');
-                    isCollapse=true;
-                    Ext.getCmp('btdeletelayer').setVisible(false);
-                    Ext.getCmp('btinfolayer').setVisible(false);
-                    initLayers();
-                }
-            },
-            {
-                xtype: 'button',
-                id: 'btdeletelayer',
-                iconCls: 'fa-trash-can',   
-                cls: 'fa-solid',
-                hidden: true,
-                tooltip: 'Eliminar capa',
-                handler: function(){
-                    
-                }
-            },
             {
                 xtype: 'button',
                 id: 'btinfolayer',
@@ -1009,10 +959,10 @@ function createTree(){
                 hidden: true,
                 tooltip: 'Información capa',
                 handler: function(){
-                    var lname= layerSelect.data.text;
-                    var lcamera= dataLayers.findRecord('title', layerSelect.data.text).get('camera');
-                    var ltype= dataLayers.findRecord('title', layerSelect.data.text).get('type');
-                    var ldate =  new Date(dataLayers.findRecord('title', layerSelect.data.text).get('date'));                  
+                    var lname= record.data.text;
+                    var lcamera= dataLayers.findRecord('title', record.data.text).get('camera');
+                    var ltype= dataLayers.findRecord('title', record.data.text).get('type');
+                    var ldate =  new Date(dataLayers.findRecord('title', record.data.text).get('date'));                  
                     
 
                     Ext.Msg.alert(lname,
@@ -1029,10 +979,11 @@ function createTree(){
     treePanel = Ext.create('Ext.tree.Panel', {
         id:'treePanelId',
         autoScroll: true,
-        rootVisible: false,                
+        rootVisible: true,                
+        autoScroll: true,
         flex: 1,
         border: false,               
-        padding:6,
+        //padding:6,
         height:'100%',
         /*tbar: [
             tablbar,
@@ -1045,13 +996,18 @@ function createTree(){
                 Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});
             },
             itemcontextmenu: function(tree, record, item, index, e, eOpts ) {
-
-                var lname= layerSelect.data.text;
-                var lcamera= dataLayers.findRecord('title', layerSelect.data.text).get('camera');
-                var ltype= dataLayers.findRecord('title', layerSelect.data.text).get('type');
-                var ldate =  new Date(dataLayers.findRecord('title', layerSelect.data.text).get('date'));                  
+                console.log(item)
+                console.log(record.data.text)
+                console.log(record.data)
+                console.log(index)
+                
+                
                 var m_item = [];
                 if(record.data.leaf){
+                    var lcamera= dataLayers.findRecord('title', record.data.text).get('camera');
+                    var ltype= dataLayers.findRecord('title', record.data.text).get('type');
+                    var ldate =  new Date(dataLayers.findRecord('title', record.data.text).get('date'));                  
+                    var lname= record.data.text;
                     if (ltype == 'MULTIESPECTRAL '){
                         m_item = [
                             { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down', handler: function() {console.log("More details");} },
@@ -1071,7 +1027,14 @@ function createTree(){
                     
                 }
                 else{
-                    m_item =[{ text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },]
+                    if (index == 0){
+                        m_item =[{ text: 'Expandir', iconCls:'fa-solid fa-arrow-down-short-wide', handler: function() {treePanel.expandAll();} },
+                                { text: 'Contraer', iconCls:'fa-solid fa-arrow-up-short-wide', handler: function() {treePanel.collapseAll();} },
+                                { text: 'Recargar', iconCls:'fa-solid fa-rotate', handler: function() {initLayers();} },]
+                    }
+                    else{
+                        m_item =[{ text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },]
+                    }
                 }
 
                 // Optimize : create menu once
@@ -1084,19 +1047,34 @@ function createTree(){
             itemclick: {
                 fn: function(view, record, item, index, event) {
                     if(record.data.leaf){
-                        fitMap(record.data.text);
-                        layerSelect = record;        
-                        Ext.getCmp('btdeletelayer').setVisible(true);                        
-                        Ext.getCmp('btinfolayer').setVisible(true);
-                    }
-                    else{
-                        Ext.getCmp('btdeletelayer').setVisible(false);
-                        Ext.getCmp('btinfolayer').setVisible(false);
+                        fitMap(record.data.text);                        
                     }
                     
                 }
             }               
         }               
+    });
+}
+
+function createconfigPanel(){
+    configPanel = new Ext.create('Ext.panel.Panel', {       
+        width:'100%',
+        autoScroll: true,
+        border:0,
+        //height: '100%',        
+        layout: 'vbox',        
+        bodyStyle: 'padding:5px',        
+        autoScroll: true,
+        padding:10,
+        items:[
+            {
+                html:'<h3>'+project_name+'</h2'
+            },
+            {
+                html:'<p>'+project_notes+'</p'
+            }
+        ]
+
     });
 }
 
@@ -1111,11 +1089,11 @@ function createhelpPanel(){
         width:'100%',
         autoScroll: true,
         border:0,
-        height: '100%',        
+        //height: '100%',        
         layout: 'card',
         bodyStyle: 'padding:5px',        
         autoScroll: true,
-        bbar: [
+        tbar: [
             {
                 id: 'move-prev',
                 text: 'Anterior',
@@ -1171,6 +1149,7 @@ function createhelpPanel(){
 
 function createViewPort(){    
     createaddPanel();
+    createconfigPanel();
     createhelpPanel();
     createTree();    
     initLayers();             
@@ -1281,24 +1260,16 @@ function createViewPort(){
                 border:0,
                 title: project_name,
                 titleAlign: 'center',
-                width: 300,                
+                width: 320,                
                 collapsible: true,
                 cls:'myCls',
                 height: '100%',
                 header: {                    
-                    titlePosition: 1,
-                    title: {
-                        text: project_name,
-                        style: {                            
-                                color: 'white'
-                            }
-                        },
-                    //height:30,
-                    //cls:'myCls',                
+                    titlePosition: 1,                    
                     items: [
                         {
-                            iconCls:'fa-circle-xmark',
-                            cls: 'fa-regular',
+                            iconCls:'fa-up-right-from-square',
+                            cls: 'fa-solid',
                             tooltip: 'Cerrar',
                             handler: function() {
                                 Ext.Msg.show({
@@ -1320,27 +1291,16 @@ function createViewPort(){
                                 });                    
                             }
                         },
-                ]
-                  },                                
-                
-                /*tbar:[                    
-                    {
-                        xtype: 'segmentedbutton',                
-                        items: isDemo ? [] : [tabMenu],                    
-                    }
-                ],*/
+                    ]
+                },
                 collapsible: true,                                        
                 split: true,
                 layout:'fit',
-                /*layout: {
-                    type: 'vbox',
-                    align: 'stretch'
-                },*/
-
                 items: [{
                     xtype: 'tabpanel',
                     cls:'myCls',
                     id: 'tabPanel',   
+                    autoScroll: true,
                     layout : 'vbox',
                     plain: true,
                     border: false,
@@ -1356,20 +1316,12 @@ function createViewPort(){
                             //items:[{text:'datos'}]
                             
                         },
-
-
-
-                    //headerCls:'myCls',
                     items: [{
                             //title:'Capas',
                             tooltip:'Capas',
                             iconCls: "fa-solid fa-layer-group btn-white-back",
                             iconAlign: 'top',
-                            items: [{
-                                xtype: 'panel',
-                                height:'100%',
-                                id: 'viewportPanelId',
-                            }]
+                            items: [treePanel]
                         }, 
                         {
                             //title: 'Agregar',
@@ -1381,10 +1333,10 @@ function createViewPort(){
                         },
                         {
                             //title: 'Configuración',
-                            tooltip: 'Configuración',
-                            iconCls: 'fa-solid fa-gears btn-white-back',                                                  
+                            tooltip: 'Proyecto',
+                            iconCls: 'fa-solid fa-briefcase',                                                  
                             iconAlign: 'top',
-                            //items: [addPanel]
+                            items: [configPanel]
                         }
                         ,
                         {
@@ -1403,8 +1355,6 @@ function createViewPort(){
         ]
     });
    
-    var p = Ext.getCmp('viewportPanelId')
-    p.add(treePanel);
 }
 
 function createmodelPanel(){
@@ -1636,9 +1586,15 @@ function initLayers() {
                         };
                         var treeStore = Ext.create('GeoExt.data.store.LayersTree', {
                             layerGroup: layersGroup,
+                            root: {
+                                expanded: true,
+                                text: project_name,
+                            },
+                            
                         });
-                        //id:'treePanelId',            
+                        //id:'treePanelId',
                         Ext.getCmp('treePanelId').setStore(treeStore);
+                        
                         console.log("layers: " +layers.length);                
             
                     })
