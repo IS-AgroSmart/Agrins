@@ -999,8 +999,7 @@ function createTree(){
                 console.log(item)
                 console.log(record.data.text)
                 console.log(record.data)
-                console.log(index)
-                
+                console.log(index)                
                 
                 var m_item = [];
                 if(record.data.leaf){
@@ -1010,16 +1009,19 @@ function createTree(){
                     var lname= record.data.text;
                     if (ltype == 'MULTIESPECTRAL '){
                         m_item = [
-                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down', handler: function() {console.log("More details");} },
+                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',handler: function() {console.log("More details");} },
                             { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },
                             { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
                             { text: 'Modelo', iconCls:'fa-solid fa-kaaba', handler: function() {console.log("Delete");} },
                             { text: 'Índice', iconCls:'fa-solid fa-images', handler: function() {console.log("Delete");} }
                         ]
                     }
-                    else{
+                    else{                        
+                        console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/rest/layers.xml");
+                        console.log(window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_cc00afb7-b59c-4b58-b421-cb4478a9688b/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_cc00afb7-b59c-4b58-b421-cb4478a9688b:Poligono3&maxfeatures=50&outputformat=application/pdf');
                         m_item = [
-                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down', handler: function() {console.log("More details");} },
+                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
+                            handler: function() { window.location = window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/wms/kml?layers=project_cc00afb7-b59c-4b58-b421-cb4478a9688b:Poligono3&mode=download";} },
                             { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },
                             { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
                         ]

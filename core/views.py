@@ -778,11 +778,30 @@ def mapper_paneljs(request):
     filepath = "./templates/geoext/examples/tree/panel.js"
     return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
 
+def mapper_olextjs(request):
+    filepath = "./templates/geoext/examples/tree/ol-ext.js"
+    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+
+def mapper_olextcss(request):
+    filepath = "./templates/geoext/examples/tree/ol-ext.css"
+    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+
+def mapper_theme_localcss(request):
+    filepath = "./templates/geoext/examples/tree/theme_local.css"
+    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+
 
 def mapper_ticks(request, num_ticks):
     filepath = "./templates/geoext/examples/tree/" + str(num_ticks) + "ticks.png"
     return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
 
+def mapper_fondo_img(request):
+    filepath = "./templates/geoext/examples/tree/fondo_img.png"
+    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+
+def mapper_earth(request):
+    filepath = "./templates/geoext/examples/tree/earth.png"
+    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
 
 def mapper_ol(request, path):
     filepath = "./templates/geoext/examples/lib/ol/" + path
