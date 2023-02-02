@@ -1096,7 +1096,9 @@ function createhelpPanel(){
         tbar: [
             {
                 id: 'move-prev',
-                text: 'Anterior',
+                xtype:'button',
+                //text: 'Anterior',
+                iconCls:'fa-regular fa-circle-left',
                 handler: function(btn) {
                     navigate(btn.up("panel"), "prev");
                 },
@@ -1105,7 +1107,9 @@ function createhelpPanel(){
             '->', // greedy spacer so that the buttons are aligned to each side
             {
                 id: 'move-next',
-                text: 'Siguiente',
+                xtype:'button',
+                //text: 'Siguiente',
+                iconCls:'fa-regular fa-circle-right',
                 handler: function(btn) {
                     navigate(btn.up("panel"), "next");
                 }
