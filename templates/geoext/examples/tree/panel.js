@@ -1269,7 +1269,8 @@ function createViewPort(){
                 cls:'myCls',
                 height: '100%',
                 header: {                    
-                    titlePosition: 1,                    
+                    titlePosition: 1,    
+                    height: 50,
                     items: [
                         {
                             iconCls:'fa-up-right-from-square',
