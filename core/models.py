@@ -513,8 +513,43 @@ class Artifact(models.Model):
     title = models.CharField(max_length=256)
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE, related_name="artifacts", null=True)
     
-    def get_disk_path(self):
-        return ArtifactType.filename(self)
+    def get_disk_path(self): 
+        print('data capa: ',self.layer.get_disk_path(),self.name)
+        print('tipo capa: ', self.type)
+        if (self.type == "MULTIESPECTRAL" or self.type == "INDEX" or self.type == "MODEL" or self.type == "RGB" ):
+            return self.layer.get_disk_path() + self.name+'.tiff'
+        if (self.type == "SHAPEFILE"):
+            return self.layer.get_disk_path() +self.name+'.shp'
+        if (self.type == "KML"):
+            return self.layer.get_disk_path() +self.name+'.kml'
+
+def delete_geoserver_datastore(sender, instance: Artifact, **kwargs):
+    querystring = {"recurse": "true"}
+    requests.delete('http://container-geoserver:8080/geoserver/rest/workspaces/' + instance.layer.project._get_geoserver_ws_name() + '/datastores/' + instance.name,
+                    params=querystring,
+                    auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
+
+def delete_on_disk_artifact(sender, instance: Artifact, **kwargs):
+    print('capa artifact: ',instance.get_disk_path())
+    try:
+        os.remove(instance.get_disk_path())
+        #shutil.rmtree(instance.get_disk_path())
+    except FileNotFoundError:
+        pass  # no need to do anything, carry on
+    instance.layer.project.user.update_disk_space()
+
+def delete_on_disk_layer(sender, instance: Layer, **kwargs):
+    print('capa layer: '+instance.get_disk_path())
+    try:
+        shutil.rmtree(instance.get_disk_path())
+    except FileNotFoundError:
+        pass  # no need to do anything, carry on
+    instance.project.user.update_disk_space()
+
+
+post_delete.connect(delete_geoserver_datastore, sender=Artifact)
+post_delete.connect(delete_on_disk_artifact, sender=Artifact)
+post_delete.connect(delete_on_disk_layer, sender=Layer)
 
 class BlockType(Enum):
     USER_NAME = "UserName"

@@ -12,12 +12,12 @@ Ext.require([
 ]);
 
 /* Mapas Base (Satellite dafult) */
-let omslayer = new ol.layer.Tile({name: "OpenStreetMap", source: new ol.source.OSM(), visible: false });
-let stamenlayer = new ol.layer.Tile({source: new ol.source.Stamen({layer: 'watercolor'}), name: 'Stamen Watercolor', visible: false });
-let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", visible: true,                
+let omslayer = new ol.layer.Tile({diplayInlayerSwitcher:true, name: "OpenStreetMap",title: "OpenStreetMap", source: new ol.source.OSM(),baseLayer: true,type:'base', visible: false });
+let stamenlayer = new ol.layer.Tile({source: new ol.source.Stamen({layer: 'watercolor'}),title:'Watercolor', name: 'Stamen Watercolor',baseLayer: true,type:'base', visible: false });
+let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", title: 'Satélite',visible: true,baseLayer: true,type:'base',                
     source: new ol.source.XYZ({ attributions: ['Powered by Esri.',
         'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
-        'Icons from Wikimedia Commons',], attributionsCollapsible: false,
+        'Icons from Wikimedia Commons',], attributionsCollapsible: true,
     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    
 })});           
 
@@ -65,11 +65,13 @@ var dataModel = Ext.create('Ext.data.Store', {
         {"id":"CLOROFILA", "name":"CLOROFILA"},                
     ]
 });
-
-
 var dataLayers = Ext.create('Ext.data.Store', {
     storeId: 'dataCamera',
-    fields: ['title', 'name', "type","camera","date"],    
+    fields: ['pk','title', 'name', "type","camera","date"],    
+});
+var dataGroup = Ext.create('Ext.data.Store', {
+    storeId: 'dataCamera',
+    fields: ['pk','title', 'name', "date"],    
 });
 
 var dataTypeArtefact = Ext.create('Ext.data.Store', {
@@ -83,7 +85,6 @@ var dataTypeArtefact = Ext.create('Ext.data.Store', {
         {"id":"KML", "name":"Kml"},
     ]
 });
-
 var dataTypeImage = Ext.create('Ext.data.Store', {
     storeId: 'dataTypeArtefact',
     fields: ['id', 'name'],
@@ -99,24 +100,24 @@ function initApp() {
     Ext.application({
         launch: function () {
             basemapsGroup = new ol.layer.Group({
+                title:'Mapas Base',
                 layers: [omslayer, stamenlayer, satelitelayer],
             });                     
            
             let view = new ol.View({               
-                zoom: 7,
-                minZoom: 2,
-                maxZoom: 22,
-                center: ol.proj.transform([-78.58031164977537,-0.394260613241795], 'EPSG:4326', 'EPSG:3857'),
+                center: [0, 0],
+                zoom: 1,
             });
             
             olMap = new ol.Map({                
                 layers: [basemapsGroup],
                 view: view,
                 target: 'map',
-                controls: [],
-            });
+                controls:[]
+            });           
 
             addControlsMap();
+
             
             popup = Ext.create('GeoExt.component.Popup', {
                 map: olMap,
@@ -172,11 +173,18 @@ function initApp() {
                 map: olMap
             });                      
             
+            
+
             mapPanel = Ext.create('Ext.panel.Panel', {
                 region: 'center',
                 border: false,
                 layout: 'fit',
                 /*tbar:[
+                    {
+                        
+
+                    }
+                ],
                     {
                         iconCls:'fa-magnifying-glass-plus ',
                         cls: 'fa-solid',
@@ -265,12 +273,79 @@ function initApp() {
 
 function addControlsMap(){
             addMeasureInteraction();
-            let SaveMeasurementsControl = createSaveControl();
-            olMap.addControl(new SaveMeasurementsControl());
-            let ClearMeasurementsControl = createClearControl();
-            olMap.addControl(new ClearMeasurementsControl());            
-            let FullScreen = new ol.control.FullScreen();
-            olMap.addControl(FullScreen);
+
+            // Current selection
+            var sLayer = new ol.layer.Vector({
+                source: new ol.source.Vector(),
+                style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 5,
+                    stroke: new ol.style.Stroke ({
+                    color: 'rgb(255,165,0)',
+                    width: 3
+                    }),
+                    fill: new ol.style.Fill({
+                    color: 'rgba(255,165,0,.3)'
+                    })
+                }),
+                stroke: new ol.style.Stroke ({
+                    color: 'rgb(255,165,0)',
+                    width: 3
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(255,165,0,.3)'
+                })
+                })
+            });
+            olMap.addLayer(sLayer);
+
+            // Set the search control 
+            var search = new ol.control.SearchNominatim({
+                //target: $(".options").get(0),
+                id:'searchBar',
+                polygon: $("#polygon").prop("checked"),
+                reverse: true,
+                position: true	// Search, with priority to geo position
+            });
+            olMap.addControl (search);
+
+            // Select feature when click on the reference index
+            search.on('select', function(e) {
+                // console.log(e);
+                sLayer.getSource().clear();
+                // Check if we get a geojson to describe the search
+                if (e.search.geojson) {
+                var format = new ol.format.GeoJSON();
+                var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: olMap.getView().getProjection() });
+                sLayer.getSource().addFeature(f);
+                var view = olMap.getView();
+                var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), olMap.getSize());
+                var zoom = view.getZoomForResolution(resolution);
+                var center = ol.extent.getCenter(f.getGeometry().getExtent());
+                // redraw before zoom
+                setTimeout(function(){
+                    view.animate({
+                    center: center,
+                    zoom: Math.min (zoom, 16)
+                });
+                }, 100);
+                } else {
+                    olMap.getView().animate({
+                        center:e.coordinate,
+                        zoom: Math.max (olMap.getView().getZoom(),16)
+                    });
+                }
+            });
+
+            var searchBarlocal= document.getElementById('searchBar')
+
+
+            //let SaveMeasurementsControl = createSaveControl();
+            //olMap.addControl(new SaveMeasurementsControl());
+            //let ClearMeasurementsControl = createClearControl();
+            //olMap.addControl(new ClearMeasurementsControl());            
+            //let FullScreen = new ol.control.FullScreen();
+            //olMap.addControl(FullScreen);
             let Scale = new ol.control.ScaleLine({
                 units: 'metric',
                 minWidth: 100
@@ -311,14 +386,7 @@ function addControlsMap(){
             element.className = 'btn btn-small';
             element.appendChild(selectbase);
             
-            var btfullscreen = document.createElement('button');
-            btfullscreen.className = "btn btn-small icon-resize-full";
-            btfullscreen.setAttribute("title","Pantalla completa");                                  
-            const controlFull = new ol.control.FullScreen();                        
-            btfullscreen.addEventListener('click', function () {
-                controlFull.element.querySelector('button').click();
-            });
-            olMap.addControl(controlFull);
+            
             var btzoomin = document.createElement('button');
             btzoomin.className = "btn btn-small icon-zoom-in";
             btzoomin.setAttribute("title","Acercar");
@@ -364,26 +432,62 @@ function addControlsMap(){
             btprint.setAttribute("title","Imprimir capa");
             var btcolorleg = document.createElement("button");
             btcolorleg.className = "btn btn-small icon-bar-chart";
-            btcolorleg.setAttribute("title","Ver leyenda");            
+            btcolorleg.setAttribute("title","Ver leyenda");       
+            
+            var bterase = document.createElement("button");
+            bterase.className = "btn btn-small icon-eraser";
+            bterase.setAttribute("title","Borrar anotaciones");
+            bterase.addEventListener("click",clearMeasurementsListener)
+
+            var btsave = document.createElement("button");
+            btsave.className = "btn btn-small icon-cloud-upload";
+            btsave.setAttribute("title","Guardar anotaciones");
+            btsave.addEventListener("click",saveMeasurementsListener)
+
             var elementGroup = document.createElement('div');
             elementGroup.className = 'btcontrols btn-group';         
             elementGroup.setAttribute("id","idcontrols");
+            
+            
             elementGroup.appendChild(btzoomin);
             elementGroup.appendChild(btzoomout);            
             elementGroup.appendChild(btnorth);
-            elementGroup.appendChild(element);
-            //elementGroup.appendChild(btfullscreen);
+            
+            
+            //elementGroup.appendChild(searchBarlocal);
             elementGroup.appendChild(btpoligono);
             elementGroup.appendChild(btdistance);
             elementGroup.appendChild(btpoint);
+            elementGroup.appendChild(bterase);
+            elementGroup.appendChild(btsave);
+            
             //elementGroup.appendChild(btprint);
+            
             elementGroup.appendChild(btcolorleg);            
+            //elementGroup.appendChild(element);
             var groupControl = new ol.control.Control({
                 element: elementGroup
             });
             olMap.addControl(groupControl);  
             var att = new ol.control.Attribution();
             olMap.addControl(att);
+
+            var logo = document.createElement("div");
+            logo.className = "img-logo";
+
+            var controllogo = new ol.control.Control({
+                element: logo
+            });
+            olMap.addControl(controllogo);  
+
+            var switcher = new ol.control.LayerSwitcherImage({
+                layerGroup: basemapsGroup
+            });
+            olMap.addControl(switcher);
+
+            
+
+
 }
 
 function indexWin(id, title, width, height){
@@ -982,6 +1086,7 @@ function createTree(){
         rootVisible: true,                
         autoScroll: true,
         flex: 1,
+        layout: 'fit',
         border: false,               
         //padding:6,
         height:'100%',
@@ -1002,29 +1107,43 @@ function createTree(){
                 console.log(index)                
                 
                 var m_item = [];
-                if(record.data.leaf){
+                if(record.data.leaf){                    
                     var lcamera= dataLayers.findRecord('title', record.data.text).get('camera');
                     var ltype= dataLayers.findRecord('title', record.data.text).get('type');
                     var ldate =  new Date(dataLayers.findRecord('title', record.data.text).get('date'));                  
                     var lname= record.data.text;
-                    if (ltype == 'MULTIESPECTRAL '){
+                    if (ltype == 'MULTIESPECTRAL' || ltype == 'RGB'){
+                        var pk = dataLayers.findRecord('title', record.data.text).get('pk');                                                                        
                         m_item = [
-                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',handler: function() {console.log("More details");} },
-                            { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },
+                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',handler: function() {console.log("More details");} },                            
+                            { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
+                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', pk)} },  
                             { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
                             { text: 'Modelo', iconCls:'fa-solid fa-kaaba', handler: function() {console.log("Delete");} },
                             { text: 'Índice', iconCls:'fa-solid fa-images', handler: function() {console.log("Delete");} }
                         ]
                     }
-                    else{                        
+                    else{
+                        var pk = dataLayers.findRecord('title', record.data.text).get('pk');                                                                        
                         console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/rest/layers.xml");
-                        console.log(window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_cc00afb7-b59c-4b58-b421-cb4478a9688b/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_cc00afb7-b59c-4b58-b421-cb4478a9688b:Poligono3&maxfeatures=50&outputformat=application/pdf');
-                        m_item = [
-                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
-                            handler: function() { window.location = window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/wms/kml?layers=project_cc00afb7-b59c-4b58-b421-cb4478a9688b:Poligono3&mode=download";} },
-                            { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },
-                            { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
-                        ]
+                        console.log(window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_cc00afb7-b59c-4b58-b421-cb4478a9688b/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_cc00afb7-b59c-4b58-b421-cb4478a9688b:Poligono3&maxfeatures=50&outputformat=kml');
+                        if (ltype == 'INDEX' || ltype == 'MODEL'){
+                            m_item = [
+                                { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',handler: function() {console.log("More details");} },
+                                { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
+                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', pk)} },  
+                                { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
+                            ]
+                        }
+                        else{
+                            m_item = [
+                                { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
+                                handler: function() { window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_cc00afb7-b59c-4b58-b421-cb4478a9688b/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_cc00afb7-b59c-4b58-b421-cb4478a9688b:Poligono3&maxfeatures=50&outputformat=shape-zip';} },                            
+                                { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
+                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', pk)} },  
+                                { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
+                            ]
+                        }                        
                     }
                     
                 }
@@ -1034,8 +1153,8 @@ function createTree(){
                                 { text: 'Contraer', iconCls:'fa-solid fa-arrow-up-short-wide', handler: function() {treePanel.collapseAll();} },
                                 { text: 'Recargar', iconCls:'fa-solid fa-rotate', handler: function() {initLayers();} },]
                     }
-                    else{
-                        m_item =[{ text: 'Eliminar', iconCls:'fa-solid fa-trash-can', handler: function() {console.log("Delete");} },]
+                    else{                        
+                        m_item =[{ text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },];
                     }
                 }
 
@@ -1270,6 +1389,7 @@ function createViewPort(){
                 collapsible: true,
                 cls:'myCls',
                 height: '100%',
+                layout: 'fit',
                 header: {                    
                     titlePosition: 1,    
                     height: 50,
@@ -1308,7 +1428,7 @@ function createViewPort(){
                     cls:'myCls',
                     id: 'tabPanel',   
                     autoScroll: true,
-                    layout : 'vbox',
+                    layout : 'fit',
                     plain: true,
                     border: false,
                     region: 'center',
@@ -1326,12 +1446,14 @@ function createViewPort(){
                     items: [{
                             //title:'Capas',
                             tooltip:'Capas',
+                            layout : 'fit',
                             iconCls: "fa-solid fa-layer-group btn-white-back",
                             iconAlign: 'top',
                             items: [treePanel]
                         }, 
                         {
                             //title: 'Agregar',
+                            layout : 'fit',
                             tooltip: 'Agregar',
                             iconCls: 'fa-solid fa-file-circle-plus btn-white-back',                                                  
                             iconAlign: 'top',
@@ -1340,6 +1462,7 @@ function createViewPort(){
                         },
                         {
                             //title: 'Configuración',
+                            layout : 'fit',
                             tooltip: 'Proyecto',
                             iconCls: 'fa-solid fa-briefcase',                                                  
                             iconAlign: 'top',
@@ -1348,6 +1471,7 @@ function createViewPort(){
                         ,
                         {
                             //title: 'Ayuda',
+                            layout : 'fit',
                             tooltip: 'Ayuda',
                             iconCls: 'fa-solid fa-circle-question btn-white-back',                                                  
                             iconAlign: 'top',
@@ -1476,6 +1600,37 @@ function createmodelPanel(){
 
 }
 
+function deleteItem(layer, url, pk){   
+    Ext.Msg.show({
+        title:'Salir',
+        message: 'Desea eliminar la capa '+layer+'?',
+        buttonText: {
+            yes: 'Si',
+            no: 'No'
+        },
+        buttons: Ext.Msg.YESNO,
+        //iconCls: "fa-solid fa-triangle-exclamation",
+        fn: function(btn) {
+            if (btn === 'yes') {
+                fetch(window.location.protocol + "//" + window.location.host + "/api/"+url+"/" + pk, {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                    },
+                    //waitMsg:'Eliminando capa, espere por favor...',
+                }).then(function (response) {
+                    if (response.status === 200) {
+                        Ext.Msg.alert('Detalle', 'capa eliminada.');
+                        initLayers();
+                    } else throw response.text();
+                }).catch((msg) => Ext.Msg.alert('Error', 'Error al eliminar la capa.'));
+            } else {
+                console.log('Cancel pressed');
+            } 
+        }
+    });                    
+}
+
 function initLayers() {    
     let layers = [];    
     olMap.removeLayer(layersGroup);
@@ -1485,6 +1640,13 @@ function initLayers() {
         .then(response => response.json())
         .then(value => {                           
             for (let lyr of value.layers){
+                var layerGrp = {
+                    'pk':lyr.pk,
+                    'title' : lyr.title, 
+                    'name': lyr.name, 
+                    "date":lyr.date,
+                };            
+                dataGroup.add(layerGrp)
                 console.log('codigo capa: '+ lyr)
                 fetch(window.location.protocol + "//" + window.location.host + "/mapper/"+lyr.pk+"/artifacts",
                     {headers: noCacheHeaders})
@@ -1493,6 +1655,7 @@ function initLayers() {
                         let layerfiles=[];     
                         for (let art of data.artifacts) {                               
                             var layerart = {
+                                'pk': art.pk,
                                 'title' : art.title, 
                                 'name': art.name, 
                                 "type": art.type,

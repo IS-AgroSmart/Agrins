@@ -159,12 +159,30 @@ class ArtifactViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Artifact.objects.all()
 
+@xframe_options_exempt 
+@csrf_exempt
+@action(detail=True, methods=["delete"])
+def delete_artifact(request, pk=None):
+    user = Token.objects.get(key=request.headers["Authorization"][6:]).user
+    print('usuario: ',user)
+    #if not request.user.type == UserType.ADMIN.name:
+     #   return Response(status=status.HTTP_403_FORBIDDEN)
+    instance = Artifact.objects.get(pk=pk)
+    layer = instance.layer
+    instance.delete()     
+    if(layer.artifacts.all().count() == 0):
+        layer.delete()
+    user.update_disk_space()
+    return HttpResponse(status=200)
+    #return JsonResponse({'success':True, "msg":"Archivo cargado"})
+
 class LayerViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = LayerSerializer
 
     def get_queryset(self):
         return Layer.objects.all()
+
 
 class UserProjectViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -742,6 +760,7 @@ def mapper_artifacts(request,index):
     layer = Layer.objects.get(pk=index)
     return JsonResponse({"artifacts": [
         {"title": art.title,
+         "pk": art.pk,
          "name" : art.name,
          "layer": layer.project._get_geoserver_ws_name() + ":" + art.name,         
          "camera": art.camera,
@@ -798,6 +817,11 @@ def mapper_ticks(request, num_ticks):
 def mapper_fondo_img(request):
     filepath = "./templates/geoext/examples/tree/fondo_img.png"
     return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+
+def mapper_logo_img(request):
+    filepath = "./templates/geoext/examples/tree/logo.png"
+    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+
 
 def mapper_earth(request):
     filepath = "./templates/geoext/examples/tree/earth.png"

@@ -26,6 +26,7 @@ router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename="users")
 #router.register(r'flights', FlightViewSet, basename="flights")
 router.register(r'projects', UserProjectViewSet, basename="projects")
+router.register(r'layers', LayerViewSet, basename="layers")
 router.register(r'artifacts', ArtifactViewSet, basename="artifacts")
 router.register(r'block_criteria', BlockCriteriaViewSet, basename="block_criteria")
 
@@ -36,6 +37,8 @@ urlpatterns = [
     path(r'metrics/', include("prometheus_metrics.urls")),
     path('api/api-auth', obtain_auth_token, name='api_auth'),
     path('api/upload-files/<uuid:uuid>', upload_images, name='upload_files'),
+    path('api/delete_artifact/<int:pk>', delete_artifact, name="delete_artifacts"),
+    #path('api/delete_layer/<int:pk>', delete_layer, name="delete_layer"),
 #    path('api/webhook-processing-complete', webhook_processing_complete, name='webhook'),
 #    path('api/downloads/<uuid:uuid>/<artifact>', download_artifact, name="download_artifact"),
 #    path('api/downloads/<uuid:uuid>/<options>/<artifact>', download_artifact_movil, name="download_artifact"),
@@ -55,6 +58,7 @@ urlpatterns = [
     path('mapper/ol-ext.js', mapper_olextjs),
     path('mapper/ol-ext.css', mapper_olextcss),
     path('mapper/fondo_img.png', mapper_fondo_img),
+    path('mapper/logo.png', mapper_logo_img),
     path('mapper/earth.png', mapper_earth),
     path('mapper/theme_local.css', mapper_theme_localcss),
     path('mapper/ticks/<int:num_ticks>', mapper_ticks),
