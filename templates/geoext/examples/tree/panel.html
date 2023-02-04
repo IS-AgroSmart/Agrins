@@ -35,14 +35,14 @@
     <script src="https://cesiumjs.org/releases/1.53/Build/Cesium/Cesium.js" charset="UTF-8"></script>-->
     
     <!--Local Css-->
-    <link rel="stylesheet" href="theme_local.css"/>
+    <link rel="stylesheet" href="agrins/theme_local.css"/>
 
 
 </head>
 
 <body >
     <div id="spiner" class="container">        
-        <img src="earth.png" width="200" height="200"/>
+        <img src="agrins/earth.png" width="200" height="200"/>
         <h2>Agrins</h2>
         <p>Geoportal</p>                                             
         
@@ -65,7 +65,7 @@
     Ext.Loader.setConfig({
         enabled: true,
         paths: {
-            'GeoExt': 'geoext/src'
+            'GeoExt': 'geoext/src',       
         }
     });
 
@@ -81,7 +81,10 @@
     
     
 </script>
+
 <script src="panel.js"></script>
-<script src="ol-ext.js"></script>
+<script src="agrins/datamodel.js"></script>
+<script src="agrins/ol-ext.js"></script>
+
 </body>
 </html>

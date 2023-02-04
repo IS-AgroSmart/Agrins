@@ -22,78 +22,19 @@ let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", title: 
 })});           
 
 /* Initial values*/
-let mapComponent, mapPanel, selectClick, olMap;
-let popup;
+let mapComponent, mapPanel, selectClick, olMap, popup, basemapsGroup, layersGroup;;
 let mainPanel, startPanel, treePanel, addPanel, indexPanel, modelPanel, helpPanel, configPanel;
 let artifactLayer = [];
-let basemapsGroup, layersGroup;
 let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
 var ctrlSwiper; //LayerSwiper control compare layers tool
 noCacheHeaders.append('pragma', 'no-cache');
 noCacheHeaders.append('cache-control', 'no-cache');
+
 proj4.defs('EPSG:32617', '+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs');
 proj4.defs('EPSG:32717', '+proj=utm +zone=17 +south +datum=WGS84 +units=m +no_defs');
 proj4.defs('EPSG:32634', '+proj=utm +zone=34 +datum=WGS84 +units=m +no_defs')
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
-
-var dataCamera = Ext.create('Ext.data.Store', {
-    storeId: 'dataCamera',
-    fields: ['id', 'name'],
-    data : [
-        {"id":"REDEDGE", "name":"Micasense RedEdge-M"},
-        {"id":"PARROT", "name":"Parrot Sequoia"},
-    ]
-});
-
-var dataIndex = Ext.create('Ext.data.Store', {
-    storeId: 'dataIndex',
-    fields: ['id', 'index'],
-    data : [
-        {"id":"GCI", "name":"GCI"},
-        {"id":"GRRI", "name":"GRRI"},
-        {"id":"MGRVI", "name":"MGRVI"},
-        {"id":"NDRE", "name":"NDRE"},
-        {"id":"NDVI", "name":"NDVI"},
-        {"id":"NGRDI", "name":"NGRDI"},        
-    ]
-});
-var dataModel = Ext.create('Ext.data.Store', {
-    storeId: 'dataModel',
-    fields: ['id', 'name'],
-    data : [
-        {"id":"ALTURA", "name":"ALTURA"},
-        {"id":"CLOROFILA", "name":"CLOROFILA"},                
-    ]
-});
-var dataLayers = Ext.create('Ext.data.Store', {
-    storeId: 'dataCamera',
-    fields: ['pk','title', 'name', "type","camera","date"],    
-});
-var dataGroup = Ext.create('Ext.data.Store', {
-    storeId: 'dataCamera',
-    fields: ['pk','title', 'name', "date", 'type'],    
-});
-
-var dataTypeArtefact = Ext.create('Ext.data.Store', {
-    storeId: 'dataTypeArtefact',
-    fields: ['id', 'name'],
-    data : [
-        {"id":"MULTIESPECTRAL", "name":"Multiespectral"},
-        {"id":"SHAPEFILE", "name":"Shapefile"},
-        {"id":"INDEX", "name":"Index"},
-        {"id":"RGB", "name":"Rgb"},
-        {"id":"KML", "name":"Kml"},
-    ]
-});
-var dataTypeImage = Ext.create('Ext.data.Store', {
-    storeId: 'dataTypeArtefact',
-    fields: ['id', 'name'],
-    data : [
-        {"id":"MULTIESPECTRAL", "name":"Multiespectral"},        
-        {"id":"RGB", "name":"Rgb"},
-    ]
-});
 
 initApp();
 
@@ -108,6 +49,7 @@ function initApp() {
             let view = new ol.View({               
                 center: [0, 0],
                 zoom: 1,
+                maxZoom: 18,
             });
             
             olMap = new ol.Map({                
@@ -179,80 +121,6 @@ function initApp() {
                 region: 'center',
                 border: false,
                 layout: 'fit',
-                /*tbar:[
-                    {
-                        
-
-                    }
-                ],
-                    {
-                        iconCls:'fa-magnifying-glass-plus ',
-                        cls: 'fa-solid',
-                        handler: function(e) {
-                            olMap.getView().animate({
-                                zoom: olMap.getView().getZoom() + 1,
-                                duration: 250
-                              })    
-                        }
-                    },'-',
-                    {
-                        iconCls:'fa-magnifying-glass-minus',
-                        cls: 'fa-solid',
-                        handler: function(e) {
-                            olMap.getView().animate({
-                                zoom: olMap.getView().getZoom() - 1,
-                                duration: 250
-                              })    
-                        }
-                    },
-                    '-',
-                    {
-                        iconCls:'fa-draw-polygon',
-                        cls: 'fa-solid',
-                        handler: function(e){
-                            measureAreaListener();
-                        }
-                    },
-                    {
-                        iconCls:'fa-solid fa-ruler-combined',
-                        //cls: 'btnmenu',
-                        handler: function(e){
-                            measureLengthListener();
-                        }
-                    },
-                    {
-                        iconCls:'fa-location-dot',
-                        cls: 'fa-solid',
-                        handler: function(e){
-                            measurePointListener();
-                        }
-                    },
-                    '-',
-                    {
-                        iconCls:'fa-compass',
-                        cls: 'fa-solid',
-                        handler: function(e) {
-                            olMap.getView().setRotation(0);
-                        }
-                    },
-                    {
-                        iconCls:'fa-maximize',
-                        cls: 'fa-solid'
-                    },
-                    '-',
-                    {
-                        iconCls:'fa-print',
-                        cls: 'fa-solid'
-                    },
-                    {
-                        iconCls:'fa-file-pdf',
-                        cls: 'fa-solid'
-                    },
-                    {
-                        iconCls:'fa-square-poll-horizontal',
-                        cls: 'fa-solid'
-                    },
-                ],*/
                 items: [mapComponent],
                
             });            
