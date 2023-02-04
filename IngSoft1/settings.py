@@ -122,6 +122,8 @@ TEMPLATES = [
     },
 ]
 
+
+
 WSGI_APPLICATION = 'IngSoft1.wsgi.application'
 
 # Database
