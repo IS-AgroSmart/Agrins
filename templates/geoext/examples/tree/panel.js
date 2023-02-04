@@ -29,6 +29,7 @@ let artifactLayer = [];
 let basemapsGroup, layersGroup;
 let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
+var ctrlSwiper; //LayerSwiper control compare layers tool
 noCacheHeaders.append('pragma', 'no-cache');
 noCacheHeaders.append('cache-control', 'no-cache');
 proj4.defs('EPSG:32617', '+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs');
@@ -71,7 +72,7 @@ var dataLayers = Ext.create('Ext.data.Store', {
 });
 var dataGroup = Ext.create('Ext.data.Store', {
     storeId: 'dataCamera',
-    fields: ['pk','title', 'name', "date"],    
+    fields: ['pk','title', 'name', "date", 'type'],    
 });
 
 var dataTypeArtefact = Ext.create('Ext.data.Store', {
@@ -98,7 +99,7 @@ initApp();
 
 function initApp() {
     Ext.application({
-        launch: function () {
+        launch: function () {            
             basemapsGroup = new ol.layer.Group({
                 title:'Mapas Base',
                 layers: [omslayer, stamenlayer, satelitelayer],
@@ -167,7 +168,6 @@ function initApp() {
                 else popup.hide();
             });
             olMap.addInteraction(selectClick);
-
 
             mapComponent = Ext.create('GeoExt.component.Map', {
                 map: olMap
@@ -273,6 +273,7 @@ function initApp() {
 
 function addControlsMap(){
             addMeasureInteraction();
+            ctrlSwiper = new ol.control.Swipe({position: -0.5});
 
             // Current selection
             var sLayer = new ol.layer.Vector({
@@ -308,6 +309,9 @@ function addControlsMap(){
                 position: true	// Search, with priority to geo position
             });
             olMap.addControl (search);
+
+            
+            olMap.addControl(ctrlSwiper);
 
             // Select feature when click on the reference index
             search.on('select', function(e) {
@@ -439,6 +443,24 @@ function addControlsMap(){
             bterase.setAttribute("title","Borrar anotaciones");
             bterase.addEventListener("click",clearMeasurementsListener)
 
+            var btswiper = document.createElement("button");
+            btswiper.className = "btn btn-small icon-exchange";
+            btswiper.setAttribute("title","Dividir mapa");
+            var handleSwiper = function(e) {  
+                value = ctrlSwiper.get('position');             
+                if (value<0){
+                    ctrlSwiper.set('position', value*-1);                
+                }
+                else{
+                    ctrlSwiper.set('position', value*-1);                
+                    ctrlSwiper.removeLayers();
+                }
+                
+            };
+            btswiper.addEventListener("click", handleSwiper);   
+
+
+            
             var btsave = document.createElement("button");
             btsave.className = "btn btn-small icon-cloud-upload";
             btsave.setAttribute("title","Guardar anotaciones");
@@ -463,7 +485,8 @@ function addControlsMap(){
             
             //elementGroup.appendChild(btprint);
             
-            elementGroup.appendChild(btcolorleg);            
+            elementGroup.appendChild(btswiper);
+            elementGroup.appendChild(btcolorleg);
             //elementGroup.appendChild(element);
             var groupControl = new ol.control.Control({
                 element: elementGroup
@@ -1138,7 +1161,8 @@ function createTree(){
                         else{
                             m_item = [
                                 { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
-                                handler: function() { window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_cc00afb7-b59c-4b58-b421-cb4478a9688b/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_cc00afb7-b59c-4b58-b421-cb4478a9688b:Poligono3&maxfeatures=50&outputformat=shape-zip';} },                            
+                                handler: function() { 
+                                    windowDownload(dataLayers.findRecord('title', record.data.text).get('title'), dataLayers.findRecord('title', record.data.text).get('name'))}},
                                 { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
                                     handler: function() {deleteItem(record.data.text, 'delete_artifact', pk)} },  
                                 { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
@@ -1154,7 +1178,19 @@ function createTree(){
                                 { text: 'Recargar', iconCls:'fa-solid fa-rotate', handler: function() {initLayers();} },]
                     }
                     else{                        
-                        m_item =[{ text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },];
+                        m_item =[{ text: 'Información', iconCls:'fa-solid fa-circle-info', 
+                        handler: function() {
+                            var type = '';
+                            if(dataGroup.findRecord('title', record.data.text).get('type') == 'IMAGE')
+                                type = 'Imagen formato .tiff'
+                            else
+                                type = 'Vector'
+                            Ext.Msg.alert(record.data.text,
+                                'Grupo de capas: '+record.data.text+
+                                '<br/>Capa principal: '+type+
+                                '<br/>Creado:  '+new Date(dataGroup.findRecord('title', record.data.text).get('date')).toLocaleDateString('en-US')
+                                , Ext.emptyFn);
+                        } },];
                     }
                 }
 
@@ -1168,6 +1204,7 @@ function createTree(){
             itemclick: {
                 fn: function(view, record, item, index, event) {
                     if(record.data.leaf){
+                        ctrlSwiper.addLayer(record);                        
                         fitMap(record.data.text);                        
                     }
                     
@@ -1175,6 +1212,75 @@ function createTree(){
             }               
         }               
     });
+}
+
+function windowDownload(layer, path){
+    console.log('uid: '+uuid),
+    console.log('layer: '+path)
+
+    Ext.create('Ext.window.Window', {
+        title: layer,
+        height: 180,
+        width: 300,
+        layout: 'vbox',
+        modal: true,
+        resizable   : false,
+        items:
+            {
+                xtype: 'panel',
+                height: '100%',
+                width: '100%',
+                
+                items:[                    
+                    {
+                        padding:5,
+                        xtype      : 'fieldcontainer',
+                        id: 'idgroupformat',
+                        fieldLabel : 'Formato',
+                        labelAlign: 'top',
+                        defaultType: 'radiofield',                        
+                        layout: 'hbox',
+                        items: [
+                            {
+                                padding: 5,
+                                boxLabel  : 'kml',
+                                checked: true,
+                                name      : 'format',
+                                inputValue: 'kml',
+                                id        : 'radio1'
+                            }, {
+                                padding: 5,
+                                boxLabel  : 'shape-zip',
+                                name      : 'format',
+                                inputValue: 'sape-zip',
+                                id        : 'radio2'
+                            }, {
+                                padding: 5,
+                                boxLabel  : 'csv',
+                                name      : 'format',
+                                inputValue: 'csv',
+                                id        : 'radio3'
+                            }
+                        ]
+                    },
+                    {
+                        margin: '8%',      
+                        
+                        xtype:'button',
+                        width:'95%',
+                        buttonAlign: 'center',
+                        text:'Descargar',
+                        handler: function(){ 
+                            var formartDW = '';
+                            if(Ext.getCmp('radio1').getValue())formartDW='kml';
+                            if(Ext.getCmp('radio2').getValue())formartDW='shape-zip';
+                            if(Ext.getCmp('radio3').getValue())formartDW='csv';                            
+                            window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_'+uuid+':'+path+'&maxfeatures=50&outputformat='+formartDW;
+                        }
+                    }
+                ],
+               
+    }}).show();
 }
 
 function createconfigPanel(){
@@ -1634,6 +1740,7 @@ function deleteItem(layer, url, pk){
 function initLayers() {    
     let layers = [];    
     olMap.removeLayer(layersGroup);
+    var flag = true;
     dataLayers.removeAll();
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/layers",
         {headers: noCacheHeaders})
@@ -1645,6 +1752,7 @@ function initLayers() {
                     'title' : lyr.title, 
                     'name': lyr.name, 
                     "date":lyr.date,
+                    "type":lyr.type,
                 };            
                 dataGroup.add(layerGrp)
                 console.log('codigo capa: '+ lyr)
@@ -1731,13 +1839,18 @@ function initLayers() {
                                         })
                                     })
                             }));}
+                            if (!flag)
+                                ctrlSwiper.addLayer(layerfiles[0],true); 
+                            flag=false
                         }
+                        
                         //console.log('capa geo '+art.layer)                     
                         let layerGroup = new ol.layer.Group({
                             name: lyr.title,
                             leaf: true, 
                             layers: layerfiles,
                         });
+                        
                         layers.push(layerGroup); 
                         console.log("layers valores: " +layers.length);
                     })
@@ -1762,8 +1875,10 @@ function initLayers() {
                             },
                             
                         });
+                        
                         //id:'treePanelId',
-                        Ext.getCmp('treePanelId').setStore(treeStore);
+                        Ext.getCmp('treePanelId').setStore(treeStore);                       
+                        
                         
                         console.log("layers: " +layers.length);                
             

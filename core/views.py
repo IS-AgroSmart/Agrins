@@ -777,6 +777,7 @@ def mapper_layers(request, uuid):
          "name" : lyr.name,
          "title" : lyr.title,
          "date": lyr.date,
+         "type": lyr.type
         }
         for lyr in project.layers.all()
     ]})
