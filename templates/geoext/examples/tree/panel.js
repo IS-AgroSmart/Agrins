@@ -49,7 +49,7 @@ function initApp() {
             let view = new ol.View({               
                 center: [0, 0],
                 zoom: 1,
-                maxZoom: 18,
+                maxZoom: 24,
             });
             
             olMap = new ol.Map({                
@@ -1399,20 +1399,13 @@ function initLayers() {
                                 layerfiles.push(new ol.layer.Vector({
                                     name: art.title,
                                     source: new ol.source.Vector({
-                                        format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),
-                                        
-                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
+                                        format: new ol.format.GeoJSON(),
+                                        //projection: 'EPSG:4326',
+                                        //srs: 'EPSG:4326',
+                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&srsname=EPSG:3857&"
                                             //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
-                                    }),
-                                    
-                                    style: new ol.style.Style({
-                                        fill: new ol.style.Fill({
-                                            color:'orange'
-                                        }),
-                                        stroke: new ol.style.Stroke({
-                                            color:'black'
-                                        })
-                                    })
+                                    }),                                    
+                                   
                             }));}
                             else if (art.type === "MULTIESPECTRAL"){
                                 //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");

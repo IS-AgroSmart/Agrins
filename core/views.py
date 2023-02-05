@@ -464,12 +464,6 @@ def upload_vectorfile(request, uuid):
         with cd(project.get_disk_path() + "/" + file_name):
             os.system('ogr2ogr -f "ESRI Shapefile" "{0}.shp" "{0}.kml"'.format(file_name))
 
-    if datatype == 'shp':
-        filein = project.get_disk_path() + "/" + file_name+"/" + file_name +'.prj'
-        with cd(project.get_disk_path() + "/" + file_name):
-            os.system('ogr2ogr f"ESRI Shapefile -s_srs EPSG:32717 -t_srs EPSG:4326 "{0}.shp" "{0}.shp"'.format(file_name))
-        
-        
 
     GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
 
@@ -486,7 +480,7 @@ def upload_vectorfile(request, uuid):
         GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/datastores/" +
         file_name + "/featuretypes/" + file_name + ".json",
         headers={"Content-Type": "application/json"},        
-        data='{"featureType": {"enabled": true, }}',
+        data='{"featureType": {"enabled": true, "srs":"4326"}}',
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
