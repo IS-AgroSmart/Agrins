@@ -298,17 +298,104 @@ function saveMeasurementsListener() {
         alert("Realice alguna medición antes de guardar");
         return;
     }
-
+    
     let geojson = serializer.writeFeatures(features, {
         dataProjection: 'EPSG:4326',
         featureProjection: olMap.getView().getProjection()
     });
     console.log(geojson);
+    
+    var formaddgeo = Ext.create('Ext.form.Panel', {                
+        id: 'formIdAddgeo',
+        width: '100%', 
+        height: '100%',
+        bodyPadding: 10,    
+        border:false,
+        defaultType: 'textfield',
+        items: [{
+            xtype: 'textfield',
+            name: 'name',
+            id: 'namegeo',
+            width:'100%',     
+            fieldLabel: 'Nombre',
+            labelAlign: 'top',
+            allowBlank: false,  // requires a non-empty value            
+            blankText: 'El campo nombre es necesario',
+            msgTarget: 'under' ,
+        },
+        ],
+            // Reset and Submit buttons
+        buttons: [{
+            text: 'Borrar',
+            iconCls: 'icon-eraser',
+            cls: 'btnform',
+            handler: function() {
+                this.up('form').getForm().reset();
+            }
+        }, {
+            text: 'Guardar',
+            formBind: true, //only enabled once the form is valid
+            disabled: true,
+            iconCls: 'icon-save',
+            cls:'btnform',
+            handler: function() {
+                var form = this.up('form').getForm();                
+                if (form.isValid()) {
+                    form.submit({
+                        method: 'POST',
+                        url : '/api/uploads/' + uuid + '/measure',
+                        params: {
+                            'json': geojson,
+                        },
+                        headers: {
+                            Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                        },
+                        waitMsg:'Cargando medición espere por favor...',
+                        success: function(fp, o) {
+                            Ext.getCmp('formIdAddgeo').reset();
+                            initLayers();
+                            Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
+                        },
+                        failure: function(fp, o) {
+                            Ext.Msg.alert('Error', 'Error al subir capa.');
+                        }
+                    });
+                }
+                
+            }
+        }],        
+    });
+    console.log('items')
+    Ext.create('Ext.window.Window', {
+        title: 'Crear nueva capa',
+        height: 180,
+        width: 300,
+        layout: 'vbox',
+        modal: true,
+        resizable   : false,
+        items:
+        {
+            xtype: 'panel',
+            height: '100%',
+            width: '100%',                
+            items:[                    
+                
+                    formaddgeo
+                
+            ]
+        }
+    }).show();
+
+
+/*
+
+
     let geojsonFormat = new ol.format.GeoJSON();
     let featArray2 = geojsonFormat.readFeatures(geojson, {
         dataProjection: 'EPSG:4326',
         featureProjection: 'EPSG:3857'
     });
+    console.log(geojsonFormat);
     let redStyle = new ol.style.Style({
         image: new ol.style.Circle({
             radius: 6,
@@ -343,7 +430,7 @@ function saveMeasurementsListener() {
 
     link.href = URL.createObjectURL(blob);
     link.click();
-    URL.revokeObjectURL(link.href);
+    URL.revokeObjectURL(link.href);*/
 }
 
 function clearMeasurementsListener() {

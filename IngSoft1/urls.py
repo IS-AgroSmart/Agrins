@@ -43,6 +43,7 @@ urlpatterns = [
 #    path('api/downloads/<uuid:uuid>/<artifact>', download_artifact, name="download_artifact"),
 #    path('api/downloads/<uuid:uuid>/<options>/<artifact>', download_artifact_movil, name="download_artifact"),
     path('api/uploads/<uuid:uuid>/vectorfile', upload_vectorfile, name="upload_vector"),
+    path('api/uploads/<uuid:uuid>/measure', upload_measure, name="upload_vector"),
     path('api/uploads/<uuid:uuid>/geotiff', upload_geotiff, name="upload_geotiff"),
 #    path('api/preview/<uuid:uuid>', preview_flight_url, name="preview_flight_url"),
     path('api/rastercalcs/check', check_formula, name="check_formula"),

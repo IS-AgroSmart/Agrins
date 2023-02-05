@@ -487,6 +487,59 @@ def upload_vectorfile(request, uuid):
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
 
 
+@xframe_options_exempt 
+@csrf_exempt
+def upload_measure(request, uuid):
+    project = UserProject.objects.get(pk=uuid)
+    file_name = request.POST["name"]
+    if project.user.used_space >= project.user.maximum_space:
+        return HttpResponse(status=402)
+    geojs=request.POST["json"]
+    json.dumps(geojs)
+
+
+    print(geojs)
+    os.makedirs(project.get_disk_path() + "/" + file_name, exist_ok=True)
+
+    #with open(project.get_disk_path() + "/" + file_name + "/" + file_name + ".josn", "w") as outfile:
+     #   json.dump(geojs, outfile)
+
+    with open(project.get_disk_path() + "/" + file_name + "/" + file_name + ".json", "w") as f:
+        f.write(request.POST["json"])
+
+    #with open(project.get_disk_path() + "/" + file_name+"/"+file_name+".json", 'wb') as stream:
+     #   json.dump(request.POST["json"], stream)
+
+
+    with cd(project.get_disk_path() + "/" + file_name):
+        os.system('ogr2ogr -f "ESRI Shapefile" "{0}.shp" "{0}.json"'.format(file_name))
+    
+    layer = project.layers.create(
+        name=file_name, title=request.POST["name"], type=LayerType.VECTOR.name)
+    
+    layer.artifacts.create(
+        name=file_name, type=ArtifactType.SHAPEFILE.name, title=request.POST["name"], camera=Camera.NONE.name)
+        
+    GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
+
+    requests.put(
+        GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/datastores/" +
+        file_name + "/"
+                    "external.shp",
+        headers={"Content-Type": "text/plain"},
+        data="file:///media/USB/" +
+             str(project.uuid) + "/" + file_name + "/" + file_name + ".shp",
+        auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
+
+    requests.put(    
+        GEOSERVER_BASE_URL + project._get_geoserver_ws_name() + "/datastores/" +
+        file_name + "/featuretypes/" + file_name + ".json",
+        headers={"Content-Type": "application/json"},        
+        data='{"featureType": {"enabled": true, "srs":"4326"}}',
+        auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
+    project.update_disk_space()
+    project.user.update_disk_space()
+    return JsonResponse({'success':True, "msg":"Archivo cargado"})
 
 @xframe_options_exempt 
 @csrf_exempt
