@@ -1,5 +1,5 @@
 let interactionLayer, interactionSource, popup, selectClick;
-var featureType = 'LineString';
+var featureType = '';
 var helpTooltipElement, helpTooltip;
 var measureTooltipElement, measureTooltip;
 var numMeasurement = 0;
@@ -8,6 +8,8 @@ var draw, listener, isDrawing = false;
 var delete_handler;
 var drawingFeature = null;
 var helpMsg;
+
+
 
 function addMeasureInteraction() {
     interactionSource = new ol.source.Vector();
@@ -33,9 +35,8 @@ function addMeasureInteraction() {
 }
 
 function addControlsMap(){
-    addMeasureInteraction();
-    ctrlSwiper = new ol.control.Swipe({position: -0.5});
-
+    addMeasureInteraction(); 
+    ctrlSwiper= new ol.control.Swipe({position:-0.5});
     // Current selection
     var sLayer = new ol.layer.Vector({
         source: new ol.source.Vector(),
@@ -163,15 +164,14 @@ function addControlsMap(){
     btswiper.className = "btn btn-small icon-exchange";
     btswiper.setAttribute("title","Dividir mapa");
     var handleSwiper = function(e) {  
-        value = ctrlSwiper.get('position');             
-        if (value<0){
-            ctrlSwiper.set('position', value*-1);                
+        isswipervisible = !isswipervisible;
+        if (isswipervisible){
+            ctrlSwiper.set('position', 0.5);                            
         }
         else{
-            ctrlSwiper.set('position', value*-1);                
-            ctrlSwiper.removeLayers();
+            ctrlSwiper.set('position', -0.5); 
+            ctrlSwiper.removeLayers();                           
         }
-        
     };
     btswiper.addEventListener("click", handleSwiper);   
     
@@ -179,7 +179,7 @@ function addControlsMap(){
     btsave.className = "btn btn-small icon-cloud-upload";
     btsave.setAttribute("title","Guardar anotaciones");
     btsave.addEventListener("click",saveMeasurementsListener)
-
+    
     var elementGroup = document.createElement('div');
     elementGroup.className = 'btcontrols btn-group';         
     elementGroup.setAttribute("id","idcontrols");
@@ -203,7 +203,6 @@ function addControlsMap(){
 
     var logo = document.createElement("div");
     logo.className = "img-logo";
-
     var controllogo = new ol.control.Control({
         element: logo
     });
@@ -273,21 +272,59 @@ function removeInteraction() {
 }
 
 function measurePointListener() {
-    featureType = 'Point';
-    if (isDrawing) removeInteraction();
-    else addInteraction();
+    if (featureType == 'Point' || featureType == ''){
+        featureType = 'Point';
+        if (isDrawing) removeInteraction();
+        else addInteraction();
+    }
+    else{
+        changeFeature('Point');
+    }    
+    
 }
 
-function measureLengthListener() {
-    featureType = 'LineString';
-    if (isDrawing) removeInteraction();
-    else addInteraction();
+function changeFeature(feature_up){
+    Ext.Msg.show({
+        title:'Nueva medición',
+        message: 'Medición actual: '+featureType+' ¿Desea eliminar e inicar una medición de '+feature_up+'?',
+        buttonText: {
+            yes: 'Si',
+            no: 'No'
+        },
+        buttons: Ext.Msg.YESNO,
+        icon: Ext.Msg.QUESTION,
+        fn: function(btn) {
+            if (btn === 'yes') {
+                featureType = feature_up;
+                clearMeasurementsListener();
+            } else {
+                
+            } 
+        }
+    });
+
+}
+
+function measureLengthListener() {    
+    if (featureType == 'LineString' || featureType == ''){
+        featureType='LineString';
+        if (isDrawing) removeInteraction();
+        else addInteraction();
+    }
+    else{
+        changeFeature('LineString');
+    }
 }
 
 function measureAreaListener() {
-    featureType = 'Polygon';
-    if (isDrawing) removeInteraction();
-    else addInteraction();
+    if (featureType == 'Polygon' || featureType == ''){
+        featureType='Polygon';
+        if (isDrawing) removeInteraction();
+        else addInteraction();
+    }
+    else{
+        changeFeature('Polygon');
+    }
 }
 
 function saveMeasurementsListener() {
@@ -355,6 +392,9 @@ function saveMeasurementsListener() {
                             Ext.getCmp('formIdAddgeo').reset();
                             initLayers();
                             Ext.Msg.alert('Detalle', 'Capa agregada correctamente.');                                                   
+                            clearMeasurementsListener();
+                            featureType = '';
+                            Ext.getCmp('wndowupload').close();
                         },
                         failure: function(fp, o) {
                             Ext.Msg.alert('Error', 'Error al subir capa.');
@@ -368,6 +408,7 @@ function saveMeasurementsListener() {
     console.log('items')
     Ext.create('Ext.window.Window', {
         title: 'Crear nueva capa',
+        id: 'wndowupload',
         height: 180,
         width: 300,
         layout: 'vbox',
@@ -523,7 +564,7 @@ function addInteraction() {
         })
     }, this)
     draw.on('drawend', (evt) => {
-        ans = prompt("Escriba el nombre de la medición (opcional)");
+        ans = prompt("Nombre de la medición para metadata (opcional)");
         if (ans !== null && ans.trim() !== ""){
             drawingFeature.set("Nombre", ans);
             drawingFeature.set("Total", Medition);

@@ -505,7 +505,7 @@ def upload_measure(request, uuid):
      #   json.dump(geojs, outfile)
 
     with open(project.get_disk_path() + "/" + file_name + "/" + file_name + ".json", "w") as f:
-        f.write(request.POST["json"])
+        f.write(geojs)
 
     #with open(project.get_disk_path() + "/" + file_name+"/"+file_name+".json", 'wb') as stream:
      #   json.dump(request.POST["json"], stream)

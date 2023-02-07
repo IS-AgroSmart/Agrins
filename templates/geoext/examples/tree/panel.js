@@ -22,12 +22,13 @@ let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", title: 
 })});           
 
 /* Initial values*/
-let mapComponent, mapPanel, olMap, basemapsGroup, layersGroup;;
+let mapComponent, mapPanel, olMap, basemapsGroup, layersGroup;
 let startPanel, treePanel, addPanel, indexPanel, modelPanel, helpPanel, configPanel;
 let artifactLayer = [];
+let ctrlSwiper;
 let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
+let isLayerSelect = false;let isswipervisible = false;
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
-var ctrlSwiper; //LayerSwiper control compare layers tool
 noCacheHeaders.append('pragma', 'no-cache');
 noCacheHeaders.append('cache-control', 'no-cache');
 
@@ -770,10 +771,23 @@ function createTree(){
              },
             
             itemclick: {
-                fn: function(view, record, item, index, event) {
+                fn: function(view, record, item, index, event) {                    
+                    ctrlSwiper.removeLayers();
                     if(record.data.leaf){
-                        ctrlSwiper.addLayer(record);                        
-                        fitMap(record.data.text);                        
+                        isLayerSelect = true;
+                        console.log('datavalue: ', record.data.text);                     
+                        fitMap(record.data.text);  
+                        ctrlSwiper.removeLayers();        
+                        if (isswipervisible)
+                            ctrlSwiper.addLayer(record.data,true);
+                                                
+                    }
+                    else{
+                        isLayerSelect = false;
+                        //isswipervisible = false
+                        ctrlSwiper.removeLayers();
+                        //ctrlSwiper.set('position', -0.5);                
+                        
                     }
                     
                 }
@@ -844,6 +858,7 @@ function windowDownload(layer, path){
                             if(Ext.getCmp('radio2').getValue())formartDW='shape-zip';
                             if(Ext.getCmp('radio3').getValue())formartDW='csv';                            
                             window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_'+uuid+':'+path+'&maxfeatures=50&outputformat='+formartDW;
+                            this.up('window').close();
                         }
                     }
                 ],
@@ -873,78 +888,6 @@ function createconfigPanel(){
     });
 }
 
-function createhelpPanel(){
-    var navigate = function(panel, direction){
-        var layout = panel.getLayout();
-        layout[direction]();
-        Ext.getCmp('move-prev').setDisabled(!layout.getPrev());
-        Ext.getCmp('move-next').setDisabled(!layout.getNext());
-    };    
-    helpPanel = new Ext.create('Ext.panel.Panel', {       
-        width:'100%',
-        autoScroll: true,
-        border:0,
-        //height: '100%',        
-        layout: 'card',
-        bodyStyle: 'padding:5px',        
-        autoScroll: true,
-        tbar: [
-            {
-                id: 'move-prev',
-                xtype:'button',
-                //text: 'Anterior',
-                iconCls:'fa-regular fa-circle-left',
-                handler: function(btn) {
-                    navigate(btn.up("panel"), "prev");
-                },
-                disabled: true
-            },
-            '->', // greedy spacer so that the buttons are aligned to each side
-            {
-                id: 'move-next',
-                xtype:'button',
-                //text: 'Siguiente',
-                iconCls:'fa-regular fa-circle-right',
-                handler: function(btn) {
-                    navigate(btn.up("panel"), "next");
-                }
-            }
-        ],
-        // the panels (or "cards") within the layout
-        items: [{
-            id: 'card-0',
-            border:0,
-            padding:10,
-            autoScroll: true,
-            html: '<h2> Geoportal Agrins</h2>'+
-                    '<p> A continuación encontrará una guía para el uso de la plataforma.</p>'+
-                    '<ol><li>Agregar capas</li><li>Obtener índices</li><li>Modelo</li>'+
-                    '<li>Mediciones</li><li>Áreas</li><li>Puntos</li><li>Mapa bases</li></ol'+
-                    '<ol><li>Eliminar capa</li><li>Detalle de capa</li><li>Salir del visualizador</li>'
-                    
-        },{
-            id: 'card-1',
-            border:0,
-            padding:10,
-            autoScroll: true,
-            html:'<h5> Agregar Capa</h5>'+
-                    '<p> En la plataforma puede agregar archivos (multiespectrales, RGB) .tiff deberá especificad el modelo de la cámara para poder obtener los índices así como ejeccutar el modelo.</p>'+
-                    '<p> Además podrá agregar archivos kml y shapefile </p>'+
-                '<h5> Obtener índices</h5>'+
-                    '<p> Seleccione el índice requerido de la lista disponible (GCI, GRRI, MGRVI, NDRE, NDVI, NGRDI)</p>'+
-                '<h5> Modelo</h5>'+
-                    '<p> En el geoportal podrá obtener dos modelos uno para determinar la altura y otro para clorofila.</p>'
-                    
-        },{
-            id: 'card-2',
-            border:0,
-            padding:10,
-            autoScroll: true,
-            html: '<h3> Continuar..</h3>'+            
-            '<p> Continuar agregando </p>'
-        }],
-    });    
-}
 
 function createViewPort(){    
     createaddPanel();
@@ -1308,8 +1251,9 @@ function deleteItem(layer, url, pk){
 function initLayers() {    
     let layers = [];    
     olMap.removeLayer(layersGroup);
-    var flag = true;
+    layersGroup = [];
     dataLayers.removeAll();
+    dataGroup.removeAll();
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/layers",
         {headers: noCacheHeaders})
         .then(response => response.json())
@@ -1400,9 +1344,7 @@ function initLayers() {
                                         })
                                     })
                             }));}
-                            if (!flag)
-                                ctrlSwiper.addLayer(layerfiles[0],true); 
-                            flag=false
+                            
                         }
                         
                         //console.log('capa geo '+art.layer)                     
@@ -1410,44 +1352,61 @@ function initLayers() {
                             name: lyr.title,
                             leaf: true, 
                             layers: layerfiles,
-                        });
-                        
+                        });                        
                         layers.push(layerGroup); 
                         console.log("layers valores: " +layers.length);
-                    })
-                    .finally(() => { 
-
+                    }).finally(() => { 
+                        
                         layersGroup = new ol.layer.Group({                
                             layers: layers
                         });
                         olMap.addLayer(layersGroup);
-                
+                        var treeStore;
                         if(layers.length > 0){
+                        
                             let layerg = layersGroup.getLayers().getArray().slice(-1); 
                             let namelayer = layerg[0].getLayers().getArray()[0].get('name');
                             console.log('data: '+namelayer)
-                            fitMap(namelayer);
-                        };
-                        var treeStore = Ext.create('GeoExt.data.store.LayersTree', {
-                            layerGroup: layersGroup,
-                            root: {
-                                expanded: true,
-                                text: project_name,
-                            },
-                            
-                        });
+                            fitMap(namelayer);                            
+                            treeStore = Ext.create('GeoExt.data.store.LayersTree', {
+                                layerGroup: layersGroup,
+                                root: {
+                                    expanded: true,
+                                    text: project_name,
+                                },
+                                
+                            });
+                        }else{
                         
-                        //id:'treePanelId',
-                        Ext.getCmp('treePanelId').setStore(treeStore);                       
-                        
-                        
+                            treeStore = Ext.create('GeoExt.data.store.LayersTree', {                               
+                                //layerGroup: [],
+                                root: {
+                                    expanded: true,
+                                    text: project_name,
+                                },
+                                
+                            });
+                        }                        
+                        Ext.getCmp('treePanelId').setStore(treeStore);                                               
                         console.log("layers: " +layers.length);                
             
-                    })
-
+                    });
             }
             }            
-        )
+        ).finally(() => { 
+            if(layers.length == 0){
+                console.log('Sin capas disponibles');
+                var emptyStore =  Ext.create('Ext.data.TreeStore',{
+                    root: {
+                        text: project_name
+                    }
+                })
+                Ext.getCmp('treePanelId').setStore(emptyStore);
+                console.log("layers: " +layers.length);                
+            }                        
+            
+
+        });
 }
 
 function fitMap(name) {
