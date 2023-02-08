@@ -23,7 +23,7 @@ let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", title: 
 
 /* Initial values*/
 let mapComponent, mapPanel, olMap, basemapsGroup, layersGroup;
-let startPanel, treePanel, addPanel, indexPanel, modelPanel, helpPanel, configPanel;
+let startPanel, treePanel, addPanel, helpPanel, configPanel;
 let artifactLayer = [];
 let ctrlSwiper;
 let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
@@ -79,23 +79,6 @@ function initApp() {
             
         },
         name: 'BasicTree'
-    });
-}
-
-function indexWin(id, title, width, height){
-    var url = top.window.location.href= "/#/projects/" +uuid + "/upload/geotiff";                         
-    Ext.widget('container', {           
-        items: [
-            {
-                xtype: 'box',
-                autoEl: {
-                    tag: 'iframe',
-                    src: url,
-                    width: 640,
-                    height: 480
-                }
-            }
-        ]        
     });
 }
 
@@ -506,43 +489,7 @@ function onConfig(){
     }).show();
 }
 
-function createindexPanel(){   
-    var indice = Ext.create('Ext.form.ComboBox', {
-        fieldLabel: 'Seleccionar índice',
-        name: 'index',
-        id: 'index',
-        msgTarget: 'under' ,
-        store: dataIndex,
-        width: '100%',
-        queryMode: 'local',
-        allowBlank : false,
-        blankText: 'Seleccione el índice que desea crear',
-        forceSelection: true,
-        displayField: 'name',
-        valueField: 'name',
-        value:'1',
-        labelAlign: 'top'
-        //renderTo: Ext.getBody()
-    });
-    var capa = Ext.create('Ext.form.ComboBox', {
-        fieldLabel: 'Seleccionar capa',
-        name: 'layer',
-        id: 'layer',
-        store: dataLayers,
-        width: '100%',
-        msgTarget: 'under' ,
-        queryMode: 'local',
-        allowBlank : false,
-        blankText: 'Seleccione la capa',
-        forceSelection: true,
-        displayField: 'title',
-        valueField: 'name',
-        labelAlign: 'top',
-        
-        
-        //value:'1'
-        //renderTo: Ext.getBody()
-    });
+
     /* filtro
 
                 artifactLayer.push(art.title);   
@@ -564,84 +511,7 @@ function createindexPanel(){
                 --------
                 console.log("fecha: "+d);
     */
-    var formSelectIndex = Ext.create('Ext.form.Panel', {                
-        id: 'formIdIndex',
-        width: '100%', 
-        height: '100%',
-        bodyPadding: 10,    
-        border:0,
-        defaultType: 'textfield',
-        items: [
-            capa,
-            indice,            
-    ],    
-        // Reset and Submit buttons
-        buttons: [{
-            text: 'Borrar',
-            iconCls: 'icon-eraser',
-            cls: 'btnform',
-            handler: function() {
-                this.up('form').getForm().reset();
-            }
-        }, {
-            text: 'Crear índice',
-            formBind: true, //only enabled once the form is valid
-            disabled: true,
-            iconCls: 'icon-save',
-            cls:'btnform',
-            handler: function() {
-                var form = Ext.getCmp('formIdIndex').getForm();                
-                console.log('camara capa: '+dataLayers.findRecord('title', Ext.getCmp('layer').getRawValue()).get('camera'));  
-                console.log('tipo capa: '+dataLayers.findRecord('title', Ext.getCmp('layer').getRawValue()).get('type'));
-                if (form.isValid()) {
-                    form.submit({
-                        method: 'POST',
-                        url : '/api/rastercalcs/' + uuid ,
-                        params: {
-                            'title': Ext.getCmp('layer').getRawValue(),
-                            'camera': dataLayers.findRecord('title', Ext.getCmp('layer').getRawValue()).get('camera'),
-                            'type': dataLayers.findRecord('title', Ext.getCmp('layer').getRawValue()).get('type')
-                        }
-                        ,
-                        headers: {
-                            Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
-                        },
-                        waitMsg:'Creando índice espere por favor...',
-                        success: function(fp, o) {
-                            Ext.getCmp('formIdIndex').reset();
-                            Ext.Msg.alert('Detalle', 'Índice creado correctamente.');                                                   
-                        },
-                        failure: function(fp, o) {
-                            
-                            Ext.Msg.alert('Error', 'Error al crear el índice.');
-                        }
-                    });
-                }
-                
-            }
-        }],        
-    });
-
-    indexPanel = new Ext.create('Ext.panel.Panel', {                
-        width: '100%',
-        autoScroll: true,
-        height: '100%',         
-        border:0,
-        
-        items:[            
-            {
-                padding: 5,                    
-                border:0,
-                html: '<h6><center>Crear índice de vegetación</center></h6'+
-                        '<img src="https://sp.depositphotos.com/173808586/stock-photo-panoramic-view-of-green-field.html"/>'
-            },
-            formSelectIndex,
-            
-        ],
-        
-    });
-}
-
+    
 function createTree(){    
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
         border: false,    
@@ -711,8 +581,10 @@ function createTree(){
                             { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
                                     handler: function() {deleteItem(record.data.text, 'delete_artifact', pk)} },  
                             { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
-                            { text: 'Modelo', iconCls:'fa-solid fa-kaaba', handler: function() {console.log("Delete");} },
-                            { text: 'Índice', iconCls:'fa-solid fa-images', handler: function() {console.log("Delete");} }
+                            { text: 'Modelo', iconCls:'fa-solid fa-kaaba', 
+                                handler: function() {windowModel(record.data.text, dataLayers.findRecord('title', record.data.text).get('name'));} },
+                            { text: 'Índice', iconCls:'fa-solid fa-images', 
+                                handler: function() {windowIndex(record.data.text, dataLayers.findRecord('title', record.data.text).get('name'));} }
                         ]
                     }
                     else{
@@ -796,10 +668,188 @@ function createTree(){
     });
 }
 
-function windowDownload(layer, path){
-    console.log('uid: '+uuid),
-    console.log('layer: '+path)
+function windowIndex(layer, path){
+    var indice = Ext.create('Ext.form.ComboBox', {
+        fieldLabel: 'Seleccionar índice',
+        name: 'index',
+        id: 'index',
+        msgTarget: 'under' ,
+        store: dataIndex,
+        width: '100%',
+        queryMode: 'local',
+        allowBlank : false,
+        blankText: 'Seleccione el índice que desea crear',
+        forceSelection: true,
+        displayField: 'name',
+        valueField: 'name',
+        value:'1',
+        labelAlign: 'top'
+        //renderTo: Ext.getBody()
+    });
 
+    Ext.create('Ext.window.Window', {
+        id: 'windowIndexId',
+        title: layer,
+        height: 180,
+        width: 300,
+        layout: 'vbox',
+        modal: true,
+        resizable   : false,
+        items:
+            {
+                xtype: 'form',
+                id: 'formIdIndex',
+                width: '100%', 
+                height: '100%',
+                bodyPadding: 10,    
+                border:0,
+                defaultType: 'textfield',
+                items: [                
+                    indice,            
+                ],    
+                // Reset and Submit buttons
+                buttons: [{
+                    text: 'Borrar',
+                    iconCls: 'icon-eraser',
+                    cls: 'btnform',
+                    handler: function() {
+                        this.up('form').getForm().reset();
+                    }
+                }, {
+                text: 'Crear índice',
+                formBind: true, //only enabled once the form is valid
+                disabled: true,
+                iconCls: 'icon-save',
+                cls:'btnform',
+                handler: function() {
+                    var form = Ext.getCmp('formIdIndex').getForm();                
+                    console.log('camara capa: '+dataLayers.findRecord('title', layer).get('camera'));  
+                    console.log('tipo capa: '+dataLayers.findRecord('title', layer).get('type'));
+                    if (form.isValid()) {
+                        form.submit({
+                            method: 'POST',
+                            url : '/api/rastercalcs/' + uuid ,
+                            params: {
+                                'layer': path,
+                                'title': layer,
+                                'camera': dataLayers.findRecord('title', layer).get('camera'),
+                                'type': dataLayers.findRecord('title', layer).get('type')
+                            }
+                            ,
+                            headers: {
+                                Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                            },
+                            waitMsg:'Creando índice espere por favor...',
+                            success: function(fp, o) {
+                                Ext.getCmp('formIdIndex').reset();
+                                Ext.Msg.alert('Detalle', 'Índice creado correctamente.');                                                   
+                                Ext.getCmp('windowIndexId').close();
+                                initLayers();
+                            },
+                            failure: function(fp, o) {                            
+                                Ext.Msg.alert('Error', 'Error al crear el índice.');
+                            }
+                        });
+                    }
+                }
+            }],        
+            }
+                
+               
+    }).show();
+}
+
+function windowModel(layer, path){
+    var indice = Ext.create('Ext.form.ComboBox', {
+        fieldLabel: 'Seleccionar modelo Deeplearning',
+        name: 'model',
+        id: 'model',
+        msgTarget: 'under' ,
+        store: dataModel,
+        width: '100%',
+        queryMode: 'local',
+        allowBlank : false,
+        blankText: 'Seleccione el modelo deeplearning',
+        forceSelection: true,
+        displayField: 'name',
+        valueField: 'name',
+        value:'1',
+        labelAlign: 'top'
+        //renderTo: Ext.getBody()
+    });
+
+    Ext.create('Ext.window.Window', {
+        id: 'windowModelId',
+        title: layer,
+        height: 180,
+        width: 300,
+        layout: 'vbox',
+        modal: true,
+        resizable   : false,
+        items:
+            {
+                xtype: 'form',
+                id: 'formIdModel',
+                width: '100%', 
+                height: '100%',
+                bodyPadding: 10,    
+                border:0,
+                defaultType: 'textfield',
+                items: [                    
+                    indice,            
+                ],    
+                // Reset and Submit buttons
+                buttons: [{
+                    text: 'Borrar',
+                    iconCls: 'icon-eraser',
+                    cls: 'btnform',
+                    handler: function() {
+                        this.up('form').getForm().reset();
+                    }
+                }, {
+                text: 'Obtener Modelo',
+                formBind: true, //only enabled once the form is valid
+                disabled: true,
+                iconCls: 'icon-save',
+                cls:'btnform',
+                handler: function() {
+                    var form = this.up('form').getForm();                
+                    //console.log('camara capa: '+dataLayers.findRecord('title', Ext.getCmp('layerm').getRawValue()).get('camera'));  
+                    //console.log('tipo capa: '+dataLayers.findRecord('title', Ext.getCmp('layerm').getRawValue()).get('type'));
+                    if (form.isValid()) {
+                        form.submit({
+                            method: 'POST',
+                            url : '/api/rastermodel/' + uuid ,
+                            params: {
+                                'layer': path,
+                                'title': layer,
+                                'camera': dataLayers.findRecord('title', layer).get('camera'),
+                                'type': dataLayers.findRecord('title', layer).get('type')
+                            },
+                            headers: {
+                                Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                            },
+                            waitMsg:'Creando modelo espere por favor...',
+                            success: function(fp, o) {
+                                Ext.getCmp('formIdModel').reset();
+                                Ext.Msg.alert('Detalle', 'Modelo creado correctamente.');                                                   
+                                Ext.getCmp('windowModelId').close();
+                                initLayers();
+                            },
+                            failure: function(fp, o) {
+                                Ext.Msg.alert('Error', 'Error al crear el modelo.');
+                            }
+                        });
+                    }
+                }
+            }],        
+            
+        }      
+               
+    }).show();
+}
+
+function windowDownload(layer, path){
     Ext.create('Ext.window.Window', {
         title: layer,
         height: 180,
@@ -888,7 +938,6 @@ function createconfigPanel(){
     });
 }
 
-
 function createViewPort(){    
     createaddPanel();
     createconfigPanel();
@@ -896,46 +945,6 @@ function createViewPort(){
     createTree();    
     initLayers();             
     
-    /*let btagregar = Ext.create('Ext.Button', {        
-            //text: 'Agregar',
-            iconCls: 'fa-circle-plus',
-            cls: 'fa-solid ',
-            tooltip: 'Agregar capa',
-            handler: function(){
-                createaddPanel();
-                var p = Ext.getCmp('viewportPanelId');
-                p.removeAll();
-                p.updateLayout();
-                p.add(addPanel);
-            }
-    });*/
-
-    let btreload = Ext.create('Ext.Button',{
-            xtype: 'button',
-            iconCls: ' fa-rotate',   
-            cls: 'fa-solid',
-            tooltip: 'Recargar',
-            handler: function(){            
-                Ext.getCmp('btdeletelayer').setVisible(false);
-                Ext.getCmp('btinfolayer').setVisible(false);
-                initLayers();
-            }
-    })
-
-    let btindice = Ext.create('Ext.Button', {        
-        //text: 'Índices',
-        iconCls: 'fa-images',
-        cls: 'fa-solid ',
-        tooltip: 'Índices de vegetación',        
-        handler: function(){ 
-            createindexPanel();
-            var p = Ext.getCmp('viewportPanelId');
-            p.removeAll();
-            p.updateLayout();
-            p.add(indexPanel);
-
-        },
-    });
 
     let btModelo  = Ext.create('Ext.Button', {
         //text: 'Modelo',
@@ -950,43 +959,6 @@ function createViewPort(){
             p.add(modelPanel);
         }
     });
-
-    /*let btcapas  = Ext.create('Ext.Button', {
-            //text: 'Capas',
-            iconCls: 'fa-layer-group',
-            cls: 'fa-solid',
-            tooltip: 'Capas',
-            //width: '90px',
-            handler: function() {
-                var p = Ext.getCmp('viewportPanelId');
-                p.removeAll();
-                //mainPanel.updateLayout();
-                initLayers();              
-                createTree();
-                p.add(treePanel);
-            },
-    });*/
-    
-    tabMenu = Ext.create('Ext.toolbar.Toolbar', {   
-        style: {
-            backgroundColor: 'white',
-        },
-        layout: {
-            pack:'middle',
-            align:'middle'
-        },         
-        items: [
-            
-            
-            btindice,
-            btModelo,
-            
-    ],
-        
-    });     
-    
-    //var p = Ext.getCmp('mainPanelId');
-    //p.add(treePanel);
 
     Ext.create('Ext.Viewport', {                
         id: 'mainWin',
@@ -1103,118 +1075,6 @@ function createViewPort(){
         ]
     });
    
-}
-
-function createmodelPanel(){
-    var indice = Ext.create('Ext.form.ComboBox', {
-        fieldLabel: 'Seleccionar modelo Deeplearning',
-        name: 'model',
-        id: 'model',
-        msgTarget: 'under' ,
-        store: dataModel,
-        width: '100%',
-        queryMode: 'local',
-        allowBlank : false,
-        blankText: 'Seleccione el modelo deeplearning',
-        forceSelection: true,
-        displayField: 'name',
-        valueField: 'name',
-        value:'1',
-        labelAlign: 'top'
-        //renderTo: Ext.getBody()
-    });
-    var capa = Ext.create('Ext.form.ComboBox', {
-        fieldLabel: 'Seleccionar capa',
-        name: 'layerm',
-        id: 'layerm',
-        store: dataLayers,
-        width: '100%',
-        msgTarget: 'under' ,
-        queryMode: 'local',
-        allowBlank : false,
-        blankText: 'Seleccione la capa',
-        forceSelection: true,
-        displayField: 'title',
-        valueField: 'name',
-        labelAlign: 'top',
-    });
-    var formSelectIndex = Ext.create('Ext.form.Panel', {                
-        id: 'formIdModel',
-        width: '100%', 
-        height: '100%',
-        bodyPadding: 10,    
-        border:0,
-        defaultType: 'textfield',
-        items: [
-            capa,
-            indice,            
-    ],    
-        // Reset and Submit buttons
-        buttons: [{
-            text: 'Borrar',
-            iconCls: 'icon-eraser',
-            cls: 'btnform',
-            handler: function() {
-                this.up('form').getForm().reset();
-            }
-        }, {
-            text: 'Obtener Modelo',
-            formBind: true, //only enabled once the form is valid
-            disabled: true,
-            iconCls: 'icon-save',
-            cls:'btnform',
-            handler: function() {
-                var form = this.up('form').getForm();                
-                console.log('camara capa: '+dataLayers.findRecord('title', Ext.getCmp('layerm').getRawValue()).get('camera'));  
-                console.log('tipo capa: '+dataLayers.findRecord('title', Ext.getCmp('layerm').getRawValue()).get('type'));
-                if (form.isValid()) {
-                    form.submit({
-                        method: 'POST',
-                        url : '/api/rastermodel/' + uuid ,
-                        params: {
-                            'title': Ext.getCmp('layerm').getRawValue(),
-                            'camera': dataLayers.findRecord('title', Ext.getCmp('layerm').getRawValue()).get('camera'),
-                            'type': dataLayers.findRecord('title', Ext.getCmp('layerm').getRawValue()).get('type')
-                        }
-                        ,
-                        headers: {
-                            Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
-                        },
-                        waitMsg:'Creando modelo espere por favor...',
-                        success: function(fp, o) {
-                            Ext.getCmp('formIdModel').reset();
-                            Ext.Msg.alert('Detalle', 'Modelo creado correctamente.');                                                   
-                        },
-                        failure: function(fp, o) {
-                            
-                            Ext.Msg.alert('Error', 'Error al crear el modelo.');
-                        }
-                    });
-                }
-                
-            }
-        }],        
-    });
-
-    modelPanel = new Ext.create('Ext.panel.Panel', {                
-        width: '100%',
-        autoScroll: true,
-        height: '100%',         
-        border:0,
-        
-        items:[            
-            {
-                padding: 5,                    
-                border:0,
-                html: '<h6><center>Obtener modelo</center></h6'
-                        
-            },
-            formSelectIndex,
-            
-        ],
-        
-    });
-
 }
 
 function deleteItem(layer, url, pk){   

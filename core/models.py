@@ -474,7 +474,7 @@ class ArtifactType(Enum):
     SHAPEFILE = "Shapefile"
     INDEX = "Index"
     MODEL = "Model"
-    RGB = "Rgb"
+    RGB = "RGB"
     KML = "Kml"    
 
     @classmethod
@@ -490,6 +490,7 @@ class Camera(Enum):
     REDEDGE = "Micasense RedEdge-M"
     PARROT = "Parrot Sequoia"
     VECTOR = 'Vector'
+    RGB = 'RGB'
     NONE ='none'
 
 class LayerType(Enum):
@@ -524,6 +525,7 @@ class Artifact(models.Model):
             return self.layer.get_disk_path() +self.name+'.kml'
 
 def delete_geoserver_datastore(sender, instance: Artifact, **kwargs):
+    print('datastore delete: ','http://container-geoserver:8080/geoserver/rest/workspaces/' + instance.layer.project._get_geoserver_ws_name() + '/datastores/' + instance.name)
     querystring = {"recurse": "true"}
     requests.delete('http://container-geoserver:8080/geoserver/rest/workspaces/' + instance.layer.project._get_geoserver_ws_name() + '/datastores/' + instance.name,
                     params=querystring,

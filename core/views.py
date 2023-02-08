@@ -625,13 +625,7 @@ def create_raster_index(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
     if project.user.used_space >= project.user.maximum_space:
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
-    bands = {
-        'R':'',
-        'G':'',
-        'B':'',
-        'NIR':'',
-        'RDG':''
-    }    
+    bands = {'R':'','G':'','B':'','NIR':'','RDG':''}    
     
     if request.POST["camera"] == Camera.REDEDGE.name:
         if request.POST["type"] == ArtifactType.MULTIESPECTRAL.name:
@@ -648,6 +642,10 @@ def create_raster_index(request, uuid):
             #bands['B']='1' no aplica 
             bands['NIR']='4'
             bands['RDG']='3'
+    elif request.POST["camera"] == Camera.RGB.name:
+        bands['R']= '1'
+        bands['G']= '2'
+        bands['B']= '3'
         
 
     print(bands)
@@ -658,20 +656,20 @@ def create_raster_index(request, uuid):
     file_name = request.POST["layer"]+'-'+request.POST["index"]
 
     COLORTXT ={
-        'NDVI':'../../../app/core/utils/color_ndvi.txt',
-        'GCI':'../../../app/core/utils/color_ndvi.txt',
-        'GRRI':'../../../app/core/utils/color_ndvi.txt',
-        'NGRDI':'../../../app/core/utils/color_ndvi.txt',
-        'MGRVI':'../../../app/core/utils/color_ndvi.txt',
-        'NDRE':'../../../app/core/utils/color_ndvi.txt',
+        'NDVI':'../../../app/core/utils/color_relief.txt',
+        'GCI':'../../../app/core/utils/color_relief.txt',
+        'GRRI':'../../../app/core/utils/color_relief.txt',
+        'NGRDI':'../../../app/core/utils/color_relief.txt',
+        'MGRVI':'../../../app/core/utils/color_relief.txt',
+        'NDRE':'../../../app/core/utils/color_relief.txt',
     }
     color = COLORTXT.get(request.POST["index"])
     COMMANDS = {
         'NDVI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'GCI':  'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['G']+' --calc="((((asarray(A, dtype=float32))/(asarray(B, dtype=float32))) - 1)+1.)*127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'GRRI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A, dtype=float32))/(asarray(B, dtype=float32)))*127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'MGRVI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="(power(asarray(A,dtype=float32),2)-power(asarray(B, dtype=float32),2))/(power(asarray(A, dtype=float32),2)+power(asarray(B, dtype=float32),2))" --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
-        'NDRE': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['RDG']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=ndre.tif --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'GCI':  'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['G']+' --calc="((((asarray(A, dtype=float32))/(asarray(B, dtype=float32))) - 1) +1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'GRRI': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A, dtype=float32))/(asarray(B, dtype=float32)) +1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'MGRVI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="(((power(asarray(A,dtype=float32),2)-power(asarray(B, dtype=float32),2))/(power(asarray(A, dtype=float32),2)+power(asarray(B, dtype=float32),2)))+1.)*127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
+        'NDRE': 'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['NIR']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['RDG']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
         'NGRDI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+bands['G']+' -B '+request.POST["layer"]+'.tiff --B_band='+bands['R']+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile=temp.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
     }
     
@@ -710,21 +708,21 @@ def create_raster_model(request, uuid):
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
     bands = [] #1r 2g 3b 4nir 5rdg
     print("typo indice: ", request.POST["model"])
-    print("nombre capa: ", request.POST["layerm"])
+    print("nombre capa: ", request.POST["layer"])
     print("nombre capa: ", request.POST["title"])
     print("nombre capa: ", request.POST["type"])
     print("nombre capa: ", request.POST["camera"])
         
-    path = project.get_disk_path()+'/'+request.POST["layerm"]+'/'
+    path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
     color = '../../../app/core/utils/color_ndvi.txt'
     file_title = request.POST["title"]+'-'+request.POST["model"]
-    file_name = request.POST["layerm"]+'-'+request.POST["model"]
+    file_name = request.POST["layer"]+'-'+request.POST["model"]
     with cd(path):                 
-        os.system('gdaldem hillshade '+request.POST["layerm"]+'.tiff temp.tiff -z 10 -s 111120')        
+        os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff temp.tiff -z 10 -s 111120')        
         #os.system('gdaldem color-relief temp.tiff '+color+' '+ file_name+'.tiff -alpha')
         os.system('gdalwarp -dstalpha -overwrite  temp.tiff '+ file_name+'.tiff')
 
-    project._create_index_datastore(request.POST["layerm"],file_name)
+    project._create_index_datastore(request.POST["layer"],file_name)
     project.update_disk_space()
     project.user.update_disk_space()
     

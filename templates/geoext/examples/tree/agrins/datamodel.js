@@ -4,6 +4,7 @@ var dataCamera = Ext.create('Ext.data.Store', {
     data : [
         {"id":"REDEDGE", "name":"Micasense RedEdge-M"},
         {"id":"PARROT", "name":"Parrot Sequoia"},
+        {"id":"RGB", "name":"RGB"},
     ]
 });
 var dataIndex = Ext.create('Ext.data.Store', {
@@ -41,7 +42,7 @@ var dataTypeArtefact = Ext.create('Ext.data.Store', {
         {"id":"MULTIESPECTRAL", "name":"Multiespectral"},
         {"id":"SHAPEFILE", "name":"Shapefile"},
         {"id":"INDEX", "name":"Index"},
-        {"id":"RGB", "name":"Rgb"},
+        {"id":"RGB", "name":"RGB"},
         {"id":"KML", "name":"Kml"},
     ]
 });
