@@ -193,7 +193,7 @@ function addControlsMap(){
     elementGroup.appendChild(bterase);
     elementGroup.appendChild(btsave);
     elementGroup.appendChild(btswiper);
-    elementGroup.appendChild(btcolorleg);
+    //elementGroup.appendChild(btcolorleg);
     var groupControl = new ol.control.Control({
         element: elementGroup
     });
@@ -212,6 +212,18 @@ function addControlsMap(){
         layerGroup: basemapsGroup
     });
     olMap.addControl(switcher);
+
+    legend = new ol.legend.Legend({ 
+        //title: 'Leyenda',
+        margin: 5,
+        maxWidth: 310,
+        maxHeight: 100
+      });
+      var legendCtrl = new ol.control.Legend({
+        legend: legend,
+        //collapsed: false
+      });
+    olMap.addControl(legendCtrl);
 
     popup = Ext.create('GeoExt.component.Popup', {
         map: olMap,

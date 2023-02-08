@@ -25,7 +25,7 @@ let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", title: 
 let mapComponent, mapPanel, olMap, basemapsGroup, layersGroup;
 let startPanel, treePanel, addPanel, helpPanel, configPanel;
 let artifactLayer = [];
-let ctrlSwiper;
+let ctrlSwiper, legend;
 let anotationLayer = new ol.layer.Group({name:'Grupo anotaciones'});
 let isLayerSelect = false;let isswipervisible = false;
 let noCacheHeaders = new Headers(); // HACK: Force disable cache, otherwise timing problem when going back to screen
@@ -651,7 +651,14 @@ function createTree(){
                         fitMap(record.data.text);  
                         ctrlSwiper.removeLayers();        
                         if (isswipervisible)
-                            ctrlSwiper.addLayer(record.data,true);
+                            ctrlSwiper.addLayer(record.data,true);                        
+                        legend.getItems().clear()
+                        var layerLegend = new ol.legend.Legend({ layer: record.data })
+                        layerLegend.addItem(new ol.legend.Image({
+                            title: record.data.text,
+                            src: 'agrins/lndvi.png'
+                        }))                            
+                        legend.addItem(layerLegend)
                                                 
                     }
                     else{
