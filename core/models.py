@@ -152,7 +152,7 @@ PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)""")
             data='{"coverage": { "enabled": true, "metadata": { "entry": [ { "@key": "time", ' +
                 '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
                 '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
-                '"InputTransparentColor", "#000000" ] } ] } }} ', 
+                '"InputTransparentColor", "#000000" ]  }  ] } }} ', 
             #data='{"coverage": { "enabled": true, "metadata": { "entry": [ { "@key": "time", ' +
              #    '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
               #   '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +

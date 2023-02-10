@@ -60,7 +60,8 @@ function initApp() {
                 controls:[]
             });           
 
-            addControlsMap();                       
+            addControlsMap();       
+                                     
 
             mapComponent = Ext.create('GeoExt.component.Map', {
                 map: olMap
@@ -565,7 +566,7 @@ function createTree(){
             itemcontextmenu: function(tree, record, item, index, e, eOpts ) {
                 console.log(item)
                 console.log(record.data.text)
-                console.log(record.data)
+                console.log(record.data.N.id)
                 console.log(index)                
                 
                 var m_item = [];
@@ -648,17 +649,28 @@ function createTree(){
                     if(record.data.leaf){
                         isLayerSelect = true;
                         console.log('datavalue: ', record.data.text);                     
+                        console.log('pk: ',record.data.N.id);
+                        console.log('name: ',record.data.title);
+                        console.log('id: ',record.id);
+                        console.log('name-red: ',record.title);
                         fitMap(record.data.text);  
                         ctrlSwiper.removeLayers();        
                         if (isswipervisible)
                             ctrlSwiper.addLayer(record.data,true);                        
                         legend.getItems().clear()
-                        var layerLegend = new ol.legend.Legend({ layer: record.data })
-                        layerLegend.addItem(new ol.legend.Image({
-                            title: record.data.text,
-                            src: 'agrins/lndvi.png'
-                        }))                            
-                        legend.addItem(layerLegend)
+                        if(record.data.text.endsWith('NDVI')){
+                            var layerLegend = new ol.legend.Legend({ layer: record.data })                            
+                            layerLegend.addItem(new ol.legend.Image({
+                                title: record.data.text,
+                                src: window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=10&STYLE=NDVI&LAYER=project_'+uuid+':'+dataLayers.findRecord('title', record.data.text).get('name')+'&LEGEND_OPTIONS=layout:horizontal;forceRule:True'
+                                
+                            }))                            
+                            //layerLegend.addItem(new ol.legend.Image({
+                              //  src: 'agrins/lndvi.png'
+                            //}));
+                            legend.addItem(layerLegend)
+                        }
+                        
                                                 
                     }
                     else{
@@ -1153,6 +1165,8 @@ function initLayers() {
                             if (art.type === "SHAPEFILE"){
                                 //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
                                 layerfiles.push(new ol.layer.Vector({
+                                    id:art.pk,
+                                    title: art.name,
                                     name: art.title,
                                     source: new ol.source.Vector({
                                         format: new ol.format.GeoJSON(),
@@ -1167,6 +1181,8 @@ function initLayers() {
                                 //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
                                 layerfiles.push(new ol.layer.Image({
                                     //style: falseColor,
+                                    id:art.pk,
+                                    title: art.name,
                                     name: art.title,
                                     source: new ol.source.ImageWMS({
                                         url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
@@ -1176,26 +1192,40 @@ function initLayers() {
                             }));}
                             else if (art.type === "RGB"){
                                 console.log('prueba RGBw'+window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                                
                                 layerfiles.push(new ol.layer.Image({
+                                    id:art.pk,
+                                    title: art.name,
                                     name: art.title,
                                     source: new ol.source.ImageWMS({
                                         url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
-                                        params: {"LAYERS": art.layer}
+                                        params: {
+                                            "LAYERS": art.layer,
+                                            
+                                        }
                                     })                            
                             }));}
                             else if (art.type === "INDEX"){
                                 console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
+                                console.log('sld: '+ window.location.protocol + "//" + window.location.host+"/mapper/agrins/NDVI.sld");
                                 layerfiles.push(new ol.layer.Image({
+                                    id:art.pk,
+                                    title: art.name,
                                     name: art.title,
                                     source: new ol.source.ImageWMS({
                                         url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
-                                        params: {"LAYERS": art.layer}
+                                        params: {
+                                            "LAYERS": art.layer,
+                                            "STYLES":'NDVI'
+                                        }
 
                                     }),                           
                             }));}
                             else if (art.type === "KML"){
                                 //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
                                 layerfiles.push(new ol.layer.Vector({
+                                    id:art.pk,
+                                    title: art.name,
                                     name: art.title,
                                     source: new ol.source.Vector({
                                         format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
@@ -1282,6 +1312,7 @@ function fitMap(name) {
         {headers: noCacheHeaders,})
         .then(response => response.json())
         .then(data => {
+            console.log('\nminx:'+data.bbox.minx +'\nminy:'+ data.bbox.miny+'\nmaxx:'+data.bbox.maxx +'\nmaxy:'+data.bbox.maxy);
             const minCoords = ol.proj.transform([data.bbox.minx, data.bbox.miny], data.srs, "EPSG:3857");
             const maxCoords = ol.proj.transform([data.bbox.maxx, data.bbox.maxy], data.srs, "EPSG:3857");
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());

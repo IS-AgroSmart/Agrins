@@ -421,6 +421,13 @@ background-color: rgb(47, 74, 155);
     
 }
 
+.popup {
+    top: 100px;
+    left: 20px;
+    width: 100px;
+    height: 100px;
+}
+
 .ol-control.ol-bar .ol-control button {
     font-size: 1.14em;
     background-color: rgba(216, 99, 35, 0.5);
@@ -428,4 +435,11 @@ background-color: rgb(47, 74, 155);
 
 .ol-control.ol-legend {
     bottom:40px !important;
+}
+
+.ol-swipe:before {
+    background: rgba(255, 255, 255, 0.653) !important;
+}
+.ol-swipe {
+    top:35% !important;
 }

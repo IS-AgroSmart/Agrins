@@ -151,9 +151,26 @@ function addControlsMap(){
     var btprint = document.createElement("button");
     btprint.className = "btn btn-small icon-print";
     btprint.setAttribute("title","Imprimir capa");
+
+    
+    var container = document.createElement('div');
+    var content = document.createElement('div');
+    var closer = document.createElement('a');
+    container.appendChild(closer);
+    container.appendChild(content);
+    container.className = "popup";
     var btcolorleg = document.createElement("button");
     btcolorleg.className = "btn btn-small icon-bar-chart";
-    btcolorleg.setAttribute("title","Ver leyenda");       
+    btcolorleg.setAttribute("title","Ver leyenda");    
+    var handleleg = function(e) {          
+        container.style.visibility = 'hidden';
+    }
+    btcolorleg.addEventListener("click", handleleg);   
+        
+
+
+    
+
     
     var bterase = document.createElement("button");
     bterase.className = "btn btn-small icon-eraser";
@@ -193,7 +210,7 @@ function addControlsMap(){
     elementGroup.appendChild(bterase);
     elementGroup.appendChild(btsave);
     elementGroup.appendChild(btswiper);
-    //elementGroup.appendChild(btcolorleg);
+    elementGroup.appendChild(btcolorleg);
     var groupControl = new ol.control.Control({
         element: elementGroup
     });
@@ -203,10 +220,16 @@ function addControlsMap(){
 
     var logo = document.createElement("div");
     logo.className = "img-logo";
+    logo.setAttribute("id","divlogo");
     var controllogo = new ol.control.Control({
         element: logo
     });
-    olMap.addControl(controllogo);  
+    olMap.addControl(controllogo);
+    
+    var controllegend = new ol.control.Control({
+        element: container
+    });
+    olMap.addControl(controllegend);
 
     var switcher = new ol.control.LayerSwitcherImage({
         layerGroup: basemapsGroup
@@ -214,7 +237,7 @@ function addControlsMap(){
     olMap.addControl(switcher);
 
     legend = new ol.legend.Legend({ 
-        //title: 'Leyenda',
+        title: 'Leyenda',
         margin: 5,
         maxWidth: 310,
         maxHeight: 100

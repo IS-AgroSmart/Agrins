@@ -1391,7 +1391,7 @@ body > .ol-ext-dialog > form {
 }
 .ol-control.ol-layerswitcher-popup .panel {
   clear:both;
-  background:#fff;
+  background:#ffffffa0;
 }
 
 .ol-layerswitcher-popup .panel {
@@ -1416,7 +1416,7 @@ body > .ol-ext-dialog > form {
 
 .ol-layerswitcher-popup button  {
   background-color: white;
-  background-image: url("earth.png");
+  background-image: url("earth.png") !important;
   background-position: center;
   background-repeat: no-repeat;
   float: right;
@@ -1425,7 +1425,7 @@ body > .ol-ext-dialog > form {
 }
 
 .ol-layerswitcher-popup li {
-  color:#369;
+  color:rgb(4, 212, 0);
   padding:0.25em 1em;
   font-family:"Trebuchet MS",Helvetica,sans-serif;
   cursor:pointer;
@@ -1858,7 +1858,7 @@ body > .ol-ext-dialog > form {
 
 .ol-layerswitcher-image > button,
 .ol-layerswitcher > button {
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   float: right;
   z-index: 10;
   position: relative;
@@ -1885,15 +1885,14 @@ body > .ol-ext-dialog > form {
   background: #e2e4e1;
   top: .32em;
   left: .34em;
-  -webkit-box-shadow: 0.1em 0.1em #325158;
-  box-shadow: 0.1em 0.1em #325158;
+  -webkit-box-shadow: 0.1em 0.1em #4e8693;
+  box-shadow: 0.1em 0.1em #3e6531;
 }
 .ol-layerswitcher-image > button:after,
 .ol-layerswitcher > button:after {
   top: .22em;
   left: .34em;
-  background: #83bcc5;
-  background-image: radial-gradient( circle at .85em .6em, #70b3be 0, #70b3be .65em, #83bcc5 .65em);
+  background:  rgb(52, 97, 131) !important;;;
 }
 .ol-layerswitcher-buttons {
   display:block;
@@ -1909,7 +1908,7 @@ body > .ol-ext-dialog > form {
   margin:2px;
   line-height: 1em;
     text-align: center;
-    background: #369;
+    background: rgb(5, 22, 39);
     vertical-align: middle;
     color: #fff;
 }
@@ -2066,7 +2065,7 @@ body > .ol-ext-dialog > form {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   border-radius: 3px;
-  background: #69c;
+  background: rgb(32, 122, 22);
   background: -webkit-gradient(linear, left top, right top, from(rgba(0,60,136,0)), to(rgba(0,60,136,0.6)));
   background: linear-gradient(to right, rgba(0,60,136,0), rgba(0,60,136,0.6));
   cursor: pointer;
@@ -2224,10 +2223,10 @@ body > .ol-ext-dialog > form {
   max-width: 90%;
   overflow-x: hidden;
   overflow-y: auto;
-  background-color: rgba(255,255,255,.6);
+  background-color: rgba(255, 255, 255, 0.432);
 }
 .ol-control.ol-legend:hover {
-  background-color: rgba(255,255,255,.8);
+  background-color: rgba(255, 255, 255, 0.655);
 }
 .ol-control.ol-legend.ol-collapsed {
   overflow: hidden;
@@ -2235,6 +2234,8 @@ body > .ol-ext-dialog > form {
 .ol-control.ol-legend button {
   position: relative;
   display: none;
+  
+  
 }
 .ol-control.ol-legend.ol-collapsed button {
   display: block;
@@ -2268,7 +2269,7 @@ body > .ol-ext-dialog > form {
   font-size: 1.3em;
 }
 .ol-control.ol-legend button.ol-closebox:hover:before {
-  color: rgba(0,60,136,1);
+  color: rgb(83, 83, 83);
 }
 .ol-control.ol-legend .ol-legendImg {
   display: block;
@@ -4177,6 +4178,7 @@ ul.ol-legend li div {
 .ol-swipe,
 .ol-swipe button {
   cursor: ew-resize;
+  /*content: "\25b6" !important;*/
 }
 .ol-swipe.horizontal,
 .ol-swipe.horizontal button {
@@ -4187,20 +4189,23 @@ ul.ol-legend li div {
 .ol-swipe button:before,
 .ol-swipe button:after {
   content: "";
+  font-size: 18;
   position: absolute;
-  top: 25%;
-  bottom: 25%;
-  left: 50%;
-  width: 2px;
+  top: 40%;
+  bottom: 50%;
+  left: 10%;
+  width: 0px;
   background: currentColor;
   transform: translate(-1px, 0);
   -webkit-transform: translate(-1px, 0);
 }
 .ol-swipe button:after {
+  content: "\2666" !important;
   -webkit-transform: translateX(4px);
           transform: translateX(4px);
 }
 .ol-swipe button:before {
+  
   -webkit-transform: translateX(-6px);
           transform: translateX(-6px);
 }

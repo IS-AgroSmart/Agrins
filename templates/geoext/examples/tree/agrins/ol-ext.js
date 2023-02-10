@@ -16444,6 +16444,7 @@ ol.control.Swipe = class olcontrolSwipe extends ol.control.Control {
     });
     element.className = (options.className || 'ol-swipe') + ' ol-unselectable ol-control';
     var button = document.createElement('button');
+    button.className = "btn btn-small icon-exchange";
     element.appendChild(button);
     element.addEventListener('mousedown', this.move.bind(this));
     element.addEventListener('touchstart', this.move.bind(this));
