@@ -152,13 +152,62 @@ function addControlsMap(){
     btprint.className = "btn btn-small icon-print";
     btprint.setAttribute("title","Imprimir capa");
 
-    
-    var container = document.createElement('div');
-    var content = document.createElement('div');
-    var closer = document.createElement('a');
+/*
+    const container = document.createElement('div');
+    container.setAttribute("id","popup");
+    const content = document.createElement('div');
+    content.setAttribute("id","popup-content");
+    const closer = document.createElement('a');
+    closer.className = "ol-popup-closer";
     container.appendChild(closer);
     container.appendChild(content);
-    container.className = "popup";
+
+    /**
+     * Create an overlay to anchor the popup to the map.
+     
+    const overlay = new ol.Overlay({
+        element: container,
+    });
+
+    /**
+     * Add a click handler to hide the popup.
+     * @return {boolean} Don't follow the href.
+     ---
+    closer.onclick = function () {
+    overlay.setPosition(undefined);
+    closer.blur();
+    return false;
+    };
+    olMap.addOverlay(overlay);
+
+    olMap.on('singleclick', function (evt) {
+        console.log('clickmap');
+        console.log('centerx: '+olMap.getView().getCenter()[0]);
+        console.log('centery: '+olMap.getView().getCenter()[1]);
+        console.log('resolucon: '+olMap.getView().getResolution());
+        console.log('size: '+olMap.getSize()[0]+'  -  '+olMap.getSize()[1]);
+        console.log('multiplicacion: '+olMap.getView().getCenter()[0]*olMap.getView().getResolution())
+        
+        const coordinate = evt.coordinate;
+        const hdms = ol.coordinate.toStringHDMS(ol.proj.toLonLat(coordinate));
+        console.log('coordenada: '+evt.coordinate);
+        overlay.setPosition(olMap.getView().getCenter());
+        let popover = bootstrap.Popover.getInstance(container);
+        if (popover) {
+            popover.dispose();
+        }
+        popover = new bootstrap.Popover(container, {
+            animation: false,
+            container: container,
+            content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
+            html: true,
+            placement: 'top',
+            title: closer
+        });
+        popover.show();
+      });
+
+      
     var btcolorleg = document.createElement("button");
     btcolorleg.className = "btn btn-small icon-bar-chart";
     btcolorleg.setAttribute("title","Ver leyenda");    
@@ -166,7 +215,7 @@ function addControlsMap(){
         container.style.visibility = 'hidden';
     }
     btcolorleg.addEventListener("click", handleleg);   
-        
+      */  
 
 
     
@@ -210,7 +259,7 @@ function addControlsMap(){
     elementGroup.appendChild(bterase);
     elementGroup.appendChild(btsave);
     elementGroup.appendChild(btswiper);
-    elementGroup.appendChild(btcolorleg);
+    //elementGroup.appendChild(btcolorleg);
     var groupControl = new ol.control.Control({
         element: elementGroup
     });
@@ -224,12 +273,7 @@ function addControlsMap(){
     var controllogo = new ol.control.Control({
         element: logo
     });
-    olMap.addControl(controllogo);
-    
-    var controllegend = new ol.control.Control({
-        element: container
-    });
-    olMap.addControl(controllegend);
+    olMap.addControl(controllogo);    
 
     var switcher = new ol.control.LayerSwitcherImage({
         layerGroup: basemapsGroup

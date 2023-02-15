@@ -444,12 +444,14 @@ def upload_vectorfile(request, uuid):
         name=file_name, title=request.POST["title"], type=LayerType.VECTOR.name)
 
     if datatype == "shp":
+        source = "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&maxFeatures=50&outputFormat=application/json&srsname=EPSG:3857&typeName="
         layer.artifacts.create(
-        name=file_name, type=ArtifactType.SHAPEFILE.name, title=request.POST["title"], camera=Camera.NONE.name)
+        name=file_name, type=ArtifactType.SHAPEFILE.name,source= source, style='shapefile', legend='',  title=request.POST["title"], camera=Camera.NONE.name)
         
     elif datatype == "kml":
+        source = "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&maxFeatures=50&outputFormat=application/json&typeName=" 
         layer.artifacts.create(
-        name=file_name, type=ArtifactType.KML.name, title=request.POST["title"], camera=Camera.NONE.name)   
+        name=file_name, type=ArtifactType.KML.name,source= source, style='kml', legend='', title=request.POST["title"], camera=Camera.NONE.name)   
 
 
     # Write file(s) to disk on project folder
@@ -516,9 +518,9 @@ def upload_measure(request, uuid):
     
     layer = project.layers.create(
         name=file_name, title=request.POST["name"], type=LayerType.VECTOR.name)
-    
+    source = "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&maxFeatures=50&outputFormat=application/json&srsname=EPSG:3857&typeName="
     layer.artifacts.create(
-        name=file_name, type=ArtifactType.SHAPEFILE.name, title=request.POST["name"], camera=Camera.NONE.name)
+        name=file_name, type=ArtifactType.SHAPEFILE.name,source= source, style='shapefile', legend='',  title=request.POST["name"], camera=Camera.NONE.name)
         
     GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
 
@@ -552,12 +554,13 @@ def upload_geotiff(request, uuid):
     file: UploadedFile = request.FILES.get("geotiff")  # file is called X.tiff
     geotiff_name = ".".join(file.name.split(
         ".")[:-1])  # Remove extension, get X
-        
+    source = "/geoserver/geoserver/ows?version=1.3.0"
+
     layer = project.layers.create(
         name=geotiff_name, title=request.POST["title"], type= LayerType.IMAGE.name)
 
     layer.artifacts.create(
-        name=geotiff_name, type=ArtifactType(request.POST["type"]).name, title=request.POST["title"], camera=Camera(request.POST["camera"]).name
+        name=geotiff_name, type=ArtifactType(request.POST["type"]).name,source= source, style='raster', legend='',title=request.POST["title"], camera=Camera(request.POST["camera"]).name
     )
 
     # Write file to disk on project folder
@@ -647,7 +650,7 @@ def create_raster_index(request, uuid):
         bands['G']= '2'
         bands['B']= '3'
         
-
+    source = "/geoserver/geoserver/ows?version=1.3.0"
     print(bands)
     
     path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
@@ -656,12 +659,12 @@ def create_raster_index(request, uuid):
     file_name = request.POST["layer"]+'-'+request.POST["index"]
 
     COLORTXT ={
-        'NDVI':'../../../app/core/utils/color_relief.txt',
-        'GCI':'../../../app/core/utils/color_relief.txt',
-        'GRRI':'../../../app/core/utils/color_relief.txt',
-        'NGRDI':'../../../app/core/utils/color_relief.txt',
-        'MGRVI':'../../../app/core/utils/color_relief.txt',
-        'NDRE':'../../../app/core/utils/color_relief.txt',
+        'NDVI':'../../../app/core/utils/color_index.txt',
+        'GCI':'../../../app/core/utils/color_index.txt',
+        'GRRI':'../../../app/core/utils/color_index.txt',
+        'NGRDI':'../../../app/core/utils/color_index.txt',
+        'MGRVI':'../../../app/core/utils/color_index.txt',
+        'NDRE':'../../../app/core/utils/color_index.txt',
     }
     color = COLORTXT.get(request.POST["index"])
     COMMANDS = {
@@ -697,7 +700,7 @@ def create_raster_index(request, uuid):
     
     layer = Layer.objects.get(title=request.POST["title"])      
     layer.artifacts.create(
-        name=file_name, type=ArtifactType.INDEX.name, title=file_title, camera=Camera.NONE.name
+        name=file_name, type=ArtifactType.INDEX.name,source= source, style=request.POST["index"], legend='', title=file_title, camera=Camera.NONE.name
     )
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
 
@@ -718,46 +721,21 @@ def create_raster_model(request, uuid):
     file_title = request.POST["title"]+'-'+request.POST["model"]
     file_name = request.POST["layer"]+'-'+request.POST["model"]
     with cd(path):                 
-        os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff temp.tiff -z 10 -s 111120')        
+        os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff '+ file_name+'.tiff -z 100 -s 111120 ')
+        #os.system('gdaldem hillshade '+request.POST["layer"]+'.tiff '+ file_name+'.tiff -z 10 -s 111120')        
         #os.system('gdaldem color-relief temp.tiff '+color+' '+ file_name+'.tiff -alpha')
-        os.system('gdalwarp -dstalpha -overwrite  temp.tiff '+ file_name+'.tiff')
+        #os.system('gdalwarp -dstalpha -overwrite  temp.tiff '+ file_name+'.tiff')
 
     project._create_index_datastore(request.POST["layer"],file_name)
     project.update_disk_space()
     project.user.update_disk_space()
-    
+    source = "/geoserver/geoserver/ows?version=1.3.0"
     layer = Layer.objects.get(title=request.POST["title"])      
     layer.artifacts.create(
-        name=file_name, type=ArtifactType.INDEX.name, title=file_title, camera=Camera.NONE.name
+        name=file_name, type=ArtifactType.MODEL.name,source= source, style=request.POST["model"], legend='', title=file_title, camera=Camera.NONE.name
     )
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
 
-
-
-    '''
-    project.get
-    if not project.all_flights_multispectral():
-        return HttpResponse("Not all flights are multispectral!", status=400)
-    
-    data = json.loads(request.body.decode('utf-8'))
-    print(data)
-
-    index = data.get("index", "custom")
-    clean_index = re.sub(r"[^a-z0-9_-]", "", index)
-    formula = data.get("formula", "")
-
-    print("FORMULA->" + formula)
-    #for flight in project.flights.all():
-    #    flight.create_index_raster(clean_index, formula)
-    #    flight.update_disk_space()
-    project._create_index_datastore(clean_index)
-    project.update_disk_space()
-    project.user.update_disk_space()
-    project.artifacts.create(
-        name=clean_index, type=ArtifactType.INDEX.name, title=clean_index.upper())
-        
-    return HttpResponse(status=200)
-    '''
 
 @xframe_options_exempt
 def mapper(request, uuid):
@@ -777,27 +755,23 @@ def mapper(request, uuid):
                    })
 
 
-def mapper_bbox(request, uuid, name):    
+def mapper_bbox(request, uuid, pk):    
     project = UserProject.objects.get(uuid=uuid)    
-    if(name.endswith(('-NDVI','-GCI','-GRRI','-MGRVI','-NDRE','-NGRDI'))):
-        name = "-".join((name).split('-')[0:-1])
-    for art in project.layers.all():
-        print('titulo: ',art.title)
-        print('nombre: ',art.name)
-        if (art.title == name):             
-            if (art.type == 'IMAGE'):
-                ans = requests.get(
-                "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
-                "/coveragestores/"+art.name+"/coverages/"+art.name+".json",
-                auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()                
-                return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
-            elif (art.type == 'VECTOR'):
-                ans = requests.get(
-                "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
-                "/datastores/"+art.name+"/featuretypes/"+art.name+".json",
-                auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
-                print('valores: ',ans["featureType"]["nativeBoundingBox"], 'srs: ',ans["featureType"]["srs"])
-                return JsonResponse({"bbox": ans["featureType"]["nativeBoundingBox"], "srs": ans["featureType"]["srs"]})
+    art = Artifact.objects.get(pk = pk)    
+    if (art.layer.type == 'IMAGE'):
+        ans = requests.get(            
+            "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
+            "/coveragestores/"+art.layer.name+"/coverages/"+art.layer.name+".json",
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()  
+        print('valores: ', ans)        
+        return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
+    elif (art.layer.type == 'VECTOR'):
+        ans = requests.get(
+            "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
+            "/datastores/"+art.layer.name+"/featuretypes/"+art.layer.name+".json",
+            auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
+        print('valores: ',ans["featureType"]["nativeBoundingBox"], 'srs: ',ans["featureType"]["srs"])
+        return JsonResponse({"bbox": ans["featureType"]["nativeBoundingBox"], "srs": ans["featureType"]["srs"]})
     return JsonResponse({"data":"not found"})
 
 def mapper_artifacts(request,index):
@@ -807,8 +781,12 @@ def mapper_artifacts(request,index):
          "pk": art.pk,
          "name" : art.name,
          "layer": layer.project._get_geoserver_ws_name() + ":" + art.name,         
+         "source": art.source,
          "camera": art.camera,
-         "type": art.type
+         "type": art.type,
+         "style": art.style,
+         "legend": art.legend,
+
          }
         for art in layer.artifacts.all()
     ]})

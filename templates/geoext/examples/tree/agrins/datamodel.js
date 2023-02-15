@@ -51,6 +51,6 @@ var dataTypeImage = Ext.create('Ext.data.Store', {
     fields: ['id', 'name'],
     data : [
         {"id":"MULTIESPECTRAL", "name":"Multiespectral"},        
-        {"id":"RGB", "name":"Rgb"},
+        {"id":"RGB", "name":"RGB"},
     ]
 });

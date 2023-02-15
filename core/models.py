@@ -512,6 +512,9 @@ class Artifact(models.Model):
     camera = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in Camera] )    
     name = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
+    source = models.CharField(max_length=500)
+    legend = models.CharField(max_length=500)
+    style = models.CharField(max_length=256)
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE, related_name="artifacts", null=True)
     
     def get_disk_path(self): 
@@ -526,8 +529,15 @@ class Artifact(models.Model):
 
 def delete_geoserver_datastore(sender, instance: Artifact, **kwargs):
     print('datastore delete: ','http://container-geoserver:8080/geoserver/rest/workspaces/' + instance.layer.project._get_geoserver_ws_name() + '/datastores/' + instance.name)
+    print(instance.layer.type)
+    datast = ''
+    if(instance.layer.type == "VECTOR"):
+        datast = '/datastores/'
+    else:
+        datast = '/coveragestores/'
+
     querystring = {"recurse": "true"}
-    requests.delete('http://container-geoserver:8080/geoserver/rest/workspaces/' + instance.layer.project._get_geoserver_ws_name() + '/datastores/' + instance.name,
+    requests.delete('http://container-geoserver:8080/geoserver/rest/workspaces/' + instance.layer.project._get_geoserver_ws_name() + datast + instance.name,
                     params=querystring,
                     auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD))
 

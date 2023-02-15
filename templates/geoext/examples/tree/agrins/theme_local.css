@@ -443,3 +443,20 @@ background-color: rgb(47, 74, 155);
 .ol-swipe {
     top:35% !important;
 }
+
+
+.popover-body {
+  min-width: 276px;
+}
+
+
+.ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    height: 20px;
+    top: 2px;
+    right: 8px;
+  }
+  .ol-popup-closer:after {
+    content: "✖";
+  }

@@ -564,39 +564,26 @@ function createTree(){
                 Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});
             },
             itemcontextmenu: function(tree, record, item, index, e, eOpts ) {
-                console.log(item)
-                console.log(record.data.text)
-                console.log(record.data.N.id)
-                console.log(index)                
-                
                 var m_item = [];
-                if(record.data.leaf){                    
-                    var lcamera= dataLayers.findRecord('title', record.data.text).get('camera');
-                    var ltype= dataLayers.findRecord('title', record.data.text).get('type');
-                    var ldate =  new Date(dataLayers.findRecord('title', record.data.text).get('date'));                  
-                    var lname= record.data.text;
-                    if (ltype == 'MULTIESPECTRAL' || ltype == 'RGB'){
-                        var pk = dataLayers.findRecord('title', record.data.text).get('pk');                                                                        
+                if(record.data.leaf){                                        
+                    if (record.data.N.type == 'MULTIESPECTRAL' || record.data.N.type == 'RGB'){                                             
                         m_item = [
                             { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',handler: function() {console.log("More details");} },                            
                             { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
-                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', pk)} },  
+                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
                             { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
                             { text: 'Modelo', iconCls:'fa-solid fa-kaaba', 
-                                handler: function() {windowModel(record.data.text, dataLayers.findRecord('title', record.data.text).get('name'));} },
+                                handler: function() {windowModel(record);} },
                             { text: 'Índice', iconCls:'fa-solid fa-images', 
-                                handler: function() {windowIndex(record.data.text, dataLayers.findRecord('title', record.data.text).get('name'));} }
+                                handler: function() {windowIndex(record);} }
                         ]
                     }
-                    else{
-                        var pk = dataLayers.findRecord('title', record.data.text).get('pk');                                                                        
-                        console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/rest/layers.xml");
-                        console.log(window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_cc00afb7-b59c-4b58-b421-cb4478a9688b/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_cc00afb7-b59c-4b58-b421-cb4478a9688b:Poligono3&maxfeatures=50&outputformat=kml');
-                        if (ltype == 'INDEX' || ltype == 'MODEL'){
+                    else{                                                               
+                        if (record.data.N.type == 'INDEX' || record.data.N.type == 'MODEL'){
                             m_item = [
                                 { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',handler: function() {console.log("More details");} },
                                 { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
-                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', pk)} },  
+                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
                                 { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
                             ]
                         }
@@ -604,9 +591,9 @@ function createTree(){
                             m_item = [
                                 { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
                                 handler: function() { 
-                                    windowDownload(dataLayers.findRecord('title', record.data.text).get('title'), dataLayers.findRecord('title', record.data.text).get('name'))}},
+                                    windowDownloadVector(record)}},
                                 { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
-                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', pk)} },  
+                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
                                 { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
                             ]
                         }                        
@@ -623,14 +610,14 @@ function createTree(){
                         m_item =[{ text: 'Información', iconCls:'fa-solid fa-circle-info', 
                         handler: function() {
                             var type = '';
-                            if(dataGroup.findRecord('title', record.data.text).get('type') == 'IMAGE')
+                            if(record.data.N.type == 'IMAGE')
                                 type = 'Imagen formato .tiff'
                             else
                                 type = 'Vector'
                             Ext.Msg.alert(record.data.text,
                                 'Grupo de capas: '+record.data.text+
                                 '<br/>Capa principal: '+type+
-                                '<br/>Creado:  '+new Date(dataGroup.findRecord('title', record.data.text).get('date')).toLocaleDateString('en-US')
+                                '<br/>Creado:  '+new Date(record.data.N.date).toLocaleDateString('en-US')
                                 , Ext.emptyFn);
                         } },];
                     }
@@ -649,27 +636,29 @@ function createTree(){
                     if(record.data.leaf){
                         isLayerSelect = true;
                         console.log('datavalue: ', record.data.text);                     
-                        console.log('pk: ',record.data.N.id);
-                        console.log('name: ',record.data.title);
-                        console.log('id: ',record.id);
-                        console.log('name-red: ',record.title);
-                        fitMap(record.data.text);  
+                        console.log('id: ',record.data.N.id);
+                        console.log('title: ',record.data.N.title);
+                        console.log('name: ',record.data.N.name);
+                        console.log('date: ',record.data.N.date);
+                        console.log('camara: ',record.data.N.camara);
+                        console.log('tipo: ',record.data.N.type);
+                        fitMap(record.data.N.id);
                         ctrlSwiper.removeLayers();        
                         if (isswipervisible)
                             ctrlSwiper.addLayer(record.data,true);                        
+                        
                         legend.getItems().clear()
-                        if(record.data.text.endsWith('NDVI')){
-                            var layerLegend = new ol.legend.Legend({ layer: record.data })                            
-                            layerLegend.addItem(new ol.legend.Image({
-                                title: record.data.text,
-                                src: window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=10&STYLE=NDVI&LAYER=project_'+uuid+':'+dataLayers.findRecord('title', record.data.text).get('name')+'&LEGEND_OPTIONS=layout:horizontal;forceRule:True'
+                        var layerLegend = new ol.legend.Legend({ layer: record.data })                            
+                        layerLegend.addItem(new ol.legend.Image({
+                            title: record.data.text,
+                            src: window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=40&HEIGHT=20&STYLE='+record.data.N.stylelayer+'&LAYER=project_'+uuid+':'+record.data.N.title+'&format_options=layout:legend&LEGEND_OPTIONS=countMatched:true;fontAntiAliasing:true'
                                 
-                            }))                            
-                            //layerLegend.addItem(new ol.legend.Image({
-                              //  src: 'agrins/lndvi.png'
-                            //}));
-                            legend.addItem(layerLegend)
-                        }
+                        }))                            
+                        //layerLegend.addItem(new ol.legend.Image({
+                        //  src: 'agrins/lndvi.png'
+                        //}));
+                        legend.addItem(layerLegend)
+                        
                         
                                                 
                     }
@@ -687,7 +676,7 @@ function createTree(){
     });
 }
 
-function windowIndex(layer, path){
+function windowIndex(layer){
     var indice = Ext.create('Ext.form.ComboBox', {
         fieldLabel: 'Seleccionar índice',
         name: 'index',
@@ -708,7 +697,7 @@ function windowIndex(layer, path){
 
     Ext.create('Ext.window.Window', {
         id: 'windowIndexId',
-        title: layer,
+        title: layer.data.text,
         height: 180,
         width: 300,
         layout: 'vbox',
@@ -741,18 +730,20 @@ function windowIndex(layer, path){
                 iconCls: 'icon-save',
                 cls:'btnform',
                 handler: function() {
+                    console.log('layer'+ layer.data.N.name+
+                    'title'+ layer.data.N.title+
+                    'camera'+ layer.data.N.camara+
+                    'type'+ layer.data.N.type)
                     var form = Ext.getCmp('formIdIndex').getForm();                
-                    console.log('camara capa: '+dataLayers.findRecord('title', layer).get('camera'));  
-                    console.log('tipo capa: '+dataLayers.findRecord('title', layer).get('type'));
                     if (form.isValid()) {
                         form.submit({
                             method: 'POST',
                             url : '/api/rastercalcs/' + uuid ,
                             params: {
-                                'layer': path,
-                                'title': layer,
-                                'camera': dataLayers.findRecord('title', layer).get('camera'),
-                                'type': dataLayers.findRecord('title', layer).get('type')
+                                'layer': layer.data.N.title,
+                                'title': layer.data.N.name,
+                                'camera': layer.data.N.camara,
+                                'type': layer.data.N.type
                             }
                             ,
                             headers: {
@@ -778,7 +769,7 @@ function windowIndex(layer, path){
     }).show();
 }
 
-function windowModel(layer, path){
+function windowModel(layer){
     var indice = Ext.create('Ext.form.ComboBox', {
         fieldLabel: 'Seleccionar modelo Deeplearning',
         name: 'model',
@@ -799,7 +790,7 @@ function windowModel(layer, path){
 
     Ext.create('Ext.window.Window', {
         id: 'windowModelId',
-        title: layer,
+        title: layer.data.text,
         height: 180,
         width: 300,
         layout: 'vbox',
@@ -833,17 +824,15 @@ function windowModel(layer, path){
                 cls:'btnform',
                 handler: function() {
                     var form = this.up('form').getForm();                
-                    //console.log('camara capa: '+dataLayers.findRecord('title', Ext.getCmp('layerm').getRawValue()).get('camera'));  
-                    //console.log('tipo capa: '+dataLayers.findRecord('title', Ext.getCmp('layerm').getRawValue()).get('type'));
                     if (form.isValid()) {
                         form.submit({
                             method: 'POST',
                             url : '/api/rastermodel/' + uuid ,
                             params: {
-                                'layer': path,
-                                'title': layer,
-                                'camera': dataLayers.findRecord('title', layer).get('camera'),
-                                'type': dataLayers.findRecord('title', layer).get('type')
+                                'layer': layer.data.N.title,
+                                'title': layer.data.N.name,
+                                'camera': layer.data.N.camara,
+                                'type': layer.data.N.type
                             },
                             headers: {
                                 Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
@@ -868,9 +857,9 @@ function windowModel(layer, path){
     }).show();
 }
 
-function windowDownload(layer, path){
+function windowDownloadVector(layer){
     Ext.create('Ext.window.Window', {
-        title: layer,
+        title: layer.data.text,
         height: 180,
         width: 300,
         layout: 'vbox',
@@ -926,7 +915,75 @@ function windowDownload(layer, path){
                             if(Ext.getCmp('radio1').getValue())formartDW='kml';
                             if(Ext.getCmp('radio2').getValue())formartDW='shape-zip';
                             if(Ext.getCmp('radio3').getValue())formartDW='csv';                            
-                            window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_'+uuid+':'+path+'&maxfeatures=50&outputformat='+formartDW;
+                            window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_'+uuid+':'+layer.data.N.title+'&maxfeatures=50&outputformat='+formartDW;
+                            this.up('window').close();
+                        }
+                    }
+                ],
+               
+    }}).show();
+}
+
+
+function windowDownloadImage(layer){
+    Ext.create('Ext.window.Window', {
+        title: layer.data.text,
+        height: 180,
+        width: 300,
+        layout: 'vbox',
+        modal: true,
+        resizable   : false,
+        items:
+            {
+                xtype: 'panel',
+                height: '100%',
+                width: '100%',
+                
+                items:[                    
+                    {
+                        padding:5,
+                        xtype      : 'fieldcontainer',
+                        id: 'idgroupformat',
+                        fieldLabel : 'Formato',
+                        labelAlign: 'top',
+                        defaultType: 'radiofield',                        
+                        layout: 'hbox',
+                        items: [
+                            {
+                                padding: 5,
+                                boxLabel  : 'jpeg',
+                                checked: true,
+                                name      : 'format',
+                                inputValue: 'jpeg',
+                                id        : 'radio1'
+                            }, {
+                                padding: 5,
+                                boxLabel  : 'png',
+                                name      : 'format',
+                                inputValue: 'png',
+                                id        : 'radio2'
+                            }, {
+                                padding: 5,
+                                boxLabel  : 'tiff',
+                                name      : 'format',
+                                inputValue: 'tiff',
+                                id        : 'radio3'
+                            }
+                        ]
+                    },
+                    {
+                        margin: '8%',      
+                        
+                        xtype:'button',
+                        width:'95%',
+                        buttonAlign: 'center',
+                        text:'Descargar',
+                        handler: function(){ 
+                            var formartDW = '';
+                            if(Ext.getCmp('radio1').getValue())formartDW='jpeg';
+                            if(Ext.getCmp('radio2').getValue())formartDW='png';
+                            if(Ext.getCmp('radio3').getValue())formartDW='tiff';                            
+                            window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_'+uuid+':'+layer.data.N.title+'&maxfeatures=50&outputformat='+formartDW;
                             this.up('window').close();
                         }
                     }
@@ -1131,123 +1188,66 @@ function initLayers() {
     let layers = [];    
     olMap.removeLayer(layersGroup);
     layersGroup = [];
-    dataLayers.removeAll();
-    dataGroup.removeAll();
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid + "/layers",
         {headers: noCacheHeaders})
         .then(response => response.json())
         .then(value => {                           
-            for (let lyr of value.layers){
-                var layerGrp = {
-                    'pk':lyr.pk,
-                    'title' : lyr.title, 
-                    'name': lyr.name, 
-                    "date":lyr.date,
-                    "type":lyr.type,
-                };            
-                dataGroup.add(layerGrp)
-                console.log('codigo capa: '+ lyr)
+            console.log('values: '+value.layers);
+            for (let lyr of value.layers){                
+                console.log('codigo capa: '+ lyr.pk)
                 fetch(window.location.protocol + "//" + window.location.host + "/mapper/"+lyr.pk+"/artifacts",
                     {headers: noCacheHeaders})
                     .then(respons => respons.json())
                     .then(data => {                   
                         let layerfiles=[];     
-                        for (let art of data.artifacts) {                               
-                            var layerart = {
-                                'pk': art.pk,
-                                'title' : art.title, 
-                                'name': art.name, 
-                                "type": art.type,
-                                "camera": art.camera, 
-                                "date":lyr.date,
-                            };                
-                            dataLayers.add(layerart);
-                            if (art.type === "SHAPEFILE"){
-                                //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
-                                layerfiles.push(new ol.layer.Vector({
-                                    id:art.pk,
+                        for (let art of data.artifacts) {                                                           
+                            console.log('vector consult' +lyr.type);
+                            if (lyr.type === "IMAGE"){
+                                layerfiles.push(new ol.layer.Image({
+                                    id: art.pk,
                                     title: art.name,
                                     name: art.title,
+                                    date: lyr.date,
+                                    camara: art.camera,
+                                    stylelayer: art.style,
+                                    legend: art.legend,
+                                    type: art.type,
+                                    source: new ol.source.ImageWMS({
+                                        url: window.location.protocol + "//" + window.location.host + art.source,
+                                        params: {
+                                            "LAYERS": art.layer,
+                                            "STYLES":art.style,
+                                        }
+
+                                    })                            
+                                }));
+                            }
+                            else if(lyr.type === "VECTOR"){
+                                console.log('vector consult: '+window.location.protocol + "//" + window.location.host + art.source+ art.layer);
+                                layerfiles.push(new ol.layer.Vector({
+                                    id: art.pk,
+                                    title: art.name,
+                                    name: art.title,
+                                    date: lyr.date,
+                                    camara: art.camera,
+                                    stylelayer: art.style,
+                                    type: art.type,
+                                    legend: art.legend,
                                     source: new ol.source.Vector({
                                         format: new ol.format.GeoJSON(),
-                                        //projection: 'EPSG:4326',
-                                        //srs: 'EPSG:4326',
-                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&srsname=EPSG:3857&"
-                                            //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
+                                        url: window.location.protocol + "//" + window.location.host + art.source+ art.layer                                            
                                     }),                                    
                                    
-                            }));}
-                            else if (art.type === "MULTIESPECTRAL"){
-                                //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
-                                layerfiles.push(new ol.layer.Image({
-                                    //style: falseColor,
-                                    id:art.pk,
-                                    title: art.name,
-                                    name: art.title,
-                                    source: new ol.source.ImageWMS({
-                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
-                                        params: {"LAYERS": art.layer}
-
-                                    })                            
-                            }));}
-                            else if (art.type === "RGB"){
-                                console.log('prueba RGBw'+window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
-                                
-                                layerfiles.push(new ol.layer.Image({
-                                    id:art.pk,
-                                    title: art.name,
-                                    name: art.title,
-                                    source: new ol.source.ImageWMS({
-                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
-                                        params: {
-                                            "LAYERS": art.layer,
-                                            
-                                        }
-                                    })                            
-                            }));}
-                            else if (art.type === "INDEX"){
-                                console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0");
-                                console.log('sld: '+ window.location.protocol + "//" + window.location.host+"/mapper/agrins/NDVI.sld");
-                                layerfiles.push(new ol.layer.Image({
-                                    id:art.pk,
-                                    title: art.name,
-                                    name: art.title,
-                                    source: new ol.source.ImageWMS({
-                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?version=1.3.0",                                
-                                        params: {
-                                            "LAYERS": art.layer,
-                                            "STYLES":'NDVI'
-                                        }
-
-                                    }),                           
-                            }));}
-                            else if (art.type === "KML"){
-                                //console.log(window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&");      
-                                layerfiles.push(new ol.layer.Vector({
-                                    id:art.pk,
-                                    title: art.name,
-                                    name: art.title,
-                                    source: new ol.source.Vector({
-                                        format: new ol.format.GeoJSON({projection: 'EPSG:4326'}),                                
-                                        url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" + art.layer + "&maxFeatures=50&outputFormat=application/json&"
-                                            //url: window.location.protocol + "//" + window.location.host + "/geoserver/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:poly&maxFeatures=50&outputFormat=application/json&"
-                                    }),
-                                    style: new ol.style.Style({
-                                        fill: new ol.style.Fill({
-                                            color:'orange'
-                                        }),
-                                        stroke: new ol.style.Stroke({
-                                            color:'black'
-                                        })
-                                    })
-                            }));}
-                            
-                        }
-                        
+                                }));
+                            }                            
+                        }                        
                         //console.log('capa geo '+art.layer)                     
                         let layerGroup = new ol.layer.Group({
-                            name: lyr.title,
-                            leaf: true, 
+                            id: lyr.pk,
+                            name: lyr.title,                            
+                            title: lyr.name,
+                            date: lyr.date,
+                            type: lyr.type,
                             layers: layerfiles,
                         });                        
                         layers.push(layerGroup); 
@@ -1259,10 +1259,9 @@ function initLayers() {
                         });
                         olMap.addLayer(layersGroup);
                         var treeStore;
-                        if(layers.length > 0){
-                        
+                        if(layers.length > 0){                        
                             let layerg = layersGroup.getLayers().getArray().slice(-1); 
-                            let namelayer = layerg[0].getLayers().getArray()[0].get('name');
+                            let namelayer = layerg[0].getLayers().getArray()[0].get('id');
                             console.log('data: '+namelayer)
                             fitMap(namelayer);                            
                             treeStore = Ext.create('GeoExt.data.store.LayersTree', {
@@ -1306,9 +1305,9 @@ function initLayers() {
         });
 }
 
-function fitMap(name) {
-    console.log('consulta: '+ name);
-    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ name+"/bbox",
+function fitMap(pk) {
+    console.log('consulta: '+ pk);
+    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ pk+"/bbox",
         {headers: noCacheHeaders,})
         .then(response => response.json())
         .then(data => {

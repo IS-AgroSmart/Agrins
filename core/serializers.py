@@ -71,7 +71,7 @@ class ArtifactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Artifact
-        fields = ["pk", "type", "layer", "name", "title", "camera", "date"]
+        fields = ["pk", "type", "layer", "name", "title", "camera", "date", "source", "legend", "style"]
 
 class LayerSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
