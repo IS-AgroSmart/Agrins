@@ -283,7 +283,7 @@ function addControlsMap(){
     legend = new ol.legend.Legend({ 
         title: 'Leyenda',
         margin: 5,
-        maxWidth: 310,
+        maxWidth: 640,
         maxHeight: 100
       });
       var legendCtrl = new ol.control.Legend({

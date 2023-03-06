@@ -40,6 +40,7 @@ from push_notifications.models import APNSDevice, GCMDevice
 
 from django_rest_passwordreset.signals import reset_password_token_created
 from .utils.token import  TokenGenerator
+from .utils.legend import  *
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 import geopandas as gpd
@@ -654,6 +655,7 @@ def create_raster_index(request, uuid):
     print(bands)
     
     path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
+    
 
     file_title = request.POST["title"]+'-'+request.POST["index"]
     file_name = request.POST["layer"]+'-'+request.POST["index"]
@@ -693,14 +695,14 @@ def create_raster_index(request, uuid):
         #os.system('gdalwarp -dstnodata "0 0 0 0" out.tif outFin.tif')
         #os.system('gdalwarp -dstalpha -overwrite  outA.tif  ndvifinally.tif')
        # print('fin comandos')
-
+    legend_path = create_legend_image(path, file_name, request.POST["index"])    
     project._create_index_datastore(request.POST["layer"],file_name)
     project.update_disk_space()
     project.user.update_disk_space()
     
     layer = Layer.objects.get(title=request.POST["title"])      
     layer.artifacts.create(
-        name=file_name, type=ArtifactType.INDEX.name,source= source, style=request.POST["index"], legend='', title=file_title, camera=Camera.NONE.name
+        name=file_name, type=ArtifactType.INDEX.name,source= source, style=request.POST["index"], legend=legend_path, title=file_title, camera=Camera.NONE.name
     )
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
 

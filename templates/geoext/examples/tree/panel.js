@@ -651,8 +651,8 @@ function createTree(){
                         var layerLegend = new ol.legend.Legend({ layer: record.data })                            
                         layerLegend.addItem(new ol.legend.Image({
                             title: record.data.text,
-                            src: window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=40&HEIGHT=20&STYLE='+record.data.N.stylelayer+'&LAYER=project_'+uuid+':'+record.data.N.title+'&format_options=layout:legend&LEGEND_OPTIONS=countMatched:true;fontAntiAliasing:true'
-                                
+                            //src: window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=40&HEIGHT=20&STYLE='+record.data.N.stylelayer+'&LAYER=project_'+uuid+':'+record.data.N.title+'&format_options=layout:legend&LEGEND_OPTIONS=countMatched:true;fontAntiAliasing:true'
+                            src:  window.location.protocol + "//" + window.location.host + '/static/'+record.data.N.legend
                         }))                            
                         //layerLegend.addItem(new ol.legend.Image({
                         //  src: 'agrins/lndvi.png'

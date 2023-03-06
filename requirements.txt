@@ -40,6 +40,8 @@ more-itertools==8.4.0
 mysqlclient==1.4.6
 #numpy==1.19.0
 numpy >= 1.20.3
+opencv-python
+opencv-contrib-python
 packaging==20.4
 Pillow==6.2.1
 pluggy==0.13.1
