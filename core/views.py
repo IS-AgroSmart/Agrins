@@ -765,8 +765,8 @@ def mapper_bbox(request, uuid, pk):
             "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
             "/coveragestores/"+art.layer.name+"/coverages/"+art.layer.name+".json",
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()  
-        print('valores: ', ans)        
-        return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"]})
+        print("valores: ", ans)        
+        return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"], "size":ans["coverage"]["grid"]["range"]["high"]})
     elif (art.layer.type == 'VECTOR'):
         ans = requests.get(
             "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +

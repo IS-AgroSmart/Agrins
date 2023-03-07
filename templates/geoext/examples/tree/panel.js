@@ -568,7 +568,9 @@ function createTree(){
                 if(record.data.leaf){                                        
                     if (record.data.N.type == 'MULTIESPECTRAL' || record.data.N.type == 'RGB'){                                             
                         m_item = [
-                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',handler: function() {console.log("More details");} },                            
+                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
+                                handler: function() {
+                                    windowDownloadImage(record); }},                            
                             { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
                                     handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
                             { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
@@ -581,7 +583,9 @@ function createTree(){
                     else{                                                               
                         if (record.data.N.type == 'INDEX' || record.data.N.type == 'MODEL'){
                             m_item = [
-                                { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',handler: function() {console.log("More details");} },
+                                { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
+                                handler: function() {
+                                    windowDownloadImage(record);} },
                                 { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
                                     handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
                                 { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
@@ -924,72 +928,88 @@ function windowDownloadVector(layer){
     }}).show();
 }
 
-
 function windowDownloadImage(layer){
-    Ext.create('Ext.window.Window', {
-        title: layer.data.text,
-        height: 180,
-        width: 300,
-        layout: 'vbox',
-        modal: true,
-        resizable   : false,
-        items:
-            {
-                xtype: 'panel',
-                height: '100%',
-                width: '100%',
-                
-                items:[                    
+    console.log('consulta: '+ layer.data.N.id);
+    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ layer.data.N.id+"/bbox",
+        {headers: noCacheHeaders,})
+        .then(response => response.json())
+        .then(data => {
+            console.log('\nminx:'+data.bbox.minx +'\nminy:'+ data.bbox.miny+'\nmaxx:'+data.bbox.maxx +'\nmaxy:'+data.bbox.maxy);
+            console.log('srs: '+data.srs);
+            console.log('size: '+data.size);
+            console.log('width ='+ data.size.split(' ')[0])
+            console.log('height ='+ data.size.split(' ')[1])
+            Ext.create('Ext.window.Window', {
+                title: layer.data.text,
+                height: 180,
+                width: 300,
+                layout: 'vbox',
+                modal: true,
+                resizable   : false,
+                items:
                     {
-                        padding:5,
-                        xtype      : 'fieldcontainer',
-                        id: 'idgroupformat',
-                        fieldLabel : 'Formato',
-                        labelAlign: 'top',
-                        defaultType: 'radiofield',                        
-                        layout: 'hbox',
-                        items: [
-                            {
-                                padding: 5,
-                                boxLabel  : 'jpeg',
-                                checked: true,
-                                name      : 'format',
-                                inputValue: 'jpeg',
-                                id        : 'radio1'
-                            }, {
-                                padding: 5,
-                                boxLabel  : 'png',
-                                name      : 'format',
-                                inputValue: 'png',
-                                id        : 'radio2'
-                            }, {
-                                padding: 5,
-                                boxLabel  : 'tiff',
-                                name      : 'format',
-                                inputValue: 'tiff',
-                                id        : 'radio3'
-                            }
-                        ]
-                    },
-                    {
-                        margin: '8%',      
+                        xtype: 'panel',
+                        height: '100%',
+                        width: '100%',
                         
-                        xtype:'button',
-                        width:'95%',
-                        buttonAlign: 'center',
-                        text:'Descargar',
-                        handler: function(){ 
-                            var formartDW = '';
-                            if(Ext.getCmp('radio1').getValue())formartDW='jpeg';
-                            if(Ext.getCmp('radio2').getValue())formartDW='png';
-                            if(Ext.getCmp('radio3').getValue())formartDW='tiff';                            
-                            window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=project_'+uuid+':'+layer.data.N.title+'&maxfeatures=50&outputformat='+formartDW;
-                            this.up('window').close();
-                        }
-                    }
-                ],
-               
-    }}).show();
+                        items:[                    
+                            {
+                                padding:5,
+                                xtype      : 'fieldcontainer',
+                                id: 'idgroupformat',
+                                fieldLabel : 'Formato',
+                                labelAlign: 'top',
+                                defaultType: 'radiofield',                        
+                                layout: 'hbox',
+                                items: [
+                                    {
+                                        padding: 5,
+                                        boxLabel  : 'jpeg',
+                                        checked: true,
+                                        name      : 'format',
+                                        inputValue: 'jpeg',
+                                        id        : 'radio1'
+                                    }, {
+                                        padding: 5,
+                                        boxLabel  : 'png',
+                                        name      : 'format',
+                                        inputValue: 'png',
+                                        id        : 'radio2'
+                                    }, {
+                                        padding: 5,
+                                        boxLabel  : 'tiff',
+                                        name      : 'format',
+                                        inputValue: 'tiff',
+                                        id        : 'radio3'
+                                    }
+                                ]
+                            },
+                            {
+                                margin: '8%',      
+                                
+                                xtype:'button',
+                                width:'95%',
+                                buttonAlign: 'center',
+                                text:'Descargar',
+                                handler: function(){ 
+                                    var formartDW = '';
+                                    if(Ext.getCmp('radio1').getValue())formartDW='jpeg';
+                                    if(Ext.getCmp('radio2').getValue())formartDW='png';
+                                    if(Ext.getCmp('radio3').getValue())formartDW='tiff';                            
+                                      //                                                              http://172.20.0.4:8080/geoserver/project_ uuid   /wms?service=WMS&version=1.1.0&request=GetMap&layers=project_ uuid   :       layer          &styles=NDVI                       &bbox=615203.4487868685,9763508.19454065,615320.2983669966,9763577.069293164        &width=1476                       &height=870                        &srs=EPSG:32717  &format=image%2Fjpeg
+                                    //window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/wms?service=WMS&version=1.1.0&request=GetMap&layers=project_'+uuid+':'+layer.data.N.title+'&styles='+layer.data.N.stylelayer+'&bbox='+data.bbox.minx +','+ data.bbox.miny+','+data.bbox.maxx +','+data.bbox.maxy+'&width='+data.size.split(' ')[0]+'&height='+data.size.split(' ')[1]+'&srs='+data.srs+'&format=image%2F'+formartDW;
+                                    let url = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/wms?service=WMS&version=1.1.0&request=GetMap&layers=project_'+uuid+':'+layer.data.N.title+'&styles='+layer.data.N.stylelayer+'&bbox='+data.bbox.minx +','+ data.bbox.miny+','+data.bbox.maxx +','+data.bbox.maxy+'&width='+data.size.split(' ')[0]+'&height='+data.size.split(' ')[1]+'&srs='+data.srs+'&format=image%2F'+formartDW;
+                                    window.open(url, '_blank');
+                                    this.up('window').close();
+                                }
+                            }
+                        ],
+                       
+            }}).show();
+
+        });
+
+    
 }
 
 function createconfigPanel(){
