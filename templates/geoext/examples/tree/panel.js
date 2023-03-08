@@ -561,6 +561,14 @@ function createTree(){
             },
             itemcontextmenu: function(tree, record, item, index, e, eOpts ) {
                 var m_item = [];
+                console.log("record id parent: "+record.data.parentId);
+                console.log("record data: "+record.data);
+                console.log("record value: "+record.data.N);
+                console.log("item : "+item);
+                console.log("item : "+e);
+                console.log("item : "+tree);
+                
+                console.log('parentid: '+record.data.parentId);
                 if(record.data.leaf){                                        
                     if (record.data.N.type == 'MULTIESPECTRAL' || record.data.N.type == 'RGB'){                                             
                         m_item = [
@@ -650,11 +658,12 @@ function createTree(){
              },
             
             itemclick: {
-                fn: function(view, record, item, index, event) {                    
+                fn: function(view, record, item, index, event) {  
+                    console.log('datavalue: ', record.data);                   
                     ctrlSwiper.removeLayers();
                     if(record.data.leaf){
                         isLayerSelect = true;
-                        console.log('datavalue: ', record.data.text);                     
+                        console.log('datavalue: ', record.data);                     
                         console.log('id: ',record.data.N.id);
                         console.log('title: ',record.data.N.title);
                         console.log('name: ',record.data.N.name);
@@ -667,11 +676,16 @@ function createTree(){
                             ctrlSwiper.addLayer(record.data,true);                        
                         
                         legend.getItems().clear()
-                        var layerLegend = new ol.legend.Legend({ layer: record.data })                            
+                        var layerLegend = new ol.legend.Legend({ layer: record.data })  
+                        var src = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=40&HEIGHT=20&STYLE='+record.data.N.stylelayer+'&LAYER=project_'+uuid+':'+record.data.N.title+'&format_options=layout:legend&LEGEND_OPTIONS=countMatched:true;fontAntiAliasing:true'
+                        if (record.data.N.legend != '' && record.data.N.legend != 'a'){
+                            src = window.location.protocol + "//" + window.location.host + '/static/'+record.data.N.legend
+                        }
                         layerLegend.addItem(new ol.legend.Image({
                             title: record.data.text,
                             //src: window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=40&HEIGHT=20&STYLE='+record.data.N.stylelayer+'&LAYER=project_'+uuid+':'+record.data.N.title+'&format_options=layout:legend&LEGEND_OPTIONS=countMatched:true;fontAntiAliasing:true'
-                            src:  window.location.protocol + "//" + window.location.host + '/static/'+record.data.N.legend
+                            //src:  window.location.protocol + "//" + window.location.host + '/static/'+record.data.N.legend
+                            src: src
                         }))                            
                         //layerLegend.addItem(new ol.legend.Image({
                         //  src: 'agrins/lndvi.png'
@@ -696,184 +710,231 @@ function createTree(){
 }
 
 function windowIndex(layer){
-    var indice = Ext.create('Ext.form.ComboBox', {
-        fieldLabel: 'Seleccionar índice',
-        name: 'index',
-        id: 'index',
-        msgTarget: 'under' ,
-        store: dataIndex,
-        width: '100%',
-        queryMode: 'local',
-        allowBlank : false,
-        blankText: 'Seleccione el índice que desea crear',
-        forceSelection: true,
-        displayField: 'name',
-        valueField: 'name',
-        value:'1',
-        labelAlign: 'top'
-        //renderTo: Ext.getBody()
-    });
+    var index=["GCI","GRRI","MGRVI","NDRE","NDVI","NGRDI"];
+    var parentGroup = Ext.getCmp('treePanelId').getStore().getNodeById(layer.data.parentId);    
+    var indices = parentGroup.data.N.indices;
+    var result = index.filter(el => !indices.includes(el));
+    if (result.length === 0){
+        Ext.Msg.alert(layer.data.text,
+            'No existen indices disponibles'
+            , Ext.emptyFn);
+    }
+    else {
+        var indexstore = []
+        for(let i of result){
+            indexstore.push({'id':i, 'name':i})
+        }
+        var dataIndex = Ext.create('Ext.data.Store', {
+            storeId: 'dataIndex',
+            fields: ['id', 'index'],
+            data : indexstore
+        });
 
-    Ext.create('Ext.window.Window', {
-        id: 'windowIndexId',
-        title: layer.data.text,
-        height: 180,
-        width: 300,
-        layout: 'vbox',
-        modal: true,
-        resizable   : false,
-        items:
-            {
-                xtype: 'form',
-                id: 'formIdIndex',
-                width: '100%', 
-                height: '100%',
-                bodyPadding: 10,    
-                border:0,
-                defaultType: 'textfield',
-                items: [                
-                    indice,            
-                ],    
-                // Reset and Submit buttons
-                buttons: [{
-                    text: 'Borrar',
-                    iconCls: 'icon-eraser',
-                    cls: 'btnform',
+        var indice = Ext.create('Ext.form.ComboBox', {
+            fieldLabel: 'Seleccionar índice',
+            name: 'index',
+            id: 'index',
+            msgTarget: 'under' ,
+            store: dataIndex,
+            width: '100%',
+            queryMode: 'local',
+            allowBlank : false,
+            blankText: 'Seleccione el índice que desea crear',
+            forceSelection: true,
+            displayField: 'name',
+            valueField: 'name',
+            value:'1',
+            labelAlign: 'top'
+            //renderTo: Ext.getBody()
+        });
+
+        Ext.create('Ext.window.Window', {
+            id: 'windowIndexId',
+            title: layer.data.text,
+            height: 180,
+            width: 300,
+            layout: 'vbox',
+            modal: true,
+            resizable   : false,
+            items:
+                {
+                    xtype: 'form',
+                    id: 'formIdIndex',
+                    width: '100%', 
+                    height: '100%',
+                    bodyPadding: 10,    
+                    border:0,
+                    defaultType: 'textfield',
+                    items: [                
+                        indice,            
+                    ],    
+                    // Reset and Submit buttons
+                    buttons: [{
+                        text: 'Borrar',
+                        iconCls: 'icon-eraser',
+                        cls: 'btnform',
+                        handler: function() {
+                            this.up('form').getForm().reset();
+                        }
+                    }, {
+                    text: 'Crear índice',
+                    formBind: true, //only enabled once the form is valid
+                    disabled: true,
+                    iconCls: 'icon-save',
+                    cls:'btnform',
                     handler: function() {
-                        this.up('form').getForm().reset();
+                        console.log('layer'+ layer.data.N.name+
+                        'title'+ layer.data.N.title+
+                        'camera'+ layer.data.N.camara+
+                        'type'+ layer.data.N.type)
+                        var form = Ext.getCmp('formIdIndex').getForm();                
+                        if (form.isValid()) {
+                            form.submit({
+                                method: 'POST',
+                                url : '/api/rastercalcs/' + uuid ,
+                                params: {
+                                    'layer': layer.data.N.title,
+                                    'title': layer.data.N.name,
+                                    'camera': layer.data.N.camara,
+                                    'type': layer.data.N.type
+                                }
+                                ,
+                                headers: {
+                                    Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                                },
+                                waitMsg:'Creando índice espere por favor...',
+                                success: function(fp, o) {
+                                    Ext.getCmp('formIdIndex').reset();
+                                    Ext.Msg.alert('Detalle', 'Índice creado correctamente.');                                                   
+                                    Ext.getCmp('windowIndexId').close();
+                                    initLayers();
+                                },
+                                failure: function(fp, o) {                            
+                                    Ext.Msg.alert('Error', 'Error al crear el índice.');
+                                }
+                            });
+                        }
                     }
-                }, {
-                text: 'Crear índice',
-                formBind: true, //only enabled once the form is valid
-                disabled: true,
-                iconCls: 'icon-save',
-                cls:'btnform',
-                handler: function() {
-                    console.log('layer'+ layer.data.N.name+
-                    'title'+ layer.data.N.title+
-                    'camera'+ layer.data.N.camara+
-                    'type'+ layer.data.N.type)
-                    var form = Ext.getCmp('formIdIndex').getForm();                
-                    if (form.isValid()) {
-                        form.submit({
-                            method: 'POST',
-                            url : '/api/rastercalcs/' + uuid ,
-                            params: {
-                                'layer': layer.data.N.title,
-                                'title': layer.data.N.name,
-                                'camera': layer.data.N.camara,
-                                'type': layer.data.N.type
-                            }
-                            ,
-                            headers: {
-                                Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
-                            },
-                            waitMsg:'Creando índice espere por favor...',
-                            success: function(fp, o) {
-                                Ext.getCmp('formIdIndex').reset();
-                                Ext.Msg.alert('Detalle', 'Índice creado correctamente.');                                                   
-                                Ext.getCmp('windowIndexId').close();
-                                initLayers();
-                            },
-                            failure: function(fp, o) {                            
-                                Ext.Msg.alert('Error', 'Error al crear el índice.');
-                            }
-                        });
-                    }
+                }],        
                 }
-            }],        
-            }
+                    
                 
-               
-    }).show();
+        }).show();
+    }
 }
 
 function windowModel(layer){
-    var indice = Ext.create('Ext.form.ComboBox', {
-        fieldLabel: 'Seleccionar modelo Deeplearning',
-        name: 'model',
-        id: 'model',
-        msgTarget: 'under' ,
-        store: dataModel,
-        width: '100%',
-        queryMode: 'local',
-        allowBlank : false,
-        blankText: 'Seleccione el modelo deeplearning',
-        forceSelection: true,
-        displayField: 'name',
-        valueField: 'name',
-        value:'1',
-        labelAlign: 'top'
-        //renderTo: Ext.getBody()
-    });
+    var model = ["ALTURA","CLOROFILA"];
+    var parentGroup = Ext.getCmp('treePanelId').getStore().getNodeById(layer.data.parentId);    
+    var modelos = parentGroup.data.N.modelos;
+    var result = model.filter(el => !modelos.includes(el));
+    if (result.length === 0){
+        Ext.Msg.alert(layer.data.text,
+            'No existen modelos disponibles'
+            , Ext.emptyFn);
+    }
+    else if (layer.data.N.type === 'RGB'){
+        Ext.Msg.alert(layer.data.text,
+            'El modelo no aplica a imágenes RGB'
+            , Ext.emptyFn);
+    }
+    else {
+        var modelstore = []
+        for(let i of result){
+            modelstore.push({'id':i, 'name':i})
+        }
+        var dataModel = Ext.create('Ext.data.Store', {
+            storeId: 'dataModel',
+            fields: ['id', 'name'],
+            data : modelstore
+        });
 
-    Ext.create('Ext.window.Window', {
-        id: 'windowModelId',
-        title: layer.data.text,
-        height: 180,
-        width: 300,
-        layout: 'vbox',
-        modal: true,
-        resizable   : false,
-        items:
-            {
-                xtype: 'form',
-                id: 'formIdModel',
-                width: '100%', 
-                height: '100%',
-                bodyPadding: 10,    
-                border:0,
-                defaultType: 'textfield',
-                items: [                    
-                    indice,            
-                ],    
-                // Reset and Submit buttons
-                buttons: [{
-                    text: 'Borrar',
-                    iconCls: 'icon-eraser',
-                    cls: 'btnform',
+        var indice = Ext.create('Ext.form.ComboBox', {
+            fieldLabel: 'Seleccionar modelo Deeplearning',
+            name: 'model',
+            id: 'model',
+            msgTarget: 'under' ,
+            store: dataModel,
+            width: '100%',
+            queryMode: 'local',
+            allowBlank : false,
+            blankText: 'Seleccione el modelo deeplearning',
+            forceSelection: true,
+            displayField: 'name',
+            valueField: 'name',
+            value:'1',
+            labelAlign: 'top'
+            //renderTo: Ext.getBody()
+        });
+
+        Ext.create('Ext.window.Window', {
+            id: 'windowModelId',
+            title: layer.data.text,
+            height: 180,
+            width: 300,
+            layout: 'vbox',
+            modal: true,
+            resizable   : false,
+            items:
+                {
+                    xtype: 'form',
+                    id: 'formIdModel',
+                    width: '100%', 
+                    height: '100%',
+                    bodyPadding: 10,    
+                    border:0,
+                    defaultType: 'textfield',
+                    items: [                    
+                        indice,            
+                    ],    
+                    // Reset and Submit buttons
+                    buttons: [{
+                        text: 'Borrar',
+                        iconCls: 'icon-eraser',
+                        cls: 'btnform',
+                        handler: function() {
+                            this.up('form').getForm().reset();
+                        }
+                    }, {
+                    text: 'Obtener Modelo',
+                    formBind: true, //only enabled once the form is valid
+                    disabled: true,
+                    iconCls: 'icon-save',
+                    cls:'btnform',
                     handler: function() {
-                        this.up('form').getForm().reset();
+                        var form = this.up('form').getForm();                
+                        if (form.isValid()) {
+                            form.submit({
+                                method: 'POST',
+                                url : '/api/rastermodel/' + uuid ,
+                                params: {
+                                    'layer': layer.data.N.title,
+                                    'title': layer.data.N.name,
+                                    'camera': layer.data.N.camara,
+                                    'type': layer.data.N.type
+                                },
+                                headers: {
+                                    Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
+                                },
+                                waitMsg:'Creando modelo espere por favor...',
+                                success: function(fp, o) {
+                                    Ext.getCmp('formIdModel').reset();
+                                    Ext.Msg.alert('Detalle', 'Modelo creado correctamente.');                                                   
+                                    Ext.getCmp('windowModelId').close();
+                                    initLayers();
+                                },
+                                failure: function(fp, o) {
+                                    Ext.Msg.alert('Error', 'Error al crear el modelo.');
+                                }
+                            });
+                        }
                     }
-                }, {
-                text: 'Obtener Modelo',
-                formBind: true, //only enabled once the form is valid
-                disabled: true,
-                iconCls: 'icon-save',
-                cls:'btnform',
-                handler: function() {
-                    var form = this.up('form').getForm();                
-                    if (form.isValid()) {
-                        form.submit({
-                            method: 'POST',
-                            url : '/api/rastermodel/' + uuid ,
-                            params: {
-                                'layer': layer.data.N.title,
-                                'title': layer.data.N.name,
-                                'camera': layer.data.N.camara,
-                                'type': layer.data.N.type
-                            },
-                            headers: {
-                                Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
-                            },
-                            waitMsg:'Creando modelo espere por favor...',
-                            success: function(fp, o) {
-                                Ext.getCmp('formIdModel').reset();
-                                Ext.Msg.alert('Detalle', 'Modelo creado correctamente.');                                                   
-                                Ext.getCmp('windowModelId').close();
-                                initLayers();
-                            },
-                            failure: function(fp, o) {
-                                Ext.Msg.alert('Error', 'Error al crear el modelo.');
-                            }
-                        });
-                    }
-                }
-            }],        
-            
-        }      
-               
-    }).show();
+                }],        
+                
+            }      
+                
+        }).show();
+    }
 }
 
 function windowDownloadVector(layer){
@@ -1191,7 +1252,7 @@ function createViewPort(){
 
 function deleteItem(layer, url, pk){   
     Ext.Msg.show({
-        title:'Salir',
+        title:'Eliminar',
         message: 'Desea eliminar la capa '+layer+'?',
         buttonText: {
             yes: 'Si',
@@ -1235,12 +1296,23 @@ function initLayers() {
                     {headers: noCacheHeaders})
                     .then(respons => respons.json())
                     .then(data => {                   
-                        let layerfiles=[];     
+                        let layerfiles=[];   
+                        let indices=[];     
+                        let modelos=[];   
                         for (let art of data.artifacts) {                                                           
                             console.log('vector consult' +lyr.type);
+                            if (art.type === 'INDEX'){
+                                let valor = art.name.split('-').slice(-1)[0];
+                                indices.push(valor)
+                            }
+                            if (art.type === 'MODEL'){
+                                let valor = art.name.split('-').slice(-1)[0];
+                                modelos.push(valor)
+                            }
                             if (lyr.type === "IMAGE"){
                                 layerfiles.push(new ol.layer.Image({
                                     id: art.pk,
+                                    cls: 'layer-item',
                                     title: art.name,
                                     name: art.title,
                                     date: lyr.date,
@@ -1284,6 +1356,8 @@ function initLayers() {
                             title: lyr.name,
                             date: lyr.date,
                             type: lyr.type,
+                            indices: indices,
+                            modelos: modelos,
                             layers: layerfiles,
                         });                        
                         layers.push(layerGroup); 

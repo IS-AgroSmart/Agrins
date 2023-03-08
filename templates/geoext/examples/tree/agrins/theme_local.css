@@ -460,3 +460,10 @@ background-color: rgb(47, 74, 155);
   .ol-popup-closer:after {
     content: "✖";
   }
+
+.layer-item{    
+    text-align: center;
+    text-transform: uppercase;
+    color: #4CAF50;
+
+}

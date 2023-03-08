@@ -7,26 +7,8 @@ var dataCamera = Ext.create('Ext.data.Store', {
         {"id":"RGB", "name":"RGB"},
     ]
 });
-var dataIndex = Ext.create('Ext.data.Store', {
-    storeId: 'dataIndex',
-    fields: ['id', 'index'],
-    data : [
-        {"id":"GCI", "name":"GCI"},
-        {"id":"GRRI", "name":"GRRI"},
-        {"id":"MGRVI", "name":"MGRVI"},
-        {"id":"NDRE", "name":"NDRE"},
-        {"id":"NDVI", "name":"NDVI"},
-        {"id":"NGRDI", "name":"NGRDI"},        
-    ]
-});
-var dataModel = Ext.create('Ext.data.Store', {
-    storeId: 'dataModel',
-    fields: ['id', 'name'],
-    data : [
-        {"id":"ALTURA", "name":"ALTURA"},
-        {"id":"CLOROFILA", "name":"CLOROFILA"},                
-    ]
-});
+
+
 var dataLayers = Ext.create('Ext.data.Store', {
     storeId: 'dataCamera',
     fields: ['pk','title', 'name', "type","camera","date"],    
