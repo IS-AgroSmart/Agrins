@@ -244,6 +244,7 @@ function addControlsMap(){
     var btsave = document.createElement("button");
     btsave.className = "btn btn-small icon-cloud-upload";
     btsave.setAttribute("title","Guardar anotaciones");
+    btsave.disabled = isDemo;    
     btsave.addEventListener("click",saveMeasurementsListener)
     
     var elementGroup = document.createElement('div');
@@ -283,8 +284,8 @@ function addControlsMap(){
     legend = new ol.legend.Legend({ 
         title: 'Leyenda',
         margin: 5,
-        maxWidth: 640,
-        maxHeight: 100
+        maxWidth: 480,
+        maxHeight: 85
       });
       var legendCtrl = new ol.control.Legend({
         legend: legend,

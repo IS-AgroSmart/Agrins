@@ -19,7 +19,8 @@ let satelitelayer = new ol.layer.Tile({ name: "Satélite (ArcGIS/ESRI)", title: 
         'Map sources: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community.',
         'Icons from Wikimedia Commons',], attributionsCollapsible: true,
     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    
-})});           
+})});       
+
 
 /* Initial values*/
 let mapComponent, mapPanel, olMap, basemapsGroup, layersGroup;
@@ -213,7 +214,8 @@ function createaddPanel(){
         bodyPadding: 10,    
         border:0,
         defaultType: 'textfield',
-        items: [{
+        items: [            
+            {
             xtype: 'textfield',
             name: 'title',
             id: 'titleshp',
@@ -241,12 +243,6 @@ function createaddPanel(){
                 iconCls:'icon-folder-open',
                 cls: 'btnform',
             },
-            /*validator: function(value){
-                if (value == '')
-                    return 'Seleccione el conjunto de archivos shapefile';
-                console.log('ingeso validator: '+ value);
-                return 'error en el archivo';
-            },*/
             listeners: {
                 change: function(fld, value) {
                     //var newValue = value.replace(/C:\\fakepath\\/g, '');
@@ -281,7 +277,7 @@ function createaddPanel(){
                     fld.setRawValue('');return;
                     
                 },
-                afterrender:function(cmp){
+            focus:function(cmp){
                     cmp.fileInputEl.set({
                         multiple:'multiple',
                         regex     : (/.(cpg|dbf|prj|shp|shx)$/i),
@@ -312,7 +308,7 @@ function createaddPanel(){
                     form.submit({
                         method: 'POST',
                         url : '/api/uploads/' + uuid + '/vectorfile',
-                        params: {
+                        params: {           
                             'datatype': 'shp',
                         },
                         headers: {
@@ -568,37 +564,56 @@ function createTree(){
                 if(record.data.leaf){                                        
                     if (record.data.N.type == 'MULTIESPECTRAL' || record.data.N.type == 'RGB'){                                             
                         m_item = [
-                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
+                            { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',hidden : isDemo,
                                 handler: function() {
                                     windowDownloadImage(record); }},                            
-                            { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
+                            { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', hidden : isDemo,
                                     handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
-                            { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
-                            { text: 'Modelo', iconCls:'fa-solid fa-kaaba', 
+                            { text: 'Información', iconCls:'fa-solid fa-circle-info', 
+                                    handler: function() {
+                                        Ext.Msg.alert(record.data.text,
+                                            'Cámara: '+record.data.N.camara+
+                                            '<br/>Tipo de Capa: '+record.data.N.type+
+                                            '<br/>Creado:  '+new Date(record.data.N.date).toLocaleDateString('en-US')
+                                            , Ext.emptyFn);
+                                    } },
+                            { text: 'Modelo', iconCls:'fa-solid fa-kaaba', hidden : isDemo,
                                 handler: function() {windowModel(record);} },
-                            { text: 'Índice', iconCls:'fa-solid fa-images', 
+                            { text: 'Índice', iconCls:'fa-solid fa-images', hidden : isDemo,
                                 handler: function() {windowIndex(record);} }
                         ]
                     }
                     else{                                                               
                         if (record.data.N.type == 'INDEX' || record.data.N.type == 'MODEL'){
                             m_item = [
-                                { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
+                                { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',hidden : isDemo,
                                 handler: function() {
                                     windowDownloadImage(record);} },
-                                { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
+                                { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', hidden : isDemo,
                                     handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
-                                { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
+                                { text: 'Información', iconCls:'fa-solid fa-circle-info', 
+                                        handler: function() {
+                                            Ext.Msg.alert(record.data.text,
+                                                'Tipo de Capa: '+record.data.N.type+
+                                                '<br/>Creado:  '+new Date(record.data.N.date).toLocaleDateString('en-US')
+                                                , Ext.emptyFn);
+                                        } },
                             ]
                         }
                         else{
                             m_item = [
-                                { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',
+                                { text: 'Descargar', iconCls:'fa-solid fa-file-arrow-down',hidden : isDemo,
                                 handler: function() { 
                                     windowDownloadVector(record)}},
-                                { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', 
+                                { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', hidden : isDemo,
                                     handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
-                                { text: 'Información', iconCls:'fa-solid fa-circle-info', handler: function() {console.log("Delete");} },
+                                { text: 'Información', iconCls:'fa-solid fa-circle-info', 
+                                        handler: function() {
+                                            Ext.Msg.alert(record.data.text,
+                                                'Tipo de Capa: '+record.data.N.type+
+                                                '<br/>Creado:  '+new Date(record.data.N.date).toLocaleDateString('en-US')
+                                                , Ext.emptyFn);
+                                        } },
                             ]
                         }                        
                     }
@@ -1140,6 +1155,7 @@ function createViewPort(){
                             //title: 'Agregar',
                             layout : 'fit',
                             tooltip: 'Agregar',
+                            hidden: isDemo,
                             iconCls: 'fa-solid fa-file-circle-plus btn-white-back',                                                  
                             iconAlign: 'top',
                             height:'100%',

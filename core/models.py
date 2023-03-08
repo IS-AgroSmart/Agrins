@@ -545,7 +545,8 @@ def delete_on_disk_artifact(sender, instance: Artifact, **kwargs):
     print('capa artifact: ',instance.get_disk_path())
     try:
         os.remove(instance.get_disk_path())
-        os.remove('staticfiles/'+instance.legend)
+        if (instance.legend != ''):
+            os.remove('staticfiles/'+instance.legend)
         #shutil.rmtree(instance.get_disk_path())
     except FileNotFoundError:
         pass  # no need to do anything, carry on

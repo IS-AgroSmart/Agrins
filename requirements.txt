@@ -20,6 +20,7 @@ djangorestframework==3.11.0
 dnspython==1.16.0
 eventlet==0.25.1
 execnet==1.7.1
+GDAL==3.3.2
 greenlet==0.4.15
 gunicorn==20.0.4
 geopandas
@@ -69,8 +70,11 @@ python-dotenv==0.15.0
 pytz>=2020.1
 pywebpush==1.11.0
 requests==2.22.0
+scikit-image==0.18.3
 six==1.13.0
 sqlparse==0.3.0
+tensorflow==2.11.0
+tifffile==2023.2.3
 tinycss2==1.0.2
 urllib3==1.25.7
 wcwidth==0.2.4

@@ -1,0 +1,5 @@
+GDAL==3.3.2
+tifffile==2023.2.3
+numpy==1.22.4
+scikit-image==0.18.3
+tensorflow==2.11.0
