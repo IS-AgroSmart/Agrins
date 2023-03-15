@@ -59,7 +59,7 @@ class BaseProject(models.Model):
     name = models.CharField(max_length=50)
     #date = models.DateField(default=date.today)
     description = models.TextField()
-    wallpaper = models.CharField(max_length=300)
+    wallpaper = models.CharField(max_length=300, default="card_proj.png")
     deleted = models.BooleanField(default=True)
 
     class Meta:
@@ -507,7 +507,7 @@ class Layer(models.Model):
     project = models.ForeignKey(UserProject, on_delete=models.CASCADE, related_name="layers", null=True)
 
     def get_disk_path(self):
-        return self.project.get_disk_path() + "/" + self.name + "/"
+        return self.project.get_disk_path() + "/" + self.name
 
 class Artifact(models.Model):
     type = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in ArtifactType])
@@ -523,11 +523,11 @@ class Artifact(models.Model):
         print('data capa: ',self.layer.get_disk_path(),self.name)
         print('tipo capa: ', self.type)
         if (self.type == "MULTIESPECTRAL" or self.type == "INDEX" or self.type == "MODEL" or self.type == "RGB" ):
-            return self.layer.get_disk_path() + self.name+'.tiff'
+            return self.layer.get_disk_path() +'/'+ self.name+'.tiff'
         if (self.type == "SHAPEFILE"):
-            return self.layer.get_disk_path() +self.name+'.shp'
+            return self.layer.get_disk_path() +'/'+self.name+'.shp'
         if (self.type == "KML"):
-            return self.layer.get_disk_path() +self.name+'.kml'
+            return self.layer.get_disk_path() +'/'+self.name+'.kml'
 
 def delete_geoserver_datastore(sender, instance: Artifact, **kwargs):
     print('datastore delete: ','http://container-geoserver:8080/geoserver/rest/workspaces/' + instance.layer.project._get_geoserver_ws_name() + '/datastores/' + instance.name)
