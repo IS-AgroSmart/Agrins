@@ -57,7 +57,7 @@ class User(DiskRelationTrackerMixin, AbstractUser):
 class BaseProject(models.Model):
     uuid = models.UUIDField(primary_key=True, default=u.uuid4, editable=False)
     name = models.CharField(max_length=50)
-    date = models.DateField(default=date.today)
+    #date = models.DateField(default=date.today)
     description = models.TextField()
     deleted = models.BooleanField(default=True)
 
