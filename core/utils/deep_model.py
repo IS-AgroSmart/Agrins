@@ -5,18 +5,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 
-clorofila_model = load_model('modelo_clorofila.h5')
-altura_model = load_model('modelo_altura.h5')
-
 ALTURA_MAX = 266.80
 ALTURA_MIN = 0.0
 
 CLOROFILA_MAX = 980.993
 CLOROFILA_MIN = 0.0
 
-def estandarizar_bandas(img):
-    banda1, banda2, banda3, banda4 = np.moveaxis(img, 2, 0)
-    bandas = [banda1, banda2, banda3, banda4]
+MODELOS={
+        'ALTURA': 'modelo_altura.h5',
+        'CLOROFILA': 'modelo_clorofila.h5',
+    }
+
+SIZE_MODEL ={
+    'ALTURA':{'MAX':266.80,'MIN':0.0},
+    'CLOROFILA':{'MAX':980.993,'MIN':0.0}
+}
+
+def estandarizar_bandas(img, bands):
+    img = np.moveaxis(img, 2, 0)
+
+    verde = img[bands['G']]
+    rojo = img[bands['R']]
+    rededge = img[bands['RDG']]
+    nir = img[bands['NIR']]
+
+    bandas = [verde, rojo, rededge, nir]
+
     bandas_norm = []
     for banda in bandas:
         mean = banda.mean()
@@ -56,44 +70,43 @@ def write_geotiff(filename, arr, in_ds):
     band.FlushCache()
     band.ComputeStatistics(False)
 
-def predecir(input_tif_path):
-    tif = tifffile.imread(input_tif_path)
-    resized_tif = resize(tif, (2240, 2240))
-    norm_tif = estandarizar_bandas(resized_tif)
-    cropped_tif = recortar(norm_tif, 10, 10)
-    X = np.array(cropped_tif)
-    clorofila_pred = clorofila_model.predict(X)
-    altura_pred = altura_model.predict(X)
-    altura_results = []
-    clorofila_results = []
-    for i in range(100):
-        img_altura = altura_pred[i]
-        img_altura = np.argmax(img_altura, axis=-1)
-        altura_results.append(img_altura)
-        img_clorofila = clorofila_pred[i]
-        img_clorofila = np.argmax(img_clorofila, axis=-1)  
-        clorofila_results.append(img_clorofila)
+def generateModel(inputPath, outputPath, model, bands):
 
-    return clorofila_results, altura_results
+    try:
+        v_max = SIZE_MODEL.get(model)['MAX']
+        v_min = SIZE_MODEL.get(model)['MIN']
+        tif = tifffile.imread(inputPath)
+        resized_tif = resize(tif, (2240, 2240))
+        norm_tif = estandarizar_bandas(resized_tif, bands)
+        cropped_tif = recortar(norm_tif, 10, 10)
+        X = np.array(cropped_tif)
 
-def guardar_tif(results, output_path, input_tif_path, v_max, v_min):
+        modelo = load_model(MODELOS.get(model))
+        y_pred = modelo.predict(X)
 
-    fragments = []
-    for i in range(10):
-        initial = i*10
-        final = (i+1)*10
-        fragment = np.concatenate(results[initial:final], axis=1)
-        fragments.append(fragment)
+        resultados = []
 
-    img = np.concatenate(fragments)
-    ds = gdal.Open(input_tif_path)
-    array = ds.ReadAsArray()
-    x, y = array.shape[1], array.shape[2]
-    resized_img = resize(img, (x, y))
-    scaled_img = resized_img*(v_max-v_min) + v_min
-    write_geotiff(output_path, scaled_img, ds)
+        for i in range(100):
+            img = y_pred[i]
+            img = np.argmax(img, axis=-1)
+            resultados.append(img)
+        
+        fragments = []
+        for i in range(10):
+            initial = i*10
+            final = (i+1)*10
+            fragment = np.concatenate(resultados[initial:final], axis=1)
+            fragments.append(fragment)
 
-#Ejemplo------------------
-clorofila_pred, altura_pred = predecir('input.tif')
-guardar_tif(clorofila_pred, 'clorofila.tif', 'input.tif', CLOROFILA_MAX, CLOROFILA_MIN)
-guardar_tif(altura_pred, 'altura.tif', 'input.tif', ALTURA_MAX, ALTURA_MIN)
+        img = np.concatenate(fragments)
+        ds = gdal.Open(inputPath)
+        array = ds.ReadAsArray()
+        x, y = array.shape[1], array.shape[2]
+        resized_img = resize(img, (x, y))
+        scaled_img = resized_img*(v_max-v_min) + v_min
+        write_geotiff(outputPath, scaled_img, ds)
+
+        return True
+
+    except:
+        return False

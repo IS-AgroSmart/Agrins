@@ -677,9 +677,12 @@ function createTree(){
                         
                         legend.getItems().clear()
                         var layerLegend = new ol.legend.Legend({ layer: record.data })  
-                        var src = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=40&HEIGHT=20&STYLE='+record.data.N.stylelayer+'&LAYER=project_'+uuid+':'+record.data.N.title+'&format_options=layout:legend&LEGEND_OPTIONS=countMatched:true;fontAntiAliasing:true'
-                        if (record.data.N.legend != '' && record.data.N.legend != 'a'){
-                            src = window.location.protocol + "//" + window.location.host + '/static/'+record.data.N.legend
+                        var src = '';
+                        if (record.data.N.legend == '' ){
+                            src= window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=40&HEIGHT=20&STYLE='+record.data.N.stylelayer+'&LAYER=project_'+uuid+':'+record.data.N.title+'&format_options=layout:legend&LEGEND_OPTIONS=countMatched:true;fontAntiAliasing:true'
+                        }
+                        else{
+                            src = window.location.protocol + "//" + window.location.host + '/static/'+record.data.N.legend                            
                         }
                         layerLegend.addItem(new ol.legend.Image({
                             title: record.data.text,
@@ -1089,6 +1092,10 @@ function windowDownloadImage(layer){
 }
 
 function createconfigPanel(){
+    var badge = '<span class="badge btn-success">PROPIETARIO</span>';
+    if (isDemo){
+        badge = '<span class="badge btn-warning">DEMO</span>';
+    }
     configPanel = new Ext.create('Ext.panel.Panel', {       
         width:'100%',
         autoScroll: true,
@@ -1100,10 +1107,13 @@ function createconfigPanel(){
         padding:10,
         items:[
             {
-                html:'<h3>'+project_name+'</h2'
+                html:badge
             },
             {
-                html:'<p>'+project_notes+'</p'
+                html:'<h3>'+project_name+'</h2>'
+            },  
+            {
+                html:'<h5>Descripción</h5><p>'+project_notes+'</p>'
             }
         ]
 
@@ -1146,7 +1156,7 @@ function createViewPort(){
                 border:0,
                 title: project_name,
                 titleAlign: 'center',
-                width: 320,                
+                width: 310,                
                 collapsible: true,
                 cls:'myCls',
                 height: '100%',

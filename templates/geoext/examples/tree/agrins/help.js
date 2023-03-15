@@ -45,7 +45,7 @@ function createhelpPanel(){
                     '<h4> Geoportal</h4>'+
                     '<p> A continuación encontrará una guía para el uso de la plataforma.</p>'+
                     '<ol>'+
-                        '<li><i class="fa-solid fa-layer-group"></i> Capas</li>'+
+                        '<li><h5><i class="fa-solid fa-layer-group"></i> Capas</h5></li>'+
                         '<li><i class="fa-solid fa-file-circle-plus"></i> Agregar Capas</li>'+
                         '<li><i class="fa-solid fa-briefcase"></i> Detalle del proyecto</li>'+
                         '<li><i class="fa-solid fa-circle-question"></i> Ayuda</li>'+

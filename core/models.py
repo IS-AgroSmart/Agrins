@@ -57,6 +57,7 @@ class User(DiskRelationTrackerMixin, AbstractUser):
 class BaseProject(models.Model):
     uuid = models.UUIDField(primary_key=True, default=u.uuid4, editable=False)
     name = models.CharField(max_length=50)
+    date = models.DateField(default=date.today)
     description = models.TextField()
     deleted = models.BooleanField(default=True)
 
@@ -501,7 +502,7 @@ class Layer(models.Model):
     name = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
     type = models.CharField(max_length=20, choices=[(tag.name, tag.value) for tag in LayerType])
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateField(default=date.today)
     project = models.ForeignKey(UserProject, on_delete=models.CASCADE, related_name="layers", null=True)
 
     def get_disk_path(self):

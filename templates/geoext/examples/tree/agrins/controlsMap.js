@@ -282,10 +282,10 @@ function addControlsMap(){
     olMap.addControl(switcher);
 
     legend = new ol.legend.Legend({ 
-        title: 'Leyenda',
+        //title: 'Leyenda',
         margin: 5,
         maxWidth: 480,
-        maxHeight: 85
+        maxHeight: 100
       });
       var legendCtrl = new ol.control.Legend({
         legend: legend,

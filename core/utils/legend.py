@@ -54,7 +54,7 @@ def create_legend_image(path, filename, index):
     normed_vals = norm(bounds)
     cmap = LinearSegmentedColormap.from_list('color',list(zip(normed_vals, color_arr[:-1])),N=256)
 
-    fig, axs = plt.subplots(2, figsize=(5, 0.6), sharex=True,gridspec_kw={'height_ratios': [0.5, 0.05]})
+    fig, axs = plt.subplots(2, figsize=(6, 0.8), sharex=True,gridspec_kw={'height_ratios': [0.5, 0.05]})
     cb = mpl.colorbar.ColorbarBase(axs[1],cmap=cmap,norm=norm,orientation='horizontal',ticks=bounds,)
     b, n, patches = axs[0].hist(img.ravel(), 256,[1,256])
     col = (n-n.min())/(n.max()-n.min())
