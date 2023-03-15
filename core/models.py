@@ -59,6 +59,7 @@ class BaseProject(models.Model):
     name = models.CharField(max_length=50)
     #date = models.DateField(default=date.today)
     description = models.TextField()
+    wallpaper = models.CharField(max_length=300)
     deleted = models.BooleanField(default=True)
 
     class Meta:
