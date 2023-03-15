@@ -20,7 +20,7 @@
                     <small style="padding-left: 3%; padding-top: 0%; fontSize:14px" class="text-muted">Tamaño del proyecto: {{this.project.used_space/1024}}MB  </small>
                     <div class="text-center">
                         <div class="text-center">                                                               
-                            <b-img  src="./card_proj.png" fluid alt="Fluid image"></b-img>                               
+                            <b-img style="object-fit:scale-down; object-position: center; width:280px; height:150px;" v-bind:src="project.wallpaper" fluid alt="Fluid image"></b-img>                               
                             <div class="text-center">
                                 <b-button-group size="sm">
                                     <b-button :to="{name: 'projectMap', params: {uuid: project.uuid}}" class="mx-1 my-1" variant="success">Ver Mapa</b-button>

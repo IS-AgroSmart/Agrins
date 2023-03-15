@@ -51,6 +51,7 @@ urlpatterns = [
     path('api/rastermodel/<uuid:uuid>', create_raster_model, name="create_raster_model"),
     path('mapper/<uuid:uuid>', mapper, name="mapper"),
     path('mapper/<uuid:uuid>/<int:pk>/bbox', mapper_bbox, name="mapper_bbox"),
+    path('api/wallpaper/<uuid:uuid>', create_wallpaper, name="create_wallpaper"),
     # path('mapper/<uuid:uuid>/shapefiles', mapper_shapefiles),
     path('mapper/<uuid:uuid>/indices', mapper_indices, name="mapper_indices"),
     path('mapper/<int:index>/artifacts', mapper_artifacts, name="mapper_artifacts"),

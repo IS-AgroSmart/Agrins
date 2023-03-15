@@ -485,29 +485,6 @@ function onConfig(){
     ]
     }).show();
 }
-
-
-    /* filtro
-
-                artifactLayer.push(art.title);   
-                console.log("Nombre: "+ art.name);
-                console.log("Tipo: "+art.type);
-                console.log("Fecha: "+art.date);
-                console.log("Fecha: "+art.camera);
-                console.log("Camera MArca: "+ dataCamera.findRecord('id', art.camera).get('name'));
-                console.log("Cuenta filtro antes: "+dataCamera.getCount());
-                dataCamera.filter('id', 'PARROT');
-                console.log("Cuenta filtro despues: "+dataCamera.getCount());
-                console.log("filtro: "+ dataCamera.data.getAt(0).get('name'));
-                const d = new Date(art.date);
-                var i = simpleCombo.getValue();-------------
-
-                var stateId = 1; // your value
-                cityStore.clearFilter(true);
-                cityStore.filter('StateId', stateId);
-                --------
-                console.log("fecha: "+d);
-    */
     
 function createTree(){    
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
@@ -588,7 +565,9 @@ function createTree(){
                             { text: 'Modelo', iconCls:'fa-solid fa-kaaba', hidden : isDemo,
                                 handler: function() {windowModel(record);} },
                             { text: 'Índice', iconCls:'fa-solid fa-images', hidden : isDemo,
-                                handler: function() {windowIndex(record);} }
+                                handler: function() {windowIndex(record);} },
+                            { text: 'Portada', iconCls:'fa-solid fa-panorama',hidden : isDemo,
+                                handler: function() {portadaImage(record); }},  
                         ]
                     }
                     else{                                                               
@@ -606,6 +585,8 @@ function createTree(){
                                                 '<br/>Creado:  '+new Date(record.data.N.date).toLocaleDateString('en-US')
                                                 , Ext.emptyFn);
                                         } },
+                                { text: 'Portada', iconCls:'fa-solid fa-panorama',hidden : isDemo,
+                                    handler: function() {portadaImage(record); }},  
                             ]
                         }
                         else{
@@ -1091,7 +1072,57 @@ function windowDownloadImage(layer){
     
 }
 
+function portadaImage(layer){
+    console.log('consulta: '+ layer.data.N.id);
+    fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ layer.data.N.id+"/bbox",
+        {headers: noCacheHeaders,})
+        .then(response => response.json())
+        .then(data => {
+            console.log('\nminx:'+data.bbox.minx +'\nminy:'+ data.bbox.miny+'\nmaxx:'+data.bbox.maxx +'\nmaxy:'+data.bbox.maxy);
+            console.log('srs: '+data.srs);
+            console.log('size: '+data.size);
+            console.log('width ='+ data.size.split(' ')[0])
+            console.log('height ='+ data.size.split(' ')[1])
+            let url = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/wms?service=WMS&version=1.1.0&request=GetMap&layers=project_'+uuid+':'+layer.data.N.title+'&styles='+layer.data.N.stylelayer+'&bbox='+data.bbox.minx +','+ data.bbox.miny+','+data.bbox.maxx +','+data.bbox.maxy+'&width='+data.size.split(' ')[0]+'&height='+data.size.split(' ')[1]+'&srs='+data.srs+'&format=image%2Fpng';
+            
+            Ext.Msg.show({
+                title:layer.data.text,
+                message: 'Desea convertir '+layer.data.text+' en portada del proyecto?',
+                buttonText: {
+                    yes: 'Si',
+                    no: 'No'
+                },
+                buttons: Ext.Msg.YESNO,
+                icon: Ext.Msg.QUESTION,
+                fn: function(btn) {
+                    if (btn === 'yes') {
+                        fetch(window.location.protocol + "//" + window.location.host + "/api/wallpaper/" + uuid, {
+                            method: "POST",
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({url: url })
+                        }).then(function (response) {
+                            if (response.status === 200) {
+                                window.location.reload(true); // Reload page
+                            } else if (response.status === 402) {
+                                throw "Su almacenamiento está lleno, no puede crear nuevos índices";
+                            } else throw response.text();
+                        }).catch((msg) => alert(msg));                           
+                    } else {
+                        console.log('Cancel pressed');
+                    } 
+                }
+            });           
+
+
+        });
+
+    
+}
+
 function createconfigPanel(){
+    console.log
     var badge = '<span class="badge btn-success">PROPIETARIO</span>';
     if (isDemo){
         badge = '<span class="badge btn-warning">DEMO</span>';
@@ -1111,7 +1142,10 @@ function createconfigPanel(){
             },
             {
                 html:'<h3>'+project_name+'</h2>'
-            },  
+            },
+            {
+                html:'<img src="'+project_wallpaper+'" style="object-fit:scale-down; object-position: center; width:280px; height:150px; "/>'
+            },
             {
                 html:'<h5>Descripción</h5><p>'+project_notes+'</p>'
             }

@@ -84,7 +84,7 @@ class LayerSerializer(serializers.ModelSerializer):
 class UserProjectSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())
     #flights = serializers.PrimaryKeyRelatedField(many=True,queryset=Flight.objects.all())
-    layers = serializers.PrimaryKeyRelatedField(many=True,queryset=Artifact.objects.all())
+    layers = serializers.PrimaryKeyRelatedField(many=True,queryset=Layer.objects.all())
 
     def create(self, validated_data):
         #flights = validated_data.pop("flights")
@@ -99,7 +99,7 @@ class UserProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProject
-        fields = ['uuid', 'user', 'layers', "name", "description", "is_demo", "used_space", "deleted"]
+        fields = ['uuid', 'user', 'layers', "name", "wallpaper","description", "is_demo", "used_space", "deleted"]
 
 
 class BlockCriteriaSerializer(serializers.ModelSerializer):

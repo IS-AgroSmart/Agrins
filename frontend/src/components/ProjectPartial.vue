@@ -1,6 +1,6 @@
 <template>
     <div class="col-md-4">
-        <b-card @click="viewProject()" :title="projectName" :sub-title="descriptionProject" img-src="./card_proj.png" img-alt="Image" img-top tag="article" style="max-width: 19rem; max-height: 17rem;">
+        <b-card @click="viewProject()" :title="projectName" :sub-title="descriptionProject" v-bind:img-src="project.wallpaper" img-alt="Image" img-height="170" img-width="100" img-top tag="article" style="max-width: 19rem; max-height: 25rem;">
          <template #footer class="flex-sm-fill">
             <b-row >
                 <small style="fontSize:12px" class="text-muted">Última actualización hace 3 min.</small>

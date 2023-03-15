@@ -687,6 +687,16 @@ def create_raster_model(request, uuid):
     else:
         return JsonResponse({'success':False, "msg":"Error"})
 
+@csrf_exempt
+def create_wallpaper(request, uuid):
+    data = json.loads(request.body.decode('utf-8'))
+    print('wallpaper: ',data)
+    url = data.get("url")
+    UserProject.objects.filter(uuid=uuid).update(wallpaper=url)
+    #MyModel.objects.filter(pk=some_value).update(field1='some value')    
+    return HttpResponse(status=200)
+
+
 
 @xframe_options_exempt
 def mapper(request, uuid):
@@ -701,7 +711,8 @@ def mapper(request, uuid):
                    "upload_new_index_path": "/#/projects/" + str(project.uuid) + "/upload/index",
                    "is_multispectral":  True,
                    "is_demo": project.is_demo,
-                   "uuid": project.uuid,                   
+                   "uuid": project.uuid,     
+                   "wallpaper": project.wallpaper              
                    #"flights": project.flights.all().order_by("date")
                    })
 
@@ -721,7 +732,7 @@ def mapper_bbox(request, uuid, pk):
             "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
             "/datastores/"+art.layer.name+"/featuretypes/"+art.layer.name+".json",
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
-        print('valores: ',ans["featureType"]["nativeBoundingBox"], 'srs: ',ans["featureType"]["srs"])
+        print('valores: ',ans)
         return JsonResponse({"bbox": ans["featureType"]["nativeBoundingBox"], "srs": ans["featureType"]["srs"]})
     return JsonResponse({"data":"not found"})
 
