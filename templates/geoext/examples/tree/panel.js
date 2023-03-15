@@ -694,7 +694,14 @@ function createTree(){
 }
 
 function windowIndex(layer){
-    var index=["GCI","GRRI","MGRVI","NDRE","NDVI","NGRDI"];
+    console.log('camara: '+layer.data.N.camara);
+    var index=[];
+    if(layer.data.N.camara === 'RGB'){
+        index=["GRRI","MGRVI","NGRDI"];
+    }
+    else{
+        index=["GCI","GRRI","MGRVI","NDRE","NDVI","NGRDI"];
+    }    
     var parentGroup = Ext.getCmp('treePanelId').getStore().getNodeById(layer.data.parentId);    
     var indices = parentGroup.data.N.indices;
     var result = index.filter(el => !indices.includes(el));
