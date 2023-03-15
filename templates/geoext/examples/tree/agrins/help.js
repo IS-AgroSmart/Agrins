@@ -61,7 +61,7 @@ function createhelpPanel(){
             padding:10,
             autoScroll: true,
             html:'<h6><i class="fa-solid fa-layer-group"></i> Capas</h6>'+
-                    '<p> Al inicio de portal encontrará la estructura del proyecto y sus capas de manera jerárquica, para visualizar asegurese de tener marcada la casilla respectiva.</p>'+                    
+                    '<p> Al inicio del portal encontrará la estructura del proyecto y sus capas de manera jerárquica, para visualizar asegúrese de tener marcada la casilla respectiva.</p>'+                    
                     '<p> Los eventos del mouse sobre capas: selección con un click sobre la capa, click derecho opciones de capas </p>'+
                     '<p> Para visualizar la leyenda de la capa seleccione la capa y active la visualización </p>'+
                 '<h6><i class="fa-solid fa-file-circle-plus"></i> Agregar Capa</h6>'+
@@ -73,10 +73,10 @@ function createhelpPanel(){
                     '</ol>'+
                     '<p> Debe considerar los formatos así como los campos requeridos para cada tipo de capa </p>'+
                 '<h6><i class="fa-solid fa-briefcase"></i> Detalle del proyecto</h6>'+
-                    '<p>En esta sección encontrará el nombre, la descripción la portada y el tipo de proyecto en el que se encuentra.</p>'+                    
+                    '<p>En esta sección encontrará el nombre, descripción, portada y tipo de proyecto en el que se encuentra.</p>'+                    
                     
                 '<h6> <i class="fa-solid fa-images"></i> Obtener índices de vegetación</h6>'+
-                    '<p>Para obtener el índice requerido  debe realizar un click derecho sobre la capa principal, de la lista disponible de índices seleccione para multiespectrales:(GCI, GRRI, MGRVI, NDRE, NDVI, NGRDI) y para RGB: (GRRI, MGRVI,NGRDI)</p>'+
+                    '<p>Para obtener el índice requerido  debe realizar un click derecho sobre la capa principal. En la lista disponible de índices seleccione para multiespectrales:(GCI, GRRI, MGRVI, NDRE, NDVI, NGRDI) y para RGB: (GRRI, MGRVI,NGRDI)</p>'+
                 '<h6><i class="fa-solid fa-kaaba"></i> Modelo Deeplearning</h6>'+
                     '<p> En el geoportal podrá obtener dos modelos uno para determinar la altura y otro para clorofila, se aplica a capas multiespectrales, debe seleccionar la capa principal y con click derecho seleccionar la opción modelo.</p>'
                     
@@ -94,7 +94,7 @@ function createhelpPanel(){
                             '<li><i class="fa-solid fa-arrows-left-right"></i> Medición: Distancia, cálculo de distancia y metadata</li>'+
                             '<li><i class="fa-solid fa-location-dot"></i> Medición: Punto de coordenadas y metadata</li>'+
                             '<li><i class="fa-solid fa-eraser"></i> Borrar mediciones: elimina todas las mediciones realizadas sobre el mapa que no se han guardado</li>'+
-                            '<li><i class="fa-solid fa-cloud-arrow-up"></i> Guardar mediciónes: Asigne un nombre a las mediciones realizadas para almacenar la capa</li>'+
+                            '<li><i class="fa-solid fa-cloud-arrow-up"></i> Guardar mediciones: Asigne un nombre a las mediciones realizadas para almacenar la capa</li>'+
                             '<li><i class="fa-solid fa-arrow-right-arrow-left"></i> Swiper: permite comparar dos capas active el control y seleccione la capa superior</li>'+
                             '<li><i class="fa-solid fa-magnifying-glass"></i> Buscar: escriba el lugar a buscar presione enter y seleccione de la lista el lugar indicado</li>'+
                             '<li><i class="fa-solid fa-diamond"></i> Mapa Base: Seleccione el mapa base(tres disponibles)</li>'+
@@ -102,12 +102,12 @@ function createhelpPanel(){
                         '</ol>'+                    
                 '<h6><i class="fa-solid fa-folder-tree"></i> Opciones de capas</h6>'+
                         '<ol>'+
-                            '<li><i class="fa-solid fa-arrow-down-short-wide"></i> Expandir: Aplica solo a la carpeta del proyecto expande todas las capas</li>'+
+                            '<li><i class="fa-solid fa-arrow-down-short-wide"></i> Expandir: Aplica solo a la carpeta del proyecto, expande todas las capas</li>'+
                             '<li><i class="fa-solid fa-arrow-up-short-wide"></i> Contraer: Aplica solo a la carpeta del proyecto, contrae todas las capas</li>'+
                             '<li><i class="fa-solid fa-rotate"></i> Recargar: actualiza las capas</li>'+                            
                             '<li><i class="fa-solid fa-file-arrow-down"></i> Descargar: Aplica para formatos ligeros Raster(tiff, jpeg, png) Vector(KML Shapefile, CSV)</li>'+                    
                             '<li><i class="fa-solid fa-trash-can"></i> Eliminar: Elimina la capa seleccionada (No recuperable)</li>'+
-                            '<li><i class="fa-solid fa-circle-info"></i>Información: Detalles de la capa</li>'+
+                            '<li><i class="fa-solid fa-circle-info"></i> Información: Detalles de la capa</li>'+
                             '<li><i class="fa-solid fa-kaaba"></i> Modelo: Obtener modelo</li>'+
                             '<li><i class="fa-solid fa-images"></i> Índice: Obtener índice</li>'+
                             '<li><i class="fa-solid fa-panorama"></i> Portada: Establece la capa como portada del proyecto (aplica: índice, modelo, raster)</li>'+
