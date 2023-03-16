@@ -603,6 +603,8 @@ function createTree(){
                                                 '<br/>Creado:  '+new Date(record.data.N.date).toLocaleDateString('en-US')
                                                 , Ext.emptyFn);
                                         } },
+                                { text: 'Portada', iconCls:'fa-solid fa-panorama',hidden : isDemo,
+                                    handler: function() {portadaImage(record); }},  
                             ]
                         }                        
                     }
@@ -1087,10 +1089,26 @@ function portadaImage(layer){
         .then(data => {
             console.log('\nminx:'+data.bbox.minx +'\nminy:'+ data.bbox.miny+'\nmaxx:'+data.bbox.maxx +'\nmaxy:'+data.bbox.maxy);
             console.log('srs: '+data.srs);
-            console.log('size: '+data.size);
-            console.log('width ='+ data.size.split(' ')[0])
-            console.log('height ='+ data.size.split(' ')[1])
-            let url = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/wms?service=WMS&version=1.1.0&request=GetMap&layers=project_'+uuid+':'+layer.data.N.title+'&styles='+layer.data.N.stylelayer+'&bbox='+data.bbox.minx +','+ data.bbox.miny+','+data.bbox.maxx +','+data.bbox.maxy+'&width='+data.size.split(' ')[0]+'&height='+data.size.split(' ')[1]+'&srs='+data.srs+'&format=image%2Fpng';
+            var heightSize = 0
+            var widthSize = 0
+            var styleLayer = ''
+            if(layer.data.N.type == "SHAPEFILE" || layer.data.N.type == "KML"){
+                heightSize = 150;
+                widthSize = 280;
+            }
+            else{
+                heightSize = data.size.split(' ')[1];
+                widthSize = data.size.split(' ')[0];
+                if (heightSize > 1000 || widthSize > 1000){
+                    heightSize = Math.trunc(heightSize /10);
+                    widthSize = Math.trunc(widthSize /10);
+                }
+                styleLayer = layer.data.N.stylelayer;
+                console.log('size: '+data.size);
+                console.log('width ='+ data.size.split(' ')[0])
+                console.log('height ='+ data.size.split(' ')[1])
+            }
+            let url = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/wms?service=WMS&version=1.1.0&request=GetMap&layers=project_'+uuid+':'+layer.data.N.title+'&styles='+styleLayer+'&bbox='+data.bbox.minx +','+ data.bbox.miny+','+data.bbox.maxx +','+data.bbox.maxy+'&width='+widthSize+'&height='+heightSize+'&srs='+data.srs+'&format=image%2Fpng';
             
             Ext.Msg.show({
                 title:layer.data.text,

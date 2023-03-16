@@ -26,6 +26,7 @@ var dataTypeArtefact = Ext.create('Ext.data.Store', {
         {"id":"INDEX", "name":"Index"},
         {"id":"RGB", "name":"RGB"},
         {"id":"KML", "name":"Kml"},
+        {"id":"MODEL","name":"Model"}
     ]
 });
 var dataTypeImage = Ext.create('Ext.data.Store', {
