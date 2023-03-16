@@ -75,6 +75,8 @@ def generateModel(inputPath, outputPath, model, bands):
     try:
         v_max = SIZE_MODEL.get(model)['MAX']
         v_min = SIZE_MODEL.get(model)['MIN']
+        print('Parametros: ',model, bands,inputPath, outputPath )
+        print('V_max -min:',v_max, v_min)
         tif = tifffile.imread(inputPath)
         resized_tif = resize(tif, (2240, 2240))
         norm_tif = estandarizar_bandas(resized_tif, bands)
@@ -97,7 +99,7 @@ def generateModel(inputPath, outputPath, model, bands):
             final = (i+1)*10
             fragment = np.concatenate(resultados[initial:final], axis=1)
             fragments.append(fragment)
-
+        print('preWrite')
         img = np.concatenate(fragments)
         ds = gdal.Open(inputPath)
         array = ds.ReadAsArray()
