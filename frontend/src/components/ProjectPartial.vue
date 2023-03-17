@@ -53,7 +53,7 @@ export default {
             return this.project.name;
         },
         descriptionProject(){
-            return this.project.description.substring(0, 60) +"...";
+            return this.project.description.substring(0, 24) +"...";
         },
         isAdmin() { return this.storage.loggedInUser != null && this.storage.loggedInUser.type == "ADMIN"; },
     },
