@@ -683,7 +683,7 @@ def create_raster_model(request, uuid):
     file_title = request.POST["title"]+'-'+request.POST["model"]
     file_name = request.POST["layer"]+'-'+request.POST["model"]
  
-    if(generateModel(inputPath,outpath,request.POST["model"]),bands):            
+    if(generateModel(inputpath,outpath,request.POST["model"],bands)):            
         project._create_index_datastore(request.POST["layer"],file_name)
         project.update_disk_space()
         project.user.update_disk_space()
