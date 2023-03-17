@@ -237,20 +237,12 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_queryset(self):
-        print('Ingreso usuario: ',self.request.user)
-        print('Ingreso tipo: ',self.request.user.type)
-        print('Ingreso META: ',self.request.META)
-        print('tipo: ',UserType.ADMIN.name)
-        print('Ingreso META: ',self.request.META)
-        print('valor: ', "HTTP_TARGETUSER" in self.request.META)
-        if self.request.user.type == UserType.ADMIN.name :
-            user = self.request.user#User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
-            print('user project Admin')
-            return UserProject.objects.all()
+        if self.request.user.type == UserType.ADMIN.name and "HTTP_TARGETUSER" in self.request.META:
+            user = User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
         else:
             user = self.request.user
-            print('user project normal')
-            return UserProject.objects.filter(user=user) | user.demo_projects.all()
+        return UserProject.objects.filter(user=user) | user.demo_projects.all()
+
 
     @staticmethod
     def _get_effective_user(request):
