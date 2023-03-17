@@ -68,7 +68,7 @@ function createhelpPanel(){
                     '<p> En la plataforma puede agregar tres tipos de capas.</p>'+
                     '<ol>'+
                         '<li> Geotiff(Multiespectrales - RGB): campos (cámara, tipo de imagen)</li>'+
-                        '<li> Shapefile: Capa:(.shp, .shx, dbf, prj)</li>'+
+                        '<li> Shapefile: Capa:(.shp, .shx, .dbf, .prj)</li>'+
                         '<li> KML</li>'+                        
                     '</ol>'+
                     '<p> Debe considerar los formatos así como los campos requeridos para cada tipo de capa </p>'+

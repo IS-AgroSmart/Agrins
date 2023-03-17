@@ -17,9 +17,6 @@
                             <b-form-group id="input-group-2" label="Descripción:*" label-for="input-2">
                                 <b-form-textarea size="sm" id="input-2" v-model="form.description" placeholder="Describa el proyecto" rows="8" max-rows="16" required></b-form-textarea>
                             </b-form-group> 
-
-                        
-                            
                             <b-row align-h="center" style="padding-bottom:2%">
                                 <b-button style="padding-top:0%; padding-bottom:0%" type="submit" pill variant="info">Agregar</b-button>
                             </b-row>

@@ -237,11 +237,20 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_queryset(self):
-        if self.request.user.type == UserType.ADMIN.name and "HTTP_TARGETUSER" in self.request.META:
-            user = User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
+        print('Ingreso usuario: ',self.request.user)
+        print('Ingreso tipo: ',self.request.user.type)
+        print('Ingreso META: ',self.request.META)
+        print('tipo: ',UserType.ADMIN.name)
+        print('Ingreso META: ',self.request.META)
+        print('valor: ', "HTTP_TARGETUSER" in self.request.META)
+        if self.request.user.type == UserType.ADMIN.name :
+            user = self.request.user#User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
+            print('user project Admin')
+            return UserProject.objects.all()
         else:
             user = self.request.user
-        return UserProject.objects.filter(user=user) | user.demo_projects.all()
+            print('user project normal')
+            return UserProject.objects.filter(user=user) | user.demo_projects.all()
 
     @staticmethod
     def _get_effective_user(request):
@@ -672,9 +681,8 @@ def create_raster_model(request, uuid):
     inputpath = project.get_disk_path()+'/'+request.POST["layer"]+'/'+request.POST["layer"]+'.tiff '
     outpath = project.get_disk_path()+'/'+request.POST["layer"]+'/'+request.POST["layer"]+'-'+request.POST["model"]+'.tiff '
     file_title = request.POST["title"]+'-'+request.POST["model"]
-    file_name = request.POST["layer"]+'-'+request.POST["model"]
- 
-    if(generateModel(inputPath,outpath,request.POST["model"]),bands):            
+    file_name = request.POST["layer"]+'-'+request.POST["model"]    
+    if(generateModel(inputpath,outpath,request.POST["model"],bands)):            
         project._create_index_datastore(request.POST["layer"],file_name)
         project.update_disk_space()
         project.user.update_disk_space()

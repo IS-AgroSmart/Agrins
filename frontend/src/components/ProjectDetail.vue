@@ -70,22 +70,20 @@
                    </div>
                 </b-card-text></b-tab>
 
-                <b-tab v-if="this.project.user == this.storage.loggedInUser.pk" style="background-color:white;" title="Configuración">
+                <b-tab v-if="isAdmin || project_is_demo" style="background-color:white;" title="Configuración">
                     <div style="padding-left: 3%; padding-right: 3%; ">                        
                         <div>                           
                             <h6>Proyecto DEMO:</h6>
                             <b-card>                                                                                            
-                                <p v-if="!project.is_demo">Advertencia al hacer un proyecto DEMO compartirá la información con todos los usuarios de la plataforma.</p>
-                                <b-button v-if="!project.is_demo" variant="warning" size="sm">Hacer DEMO</b-button>
-                                <p v-if="project.is_demo">Advertencia al deshacer proyecto DEMO los usuarios no podrán ver la información del proyecto.</p>
-                                <b-button v-if="project.is_demo" variant="success" size="sm">Deshacer DEMO</b-button>
-                                
+                                <p v-if="!project.is_demo && isAdmin">Advertencia al hacer un proyecto DEMO compartirá la información con todos los usuarios de la plataforma.</p>
+                                <b-button v-if="!project.is_demo && isAdmin" @click="onProjectClick" variant="warning" size="sm">Hacer DEMO</b-button>
+                                <p v-if="project.is_demo && isAdmin">Advertencia al deshacer proyecto DEMO los usuarios no podrán ver la información del proyecto.</p>
+                                <b-button v-if="project.is_demo && isAdmin" @click="onDemoProjectClick" variant="success" size="sm">Deshacer DEMO</b-button>                                
                             </b-card>                            
                         </div>                        
                     
                    </div>
-                </b-tab>
-                
+                </b-tab>                
                 </b-tabs>
             </b-card>
         </div>
@@ -136,6 +134,57 @@ export default {
                             });
                         });
                 });
+        },
+        onProjectClick() {
+            this.$bvModal.msgBoxConfirm('Desea convertir '+this.projectName+' en DEMO.', {
+                    title: '¿Convertir en DEMO?',
+                    okVariant: 'danger',
+                    okTitle: 'Sí',
+                    cancelTitle: 'No',
+                })
+                .then(value => {
+                    if (value){
+                        axios.post('api/projects/' + this.project.uuid + '/make_demo/', {}, {
+                            headers: { "Authorization": "Token " + this.storage.token }
+                        })
+                        .then(() => {
+                            this.$router.push("/projects");
+                        })
+                        .catch(() => {
+                            this.$bvToast.toast('Error al convertir proyecto a demo', {
+                                title: "Error",
+                                autoHideDelay: 3000,
+                                variant: "danger",
+                            });
+                        });
+                    }
+                });            
+        },
+        onDemoProjectClick() {
+            this.$bvModal.msgBoxConfirm('Desea que '+this.projectName+' no sea DEMO.', {
+                    title: 'Deshacer DEMO',
+                    okVariant: 'danger',
+                    okTitle: 'Sí',
+                    cancelTitle: 'No',
+                })
+                .then(value => {
+                    if (value){
+                        axios.delete('api/projects/' + this.project.uuid + '/delete_demo/', {
+                            headers: { "Authorization": "Token " + this.storage.token }
+                        })
+                        .then(() => {
+                            this.$router.push("/projects");
+                        })
+                        .catch(() => {
+                            this.$bvToast.toast('Error al eliminar el proyecto demo', {
+                                title: "Error",
+                                autoHideDelay: 3000,
+                                variant: "danger",
+                            });
+                        });
+                    }
+                });
+            
         },
         
     },
