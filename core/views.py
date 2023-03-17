@@ -429,7 +429,7 @@ def upload_vectorfile(request, uuid):
 
     datatype = request.POST.get("datatype", "shp")
     project = UserProject.objects.get(pk=uuid)
-
+    project.update(date_update = datetime.now())
     
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
@@ -496,6 +496,7 @@ def upload_vectorfile(request, uuid):
 @csrf_exempt
 def upload_measure(request, uuid):
     project = UserProject.objects.get(pk=uuid)
+    project.update(date_update = datetime.now())
     file_name = request.POST["name"]
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
@@ -541,6 +542,7 @@ def upload_measure(request, uuid):
 def upload_geotiff(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
     project = UserProject.objects.get(pk=uuid)
+    project.update(date_update = datetime.now())
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
     
@@ -626,6 +628,7 @@ BANDS_CAMERA = {
 @csrf_exempt
 def create_raster_index(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
+    project.update(date_update = datetime.now())
     if project.user.used_space >= project.user.maximum_space:
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
     bands = BANDS_CAMERA.get(request.POST["camera"])
@@ -665,7 +668,8 @@ def create_raster_index(request, uuid):
 
 @csrf_exempt
 def create_raster_model(request, uuid):
-    project = UserProject.objects.get(uuid=uuid)
+    project = UserProject.objects.get(uuid=uuid)    
+    project.update(date_update = datetime.now())
     if project.user.used_space >= project.user.maximum_space:
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
     

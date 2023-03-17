@@ -5,7 +5,7 @@
                 <div class="p-2 bd-highlight"><h5>{{this.project.name}}</h5>  </div>
                 
                 <div class="ml-auto p-2 bd-highlight">
-                    <small style="fontSize:12px" class="text-muted">Última actualización hace 3 min.  </small>                    
+                    <small style="fontSize:12px" class="text-muted">Última actualización {{this.project.date_update}}.  </small>                    
                     <b-badge v-if="project.is_demo" squared variant="warning">DEMO</b-badge>                    
                     <!--<b-badge v-if="isAdmin" variant="success" squared>PROPIETARIO</b-badge>-->
                     <b-badge v-if="this.project.user == this.storage.loggedInUser.pk" variant="success" squared>PROPIETARIO</b-badge>
@@ -17,7 +17,7 @@
             <b-card no-body>
                 <b-tabs size="sm" content-class="mt-3" justified>
                 <b-tab style="height: 100%;background-color:;" title="Proyecto" active>
-                    <small style="padding-left: 3%; padding-top: 0%; fontSize:14px" class="text-muted">Tamaño del proyecto: {{this.project.used_space/1024}}MB  </small>
+                    <small style="padding-left: 3%; padding-top: 0%; fontSize:14px" class="text-muted">Tamaño del proyecto: {{(this.project.used_space/1024).toFixed(2)}} MB  </small>
                     <div class="text-center">
                         <div class="text-center">                                                               
                             <b-img style="object-fit:scale-down; object-position: center; width:280px; height:150px;" v-bind:src="project.wallpaper" fluid alt="Fluid image"></b-img>                               
@@ -53,7 +53,7 @@
                         </div>
                         <h6 style="padding-top:2%">Capas disponibles</h6>
                         <div class="accordion" role="tablist">
-                            <b-card v-for="(artic, index) in project.artifacts" :key="artic" no-body class="mb-1">
+                            <b-card v-for="(artic, index) in project.layers" :key="artic" no-body class="mb-1">
                                 <b-card-header header-tag="header" class="p-1" role="tab">
                                     <b-button class="text-left" block v-b-toggle="'artifact'+index" variant="light">Capa {{artic}}</b-button>
                                 </b-card-header>
@@ -110,6 +110,7 @@ export default {
             return this.project.name + (this.project.is_demo ? " (DEMO)" : "");
         },
         isAdmin() { return this.storage.loggedInUser != null && this.storage.loggedInUser.type == "ADMIN"; },
+        
     },
     methods: {
         finalDeleteProject() {

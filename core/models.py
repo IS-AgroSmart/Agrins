@@ -57,7 +57,8 @@ class User(DiskRelationTrackerMixin, AbstractUser):
 class BaseProject(models.Model):
     uuid = models.UUIDField(primary_key=True, default=u.uuid4, editable=False)
     name = models.CharField(max_length=50)
-    #date = models.DateField(default=date.today)
+    date_create = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
     wallpaper = models.CharField(max_length=300, default="agrins/card_proj.png")
     deleted = models.BooleanField(default=True)

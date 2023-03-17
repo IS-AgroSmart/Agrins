@@ -3,7 +3,7 @@
         <b-card @click="viewProject()" :title="projectName" :sub-title="descriptionProject" v-bind:img-src="project.wallpaper" img-alt="Image" img-height="150" img-width="90" img-top tag="article" style="max-width: 19rem; max-height: 25rem;">
          <template #footer class="flex-sm-fill">
             <b-row >
-                <small style="fontSize:12px" class="text-muted">Última actualización hace 3 min.</small>
+                <small style="fontSize:12px" class="text-muted">Última actualización {{project.date_update}}.</small>
             </b-row>
             <b-row class="float-right">
                     <b-badge v-if="project.is_demo" squared variant="warning">DEMO</b-badge>                    
