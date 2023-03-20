@@ -113,7 +113,7 @@ function createhelpPanel(){
                             '<li><i class="fa-solid fa-panorama"></i> Portada: Establece la capa como portada del proyecto (aplica: índice, modelo, raster)</li>'+
                         '</ol>'+                     
                 '<h6><i class="fa-solid fa-arrow-up-right-from-square"></i> Salir del visualizador</h6>'+
-                    '<p>Asegurece de guardar las mediones o verificar que los cambios realizados se muesren en el mapa</p>'
+                    '<p>Asegurece de guardar las mediones o verificar que los cambios realizados se muestren en el mapa</p>'
                 
         }],
     });    
