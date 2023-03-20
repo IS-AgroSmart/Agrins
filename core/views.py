@@ -45,6 +45,7 @@ from .utils.deep_model import  *
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 import geopandas as gpd
+from datetime import datetime
 #import pycrs
 
 
@@ -257,6 +258,8 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         user = self._get_effective_user(request)
         if user.used_space >= user.maximum_space:
             return Response(status=402)
+        print('eser spac',request.META)
+        print('eser spac',request.POST)
         return super(UserProjectViewSet, self).create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
@@ -428,8 +431,9 @@ def upload_vectorfile(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
 
     datatype = request.POST.get("datatype", "shp")
+    UserProject.objects.filter(pk=uuid).update(date_update = datetime.now())
     project = UserProject.objects.get(pk=uuid)
-    project.update(date_update = datetime.now())
+    
     
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
@@ -442,6 +446,7 @@ def upload_vectorfile(request, uuid):
         file: UploadedFile = request.FILES["file"]
     # remove extension to get only X
     file_name = ".".join(file.name.split(".")[:-1]).replace(" ", "")
+    file_name += datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
 
     layer = project.layers.create(
         name=file_name, title=request.POST["title"], type=LayerType.VECTOR.name)
@@ -495,9 +500,10 @@ def upload_vectorfile(request, uuid):
 @xframe_options_exempt 
 @csrf_exempt
 def upload_measure(request, uuid):
+    UserProject.objects.filter(pk=uuid).update(date_update = datetime.now())
     project = UserProject.objects.get(pk=uuid)
-    project.update(date_update = datetime.now())
     file_name = request.POST["name"]
+    file_name += datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
     geojs=request.POST["json"]
@@ -541,14 +547,17 @@ def upload_measure(request, uuid):
 @csrf_exempt
 def upload_geotiff(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
+    UserProject.objects.filter(pk=uuid).update(date_update = datetime.now())
     project = UserProject.objects.get(pk=uuid)
-    project.update(date_update = datetime.now())
+    
+    
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
     
     file: UploadedFile = request.FILES.get("geotiff")  # file is called X.tiff
     geotiff_name = ".".join(file.name.split(
         ".")[:-1])  # Remove extension, get X
+    geotiff_name += datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
     source = "/geoserver/geoserver/ows?version=1.3.0"
 
     layer = project.layers.create(
@@ -627,8 +636,8 @@ BANDS_CAMERA = {
 
 @csrf_exempt
 def create_raster_index(request, uuid):
+    UserProject.objects.filter(pk=uuid).update(date_update = datetime.now())
     project = UserProject.objects.get(uuid=uuid)
-    project.update(date_update = datetime.now())
     if project.user.used_space >= project.user.maximum_space:
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
     bands = BANDS_CAMERA.get(request.POST["camera"])
@@ -668,8 +677,8 @@ def create_raster_index(request, uuid):
 
 @csrf_exempt
 def create_raster_model(request, uuid):
+    UserProject.objects.filter(pk=uuid).update(date_update = datetime.now())
     project = UserProject.objects.get(uuid=uuid)    
-    project.update(date_update = datetime.now())
     if project.user.used_space >= project.user.maximum_space:
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
     

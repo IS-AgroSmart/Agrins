@@ -5,7 +5,7 @@
                 <div class="p-2 bd-highlight"><h5>{{this.project.name}}</h5>  </div>
                 
                 <div class="ml-auto p-2 bd-highlight">
-                    <small style="fontSize:12px" class="text-muted">Última actualización {{this.project.date_update}}.  </small>                    
+                    <small style="fontSize:12px" class="text-muted">Última actualización {{dateProject}}.  </small>                    
                     <b-badge v-if="project.is_demo" squared variant="warning">DEMO</b-badge>                    
                     <!--<b-badge v-if="isAdmin" variant="success" squared>PROPIETARIO</b-badge>-->
                     <b-badge v-if="this.project.user == this.storage.loggedInUser.pk" variant="success" squared>PROPIETARIO</b-badge>
@@ -108,6 +108,9 @@ export default {
         },
         projectName() {
             return this.project.name + (this.project.is_demo ? " (DEMO)" : "");
+        },
+        dateProject(){
+            return (new Date(this.project.date_update).toLocaleDateString('es-ES'))
         },
         isAdmin() { return this.storage.loggedInUser != null && this.storage.loggedInUser.type == "ADMIN"; },
         

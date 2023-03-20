@@ -546,6 +546,7 @@ def delete_geoserver_datastore(sender, instance: Artifact, **kwargs):
 
 def delete_on_disk_artifact(sender, instance: Artifact, **kwargs):
     print('capa artifact: ',instance.get_disk_path())
+    print('caoa layer: ', instance.layer.project.user)
     try:
         os.remove(instance.get_disk_path())
         if (instance.legend != ''):

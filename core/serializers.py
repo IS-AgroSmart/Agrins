@@ -84,11 +84,13 @@ class LayerSerializer(serializers.ModelSerializer):
 class UserProjectSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())
     #flights = serializers.PrimaryKeyRelatedField(many=True,queryset=Flight.objects.all())
+    print('eser spac serializar entrada')
     layers = serializers.PrimaryKeyRelatedField(many=True,queryset=Layer.objects.all())
-    date_create = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    date_update = serializers.DateTimeField(format="%d-%m-%Y")
+    #date_create = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    #date_update = serializers.DateTimeField(format="%d-%m-%Y")
 
     def create(self, validated_data):
+        print('eser spac serializar')
         #flights = validated_data.pop("flights")
         layers = validated_data.pop("layers")
         proj = UserProject.objects.create(**validated_data)

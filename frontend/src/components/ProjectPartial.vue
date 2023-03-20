@@ -3,7 +3,7 @@
         <b-card @click="viewProject()" :title="projectName" :sub-title="descriptionProject" v-bind:img-src="project.wallpaper" img-alt="Image" img-height="150" img-width="90" img-top tag="article" style="max-width: 19rem; max-height: 25rem;">
          <template #footer class="flex-sm-fill">
             <b-row >
-                <small style="fontSize:12px" class="text-muted">Última actualización {{project.date_update}}.</small>
+                <small style="fontSize:12px" class="text-muted">Última actualización {{dateProject}}.</small>
             </b-row>
             <b-row class="float-right">
                     <b-badge v-if="project.is_demo" squared variant="warning">DEMO</b-badge>                    
@@ -54,6 +54,9 @@ export default {
         },
         descriptionProject(){
             return this.project.description.substring(0, 24) +"...";
+        },
+        dateProject(){
+            return (new Date(this.project.date_update).toLocaleDateString('es-ES'))
         },
         isAdmin() { return this.storage.loggedInUser != null && this.storage.loggedInUser.type == "ADMIN"; },
     },
