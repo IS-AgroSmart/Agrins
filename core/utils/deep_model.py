@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
+import os
 
 ALTURA_MAX = 266.80
 ALTURA_MIN = 0.0
@@ -100,8 +101,9 @@ def generateModel(path,filename, outputPath, model, bands):
         print('Cropped------------')
         X = np.array(cropped_tif)
         print('Modelo: ',MODELOS.get(model))
+        model_path = os.path.abspath(MODELOS.get(model))
 
-        modelo = load_model(MODELOS.get(model))
+        modelo = load_model(model_path)
         print('Model load------------')
         y_pred = modelo.predict(X)
         print('Predict------------')
