@@ -2,6 +2,7 @@ from osgeo import gdal
 import tifffile
 from skimage.transform import resize
 import numpy as np
+import cv2
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 
@@ -77,7 +78,7 @@ def generateModel(inputPath, outputPath, model, bands):
         v_min = SIZE_MODEL.get(model)['MIN']
         print('Parametros: ',model, bands,inputPath, outputPath )
         print('V_max -min:',v_max, v_min)
-        tif = tifffile.imread(inputPath)
+        tif = cv2.imread(inputPath)#tifffile.imread(inputPath)
         print('afeter Read------------')
         resized_tif = resize(tif, (2240, 2240))
         print('Resized------------')
