@@ -14,8 +14,8 @@ CLOROFILA_MAX = 980.993
 CLOROFILA_MIN = 0.0
 
 MODELOS={
-        'ALTURA': 'modelo_altura.h5',
-        'CLOROFILA': 'modelo_clorofila.h5',
+        'ALTURA': 'core/utils/modelo_altura.h5',
+        'CLOROFILA': 'core/utils/modelo_clorofila.h5',
     }
 
 SIZE_MODEL ={
