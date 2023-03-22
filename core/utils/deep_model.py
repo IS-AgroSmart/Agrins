@@ -129,7 +129,7 @@ def generateModel(path,filename, outputPath, model, bands):
         x, y = array.shape[1], array.shape[2]
         resized_img = resize(img, (x, y))
         scaled_img = resized_img*(v_max-v_min) + v_min
-        out = path+filename+outputPath+'tiff'
+        out = path+filename+outputPath+'.tiff'
         write_geotiff(out, scaled_img, ds)
 
         return True
