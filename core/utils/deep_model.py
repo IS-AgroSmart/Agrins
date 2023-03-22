@@ -71,14 +71,15 @@ def write_geotiff(filename, arr, in_ds):
     band.FlushCache()
     band.ComputeStatistics(False)
 
-def generateModel(inputPath, outputPath, model, bands):
+def generateModel(path,filename, outputPath, model, bands):
 
     try:
         v_max = SIZE_MODEL.get(model)['MAX']
         v_min = SIZE_MODEL.get(model)['MIN']
         print('Parametros: ',model, bands,inputPath, outputPath )
         print('V_max -min:',v_max, v_min)
-        tif = cv2.imread(inputPath)#tifffile.imread(inputPath)
+        tif = cv2.imread(path+filename+'.tiff')
+        #tif = cv2.imread(inputPath)#tifffile.imread(inputPath)
         print('afeter Read------------')
         print('cv2_read_file: ',tif)
         resized_tif = resize(tif, (2240, 2240))
