@@ -683,12 +683,13 @@ def create_raster_model(request, uuid):
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
     
     bands = BANDS_CAMERA.get(request.POST["camera"])
-    inputpath = project.get_disk_path()+'/'+request.POST["layer"]+'/'+request.POST["layer"]+'.tiff '
+    inputpath = project.get_disk_path()+'/'+request.POST["layer"]+'/'
+    layerfile= request.POST["layer"]
     outpath = project.get_disk_path()+'/'+request.POST["layer"]+'/'+request.POST["layer"]+'-'+request.POST["model"]+'.tiff '
     file_title = request.POST["title"]+'-'+request.POST["model"]
-    file_name = request.POST["layer"]+'-'+request.POST["model"]
+    file_name = request.POST["layer"]+'-'+request.POST["model"]    
  
-    if(generateModel(inputpath,outpath,request.POST["model"],bands)):            
+    if(generateModel(inputpath,layerfile,outpath,request.POST["model"],bands)):            
         project._create_index_datastore(request.POST["layer"],file_name)
         project.update_disk_space()
         project.user.update_disk_space()
