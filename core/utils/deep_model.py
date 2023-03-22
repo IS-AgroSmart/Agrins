@@ -78,13 +78,19 @@ def generateModel(inputPath, outputPath, model, bands):
         print('Parametros: ',model, bands,inputPath, outputPath )
         print('V_max -min:',v_max, v_min)
         tif = tifffile.imread(inputPath)
+        print('afeter Read------------')
         resized_tif = resize(tif, (2240, 2240))
+        print('Resized------------')
         norm_tif = estandarizar_bandas(resized_tif, bands)
+        print('Normalized------------')
         cropped_tif = recortar(norm_tif, 10, 10)
+        print('Cropped------------')
         X = np.array(cropped_tif)
 
         modelo = load_model(MODELOS.get(model))
+        print('Model load------------')
         y_pred = modelo.predict(X)
+        print('Predict------------')
 
         resultados = []
 
@@ -92,7 +98,7 @@ def generateModel(inputPath, outputPath, model, bands):
             img = y_pred[i]
             img = np.argmax(img, axis=-1)
             resultados.append(img)
-        
+        print('Arg-MAX------------')
         fragments = []
         for i in range(10):
             initial = i*10
