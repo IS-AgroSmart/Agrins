@@ -28,9 +28,13 @@ def estandarizar_bandas(img, bands):
     img = np.moveaxis(img, 2, 0)
     print('aftermoveaxis')
 
+    print('band green')
     verde = img[bands['G']]
+    print('band Red')
     rojo = img[bands['R']]
+    print('band redEdge')
     rededge = img[bands['RDG']]
+    print('band NIR')
     nir = img[bands['NIR']]
     print('after asign bands')
 
