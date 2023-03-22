@@ -23,21 +23,27 @@ SIZE_MODEL ={
 }
 
 def estandarizar_bandas(img, bands):
+    print('parametros: ',img)
+    print('parametros: ',bands)
     img = np.moveaxis(img, 2, 0)
+    print('aftermoveaxis')
 
     verde = img[bands['G']]
     rojo = img[bands['R']]
     rededge = img[bands['RDG']]
     nir = img[bands['NIR']]
+    print('after asign bands')
 
     bandas = [verde, rojo, rededge, nir]
 
     bandas_norm = []
+    print('bands')
     for banda in bandas:
         mean = banda.mean()
         std = banda.std()
         banda = (banda-mean)/std
         bandas_norm.append(banda)
+    print('bands normalzed')
     img_norm = np.array(bandas_norm)
     img_norm = np.moveaxis(bandas_norm, 0, 2)
     return img_norm
