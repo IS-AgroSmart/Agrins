@@ -101,7 +101,7 @@ def generateModel(path,filename, outputPath, model, bands):
         X = np.array(cropped_tif)
         print('Modelo: ',MODELOS.get(model))
 
-        modelo = load_model('modelo_altura.h5')
+        modelo = load_model(MODELOS.get(model))
         print('Model load------------')
         y_pred = modelo.predict(X)
         print('Predict------------')
@@ -131,4 +131,5 @@ def generateModel(path,filename, outputPath, model, bands):
         return True
 
     except:
+        print(exception)
         return False
