@@ -78,7 +78,7 @@ def generateModel(path,filename, outputPath, model, bands):
         v_min = SIZE_MODEL.get(model)['MIN']
         print('Parametros: ',model, bands,path, filename, outputPath )
         print('V_max -min:',v_max, v_min)
-        tif = cv2.imread(path+filename+'.tiff')
+        tif = tifffile.imread(path+filename+'.tiff')
         #tif = cv2.imread(inputPath)#tifffile.imread(inputPath)
         print('afeter Read------------')
         print('cv2_read_file: ',tif)
