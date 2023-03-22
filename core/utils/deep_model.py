@@ -13,8 +13,8 @@ CLOROFILA_MAX = 980.993
 CLOROFILA_MIN = 0.0
 
 MODELOS={
-        'ALTURA': 'modelo_altura',
-        'CLOROFILA': 'modelo_clorofila',
+        'ALTURA': 'modelo_altura.h5',
+        'CLOROFILA': 'modelo_clorofila.h5',
     }
 
 SIZE_MODEL ={
@@ -101,7 +101,7 @@ def generateModel(path,filename, outputPath, model, bands):
         X = np.array(cropped_tif)
         print('Modelo: ',MODELOS.get(model))
 
-        modelo = load_model(MODELOS.get(model))
+        modelo = load_model('modelo_altura.h5')
         print('Model load------------')
         y_pred = modelo.predict(X)
         print('Predict------------')
