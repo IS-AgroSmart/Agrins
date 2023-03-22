@@ -123,6 +123,7 @@ def generateModel(path,filename, outputPath, model, bands):
             fragments.append(fragment)
         print('preWrite')
         img = np.concatenate(fragments)
+        inputPath = path+filename+'.tiff'
         ds = gdal.Open(inputPath)
         array = ds.ReadAsArray()
         x, y = array.shape[1], array.shape[2]
