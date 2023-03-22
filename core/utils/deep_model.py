@@ -80,6 +80,7 @@ def generateModel(inputPath, outputPath, model, bands):
         print('V_max -min:',v_max, v_min)
         tif = cv2.imread(inputPath)#tifffile.imread(inputPath)
         print('afeter Read------------')
+        print('cv2_read_file: ',tif)
         resized_tif = resize(tif, (2240, 2240))
         print('Resized------------')
         norm_tif = estandarizar_bandas(resized_tif, bands)
