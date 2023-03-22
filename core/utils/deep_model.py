@@ -99,6 +99,7 @@ def generateModel(path,filename, outputPath, model, bands):
         cropped_tif = recortar(norm_tif, 10, 10)
         print('Cropped------------')
         X = np.array(cropped_tif)
+        print('Modelo: ',MODELOS.get(model))
 
         modelo = load_model(MODELOS.get(model))
         print('Model load------------')
