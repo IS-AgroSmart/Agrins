@@ -77,23 +77,33 @@ class LayerSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
 
     class Meta:
-        model = Artifact
-        fields = ["pk","project","type" "name", "date"]
+        model = Layer
+        fields = ["pk","project","type", "name", "date"]
+
+class  ResourceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Resource
+        fields = ["pk","project","title", "name", "description", "extension"]
+
 
 
 class UserProjectSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())
-    #flights = serializers.PrimaryKeyRelatedField(many=True,queryset=Flight.objects.all())
-    print('eser spac serializar entrada')
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())    
+    resources = serializers.PrimaryKeyRelatedField(many=True,queryset=Resource.objects.all())#ResourceSerializer(many=True)
+    #print('capas1: ',task_extendeds)
     layers = serializers.PrimaryKeyRelatedField(many=True,queryset=Layer.objects.all())
-    #date_create = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    #date_update = serializers.DateTimeField(format="%d-%m-%Y")
+    #resources = serializers.PrimaryKeyRelatedField(many=True,queryset=Resource.objects.all())
+    #print('resursos1: ',resources)
+    #print('layers1: ',layers)
 
     def create(self, validated_data):
         print('eser spac serializar')
         #flights = validated_data.pop("flights")
         layers = validated_data.pop("layers")
+        resources = validated_data.pop("resources")
         proj = UserProject.objects.create(**validated_data)
+        proj.resources.set(resources)
         #proj.flights.set(flights)
         proj.layers.set(layers)
         proj._create_geoserver_proj_workspace()
@@ -101,9 +111,10 @@ class UserProjectSerializer(serializers.ModelSerializer):
         proj.user.update_disk_space()
         return proj
 
-    class Meta:
+    class Meta:        
         model = UserProject
-        fields = ['uuid', 'user', 'layers', "date_create","date_update", "name", "wallpaper","description", "is_demo", "used_space", "deleted"]
+        print('resursos2: ',model.resources)
+        fields = ['uuid', 'user', "resources", "layers", "date_create","date_update", "name", "wallpaper","description", "is_demo", "used_space", "deleted"]
 
 
 class BlockCriteriaSerializer(serializers.ModelSerializer):

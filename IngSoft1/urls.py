@@ -27,6 +27,7 @@ router.register(r'users', UserViewSet, basename="users")
 #router.register(r'flights', FlightViewSet, basename="flights")
 router.register(r'projects', UserProjectViewSet, basename="projects")
 router.register(r'layers', LayerViewSet, basename="layers")
+router.register(r'resources', ResourceViewSet, basename="resources")
 router.register(r'artifacts', ArtifactViewSet, basename="artifacts")
 router.register(r'block_criteria', BlockCriteriaViewSet, basename="block_criteria")
 
@@ -45,6 +46,8 @@ urlpatterns = [
     path('api/uploads/<uuid:uuid>/vectorfile', upload_vectorfile, name="upload_vector"),
     path('api/uploads/<uuid:uuid>/measure', upload_measure, name="upload_vector"),
     path('api/uploads/<uuid:uuid>/geotiff', upload_geotiff, name="upload_geotiff"),
+    path('api/uploads/<uuid:uuid>/resource', upload_resource, name="upload_resource"),
+    path('api/download/<int:pk>/resource', download_resource, name="download_resource"),    
 #    path('api/preview/<uuid:uuid>', preview_flight_url, name="preview_flight_url"),
     path('api/rastercalcs/check', check_formula, name="check_formula"),
     path('api/rastercalcs/<uuid:uuid>', create_raster_index, name="create_raster_index"),

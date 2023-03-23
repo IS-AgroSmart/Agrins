@@ -471,6 +471,16 @@ post_delete.connect(delete_geoserver_workspace, sender=UserProject)
 #post_delete.connect(delete_on_disk, sender=Flight)
 post_delete.connect(delete_on_disk, sender=UserProject)
 
+class Resource(models.Model):
+    name = models.CharField(max_length=256)
+    description = models.TextField()
+    title = models.CharField(max_length=256)    
+    extension = models.CharField(max_length=10)        
+    project = models.ForeignKey(UserProject, on_delete=models.CASCADE, related_name="resources", null=True)
+
+    def get_disk_path(self):
+        return self.project.get_disk_path() + "/Resourses/"
+
 
 class ArtifactType(Enum):
     MULTIESPECTRAL = "Multiespectral"

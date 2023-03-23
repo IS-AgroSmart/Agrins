@@ -2,8 +2,10 @@ from osgeo import gdal
 import tifffile
 from skimage.transform import resize
 import numpy as np
+import cv2
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
+import os
 
 ALTURA_MAX = 266.80
 ALTURA_MIN = 0.0
@@ -12,8 +14,8 @@ CLOROFILA_MAX = 980.993
 CLOROFILA_MIN = 0.0
 
 MODELOS={
-        'ALTURA': 'modelo_altura.h5',
-        'CLOROFILA': 'modelo_clorofila.h5',
+        'ALTURA': 'core/utils/modelo_altura.h5',
+        'CLOROFILA': 'core/utils/modelo_clorofila.h5',
     }
 
 SIZE_MODEL ={
@@ -22,21 +24,31 @@ SIZE_MODEL ={
 }
 
 def estandarizar_bandas(img, bands):
+    print('parametros: ',img)
+    print('parametros: ',bands)
     img = np.moveaxis(img, 2, 0)
+    print('aftermoveaxis')
 
-    verde = img[bands['G']]
-    rojo = img[bands['R']]
-    rededge = img[bands['RDG']]
-    nir = img[bands['NIR']]
+    print('band green')
+    verde = img[bands['G']-1]
+    print('band Red')
+    rojo = img[bands['R']-1]
+    print('band redEdge')
+    rededge = img[bands['RDG']-1]
+    print('band NIR')
+    nir = img[bands['NIR']-1]
+    print('after asign bands')
 
     bandas = [verde, rojo, rededge, nir]
 
     bandas_norm = []
+    print('bands')
     for banda in bandas:
         mean = banda.mean()
         std = banda.std()
         banda = (banda-mean)/std
         bandas_norm.append(banda)
+    print('bands normalzed')
     img_norm = np.array(bandas_norm)
     img_norm = np.moveaxis(bandas_norm, 0, 2)
     return img_norm
@@ -70,21 +82,31 @@ def write_geotiff(filename, arr, in_ds):
     band.FlushCache()
     band.ComputeStatistics(False)
 
-def generateModel(inputPath, outputPath, model, bands):
+def generateModel(path,filename, outputPath, model, bands):
 
     try:
         v_max = SIZE_MODEL.get(model)['MAX']
         v_min = SIZE_MODEL.get(model)['MIN']
-        print('Parametros: ',model, bands,inputPath, outputPath )
+        print('Parametros: ',model, bands,path, filename, outputPath )
         print('V_max -min:',v_max, v_min)
-        tif = tifffile.imread(inputPath)
+        tif = tifffile.imread(path+filename+'.tiff')
+        #tif = cv2.imread(inputPath)#tifffile.imread(inputPath)
+        print('afeter Read------------')
+        print('cv2_read_file: ',tif)
         resized_tif = resize(tif, (2240, 2240))
+        print('Resized------------')
         norm_tif = estandarizar_bandas(resized_tif, bands)
+        print('Normalized------------')
         cropped_tif = recortar(norm_tif, 10, 10)
+        print('Cropped------------')
         X = np.array(cropped_tif)
+        print('Modelo: ',MODELOS.get(model))
+        model_path = os.path.abspath(MODELOS.get(model))
 
-        modelo = load_model(MODELOS.get(model))
+        modelo = load_model(model_path)
+        print('Model load------------')
         y_pred = modelo.predict(X)
+        print('Predict------------')
 
         resultados = []
 
@@ -92,7 +114,7 @@ def generateModel(inputPath, outputPath, model, bands):
             img = y_pred[i]
             img = np.argmax(img, axis=-1)
             resultados.append(img)
-        
+        print('Arg-MAX------------')
         fragments = []
         for i in range(10):
             initial = i*10
@@ -101,14 +123,17 @@ def generateModel(inputPath, outputPath, model, bands):
             fragments.append(fragment)
         print('preWrite')
         img = np.concatenate(fragments)
+        inputPath = path+filename+'.tiff'
         ds = gdal.Open(inputPath)
         array = ds.ReadAsArray()
         x, y = array.shape[1], array.shape[2]
         resized_img = resize(img, (x, y))
         scaled_img = resized_img*(v_max-v_min) + v_min
-        write_geotiff(outputPath, scaled_img, ds)
+        out = path+outputPath+'.tiff'
+        write_geotiff(out, scaled_img, ds)
 
         return True
 
     except:
+        print(exception)
         return False

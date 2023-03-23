@@ -46,6 +46,9 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 
 import geopandas as gpd
 from datetime import datetime
+from django.http import FileResponse
+import mimetypes
+import shutil
 #import pycrs
 
 
@@ -185,6 +188,57 @@ class LayerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Layer.objects.all()
+
+class ResourceViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ResourceSerializer
+
+    def get_queryset(self):
+        return Resource.objects.all()
+
+@csrf_exempt
+def upload_resource(request, uuid):
+    from django.core.files.uploadedfile import UploadedFile
+    project = UserProject.objects.get(pk=uuid)
+
+    if project.user.used_space >= project.user.maximum_space:
+        return HttpResponse(status=402)
+    
+    file: UploadedFile = request.FILES.get("file")  # file is called X.tiff
+    
+    file_name = file.name.split('.')[0]
+    extension = file.name.split('.')[1]
+        
+    project.resources.create(
+        name=file_name, description=request.POST["description"], extension = extension, title=request.POST["name"])
+
+    # Write file to disk on project folder
+    os.makedirs(project.get_disk_path() + "/Resourses", exist_ok=True)
+    with open(project.get_disk_path() + "/Resourses/" + file.name, "wb") as f:
+        for chunk in file.chunks():
+            f.write(chunk)
+    
+    project.update_disk_space()
+    project.user.update_disk_space()
+    return HttpResponse(status=201)
+    
+
+def download_resource(request, pk):    
+    resource = Resource.objects.get(pk=pk)    
+    filepath = os.path.abspath(resource.get_disk_path()+resource.name+'.'+resource.extension)
+    mime_type, _ = mimetypes.guess_type(filepath)    
+    if os.path.exists(filepath):
+        with open(filepath, 'rb') as doc:
+            data = doc.read()
+            response = HttpResponse(      
+                data,                      
+                content_type=mime_type   
+            )
+            response['Content-Disposition'] = 'inline; filename=' +os.path.basename(filepath)
+            return response
+    else:
+        return HttpResponse("Failed to Download")
+    
 
 
 class UserProjectViewSet(viewsets.ModelViewSet):
@@ -683,12 +737,13 @@ def create_raster_model(request, uuid):
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
     
     bands = BANDS_CAMERA.get(request.POST["camera"])
-    inputpath = project.get_disk_path()+'/'+request.POST["layer"]+'/'+request.POST["layer"]+'.tiff '
+    inputpath = project.get_disk_path()+'/'+request.POST["layer"]+'/'
+    layerfile= request.POST["layer"]
     outpath = project.get_disk_path()+'/'+request.POST["layer"]+'/'+request.POST["layer"]+'-'+request.POST["model"]+'.tiff '
     file_title = request.POST["title"]+'-'+request.POST["model"]
-    file_name = request.POST["layer"]+'-'+request.POST["model"]
+    file_name = request.POST["layer"]+'-'+request.POST["model"]    
  
-    if(generateModel(inputpath,outpath,request.POST["model"],bands)):            
+    if(generateModel(inputpath,layerfile,file_name,request.POST["model"],bands)):            
         project._create_index_datastore(request.POST["layer"],file_name)
         project.update_disk_space()
         project.user.update_disk_space()
