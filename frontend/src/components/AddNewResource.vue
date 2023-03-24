@@ -13,7 +13,7 @@
                             <b-form-group id="input-group-1" label="Nombre:*" label-for="input-1">
                                 <b-form-input size="sm" id="input-1" v-model="name" type="text" required placeholder="Nombre del documento"></b-form-input>
                             </b-form-group>           
-                            <b-form-group label="Documento:*">
+                            <b-form-group label="Documento: .docx, .xlsx, .pdf">
                                 <b-form-file v-model="file" :file-name-formatter="formatName" :state="anyFile" required placeholder="Escoja o arrastre un documento..." drop-placeholder="Sleccionar documento..." browse-text="Seleccionar" accept=".docx, .pdf, .xlsx"></b-form-file>
                             </b-form-group>
                             <b-form-group id="input-group-2" label="Descripción:*" label-for="input-2">
