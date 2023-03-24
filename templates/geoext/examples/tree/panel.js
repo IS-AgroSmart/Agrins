@@ -1240,7 +1240,9 @@ function createViewPort(){
                                     icon: Ext.Msg.QUESTION,
                                     fn: function(btn) {
                                         if (btn === 'yes') {
-                                            top.window.location.href='/#/projects/'                            
+                                            //top.window.location.href='/#/projects/'                            
+                                            console.log('regresar')
+                                            history.back()
                                         } else {
                                             console.log('Cancel pressed');
                                         } 

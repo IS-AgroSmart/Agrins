@@ -187,7 +187,7 @@ export default {
             return img+'.png'
         },  
         downloadResource(pk,extension,file){    
-            this.$bvToast.toast('La descarga a comenzado', {title: 'Descarga',variant: 'primary',solid: true})
+            this.$bvToast.toast('La descarga ha comenzado', {title: 'Descarga',variant: 'primary',solid: true})
             axios.get('api/download/'+pk+'/resource', {
                     headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
                     responseType: 'blob' ,
@@ -204,7 +204,7 @@ export default {
 
         },
         downloadLayer(pk,file){
-            this.$bvToast.toast('La descarga a comenzado', {title: 'Descarga',variant: 'primary',solid: true})
+            this.$bvToast.toast('La descarga ha comenzado', {title: 'Descarga',variant: 'primary',solid: true})
             axios.get('api/download/'+pk+'/layer', {
                     headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
                     responseType: 'blob' ,
