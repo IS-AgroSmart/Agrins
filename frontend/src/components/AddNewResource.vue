@@ -78,6 +78,7 @@ export default {
                     headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
                 })
                 .then(() => this.$refs['my-modal'].hide())
+                .then(() => this.$router.push("/projects")) 
                 //.then(() => this.$router.go())
                 .catch(error => this.error = "ERROR: " + error.response.data.name[0]);
         },

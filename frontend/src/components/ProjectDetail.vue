@@ -34,14 +34,14 @@
                             </b-card-header>
                             <b-collapse id="accordion-1" accordion="my-accordion" role="tabpanel">
                                 <b-list-group style="margin:1%">
-                                    <b-list-group-item variant="light"  v-for="(res) in getResources" :key="res" style="font-size: 10px;" >                                        
+                                    <b-list-group-item variant="success" v-for="(res) in resources" :key="res" style="font-size: 10px;" >                                        
                                         <div class="d-flex w-100 justify-content-between">
-                                            <h6 class="mb-1"><b-img v-b-popover.hover.top="'Contenido de la capa'" v-bind:src="getImage()" width="18" height="18" fluid alt="Fluid image"></b-img> {{res.title}} {{res.description}}</h6>
+                                            <h6 class="mb-1"><b-img v-b-popover.hover.top="res.description" v-bind:src="getImage(res.extension)" width="18" height="18" fluid alt="Fluid image"></b-img> {{res.title}}</h6>
                                             <small>
                                                 <b-button style="color: #13620f;" v-b-tooltip.hover title="Descargar" @click="downloadResource(res.pk,res.extension,res.title)" size="sm" variant="link">
-                                                    <b-icon-cloud-download-fill font-scale="0.98"/>
+                                                    <b-icon-cloud-download-fill />
                                                 </b-button>
-                                                <b-button style="color: #bd0000;" v-b-tooltip.hover title="Eliminar" v-if="!project.is_demo" size="sm"  variant="link"><b-icon-trash-fill font-scale="0.98"/></b-button> 
+                                                <b-button style="color: #bd0000;" @click="deleteResources(res.pk)" v-b-tooltip.hover title="Eliminar" v-if="!project.is_demo" size="sm"  variant="link"><b-icon-trash-fill /></b-button> 
                                                 
                                             </small>                                                    
                                         </div>
@@ -56,16 +56,25 @@
                             </b-card-header>
                             <b-collapse id="accordion-2" accordion="my-accordion" role="tabpanel">
                                 <b-list-group style="margin:1%">
-                                    <b-list-group-item variant="light"  v-for="(lay) in getLayers" :key="lay" style="font-size: 10px;" >                                        
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <h6 class="mb-1"><b-icon-layers-fill/> {{lay.title}} {{lay.type}}</h6>
-                                            <small>
-                                                <b-button style="color: #13620f;" v-b-tooltip.hover title="Descargar" @click="downloadResource(res.pk,res.extension,res.title)" size="sm" variant="link">
-                                                    <b-icon-cloud-download-fill font-scale="0.98"/>
-                                                </b-button>                                                
-                                                
-                                            </small>                                                    
-                                        </div>
+                                    <b-list-group-item  variant="light"  v-for="(lay) in layers" :key="lay" style="font-size: 10px;" >                                        
+                                        <b-card-header  header-tag="header" style="background-color: white; font-size: 12px;" class="p-1" >
+                                            <b-button v-b-popover.hover.top=getText(lay.type)  size="sm" variant="link" v-b-toggle="'accordion'+lay.pk" ><b-icon-layers-fill/>  {{lay.title}}</b-button>
+                                        </b-card-header>
+                                        <b-collapse v-if="lay.type === 'IMAGE'" :id="'accordion'+lay.pk"  :accordion="'accordion'+lay.pk" role="tabpanel">
+                                            <b-list-group style="margin:1%">
+                                                <b-list-group-item variant="info" v-for="(art) in lay.artifacts" :key="art" style="font-size: 10px;" >                                        
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 v-b-popover.hover.top=getText(art.type) class="mb-1"><b-icon-layers-half/> {{art.title}}</h6>
+                                                        <small>
+                                                            <b-button style="color: #13620f;" v-b-tooltip.hover title="Descargar" @click="downloadLayer(art.pk,art.title)" size="sm" variant="link">
+                                                                <b-icon-cloud-download-fill/>
+                                                            </b-button>                                                
+                                                            
+                                                        </small>                                                    
+                                                    </div>
+                                                </b-list-group-item>
+                                            </b-list-group>
+                                        </b-collapse>
                                     </b-list-group-item>
                                 </b-list-group>
                             </b-collapse>
@@ -123,10 +132,15 @@ import { BIconMapFill } from 'bootstrap-vue';
 import { BIconBriefcaseFill } from 'bootstrap-vue';
 import { BIconCloudDownloadFill } from 'bootstrap-vue';
 import { BIconLayersFill } from 'bootstrap-vue';
+import { BIconLayersHalf } from 'bootstrap-vue';
 
 export default {
     data() {
         return {
+            resources: [],
+            artifacts: [],
+            layers: [],
+            loading: true,
 
         };
     },
@@ -163,12 +177,16 @@ export default {
         
     },
    
-    methods: {                
-        getImage(){    
-                    
-            return 'docx.png'//value+'.png'
+    methods: {                    
+        getText(value){
+            var dicc= {'IMAGE':'Imagen','VECTOR':'Para descargar capa vector ingrese al geoportal', 'MULTIESPECTRAL':'Imagen multiespectral', 'INDEX':'Índice de vegetación', 'MODEL':'Modelo deeplearning', 'SHAPEFILE':"Shapefile", 'KML': 'Kml' }
+            return dicc[value];
+        },
+        getImage(img){    
+            return img+'.png'
         },  
-        downloadResource(pk,extension,file){
+        downloadResource(pk,extension,file){    
+            this.$bvToast.toast('La descarga a comenzado', {title: 'Descarga',variant: 'primary',solid: true})
             axios.get('api/download/'+pk+'/resource', {
                     headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
                     responseType: 'blob' ,
@@ -179,8 +197,26 @@ export default {
                     link.download = file+'.'+extension
                     link.click()                    
                     URL.revokeObjectURL(link.href)
+                    this.$bvToast.toast('Descarga finalizada', {title: 'Descarga',variant: 'success',solid: true})                    
                 })
-                .catch(error => this.error = error);
+                .catch(error => this.$bvToast.toast(error, {title: 'Error',variant: 'danger',solid: true}))
+
+        },
+        downloadLayer(pk,file){
+            this.$bvToast.toast('La descarga a comenzado', {title: 'Descarga',variant: 'primary',solid: true})
+            axios.get('api/download/'+pk+'/layer', {
+                    headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
+                    responseType: 'blob' ,
+                }).then((response) => {
+                    const blob = new Blob([response.data], { type: 'application/tiff' })
+                    const link = document.createElement('a')
+                    link.href = URL.createObjectURL(blob)
+                    link.download = file+'.tiff'
+                    link.click()                    
+                    URL.revokeObjectURL(link.href)
+                    this.$bvToast.toast('Descarga finalizada', {title: 'Descarga',variant: 'success',solid: true})                    
+                })
+                .catch(error => this.$bvToast.toast(error, {title: 'Error',variant: 'danger',solid: true}))
 
         },   
         finalDeleteProject() {
@@ -257,6 +293,50 @@ export default {
                 });
             
         },
+        loadResources() {
+            for (let res of this.project.resources){
+                axios.get('api/resources/' + res , {
+                    headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
+                })
+                .then(response => this.resources.push(response.data))
+                .catch(error => this.error = error);
+            }            
+            for (let res of this.project.layers){
+                axios.get('api/layers/' + res , {
+                    headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
+                })
+                .then(response => this.layers.push(response.data))
+                .catch(error => this.error = error);
+            }            
+        },
+        deleteResources(pk) {
+            this.$bvModal.msgBoxConfirm('Eliminar Documento es un proceso irreversible, ¿Desea continuar?.', {
+                    title: 'Eliminar documento',
+                    okVariant: 'danger',
+                    okTitle: 'Sí',
+                    cancelTitle: 'No',
+                })
+                .then(value => {
+                    if (value){
+                        axios.delete('api/resources/' + pk , {
+                            headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
+                        })
+                        .then(() => this.$emit("delete-confirmed"))
+                        .then(() => this.$router.push("/projects"))                        
+                        .catch(() => {
+                            this.$bvToast.toast('Error al eliminar documento', {
+                                title: "Error",
+                                autoHideDelay: 3000,
+                                variant: "danger",
+                            });
+                        });
+                    }
+                });
+        },
+    },
+    created() {
+        this.loadResources().then(() => this.loading = false);               
+        
         
     },
     props: {
@@ -270,7 +350,8 @@ export default {
         BIconMapFill,
         BIconBriefcaseFill,
         BIconCloudDownloadFill,
-        BIconLayersFill
+        BIconLayersFill,
+        BIconLayersHalf
     },
     mixins: [forceLogin] // forceLogin not required, this will only be instantiated from page components
 }

@@ -188,6 +188,12 @@ class LayerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Layer.objects.all()
+    
+    def retrieve(self, request, pk=None):
+        instance = self.get_object()
+        # query = request.GET.get('query', None)  # read extra data
+        return Response(self.serializer_class(instance).data,
+                        status=status.HTTP_200_OK)
 
 class ResourceViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -195,6 +201,18 @@ class ResourceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Resource.objects.all()
+    
+    def retrieve(self, request, pk=None):
+        instance = self.get_object()
+        # query = request.GET.get('query', None)  # read extra data
+        return Response(self.serializer_class(instance).data,
+                        status=status.HTTP_200_OK)
+    
+    def destroy(self, request, pk=None, *args, **kwargs):
+        instance = self.get_object()
+        # you custom logic #
+        return super(ResourceViewSet, self).destroy(request, pk, *args, **kwargs)
+
 
 @csrf_exempt
 def upload_resource(request, uuid):
@@ -224,8 +242,9 @@ def upload_resource(request, uuid):
     
 
 def download_resource(request, pk):    
+    permission_classes = (IsAuthenticated,)
     resource = Resource.objects.get(pk=pk)    
-    filepath = os.path.abspath(resource.get_disk_path()+resource.name+'.'+resource.extension)
+    filepath = os.path.abspath(resource.get_disk_path()+resource.name+'.'+resource.extension)    
     mime_type, _ = mimetypes.guess_type(filepath)    
     if os.path.exists(filepath):
         with open(filepath, 'rb') as doc:
@@ -238,7 +257,24 @@ def download_resource(request, pk):
             return response
     else:
         return HttpResponse("Failed to Download")
-    
+
+def download_layer(request, pk):    
+    permission_classes = (IsAuthenticated,)
+    resource = Artifact.objects.get(pk=pk)    
+    filepath = os.path.abspath(resource.get_disk_path())
+    print('filepath: ',filepath)
+    mime_type, _ = mimetypes.guess_type(filepath)    
+    if os.path.exists(filepath):
+        with open(filepath, 'rb') as doc:
+            data = doc.read()
+            response = HttpResponse(      
+                data,                      
+                content_type=mime_type   
+            )
+            response['Content-Disposition'] = 'inline; filename=' +os.path.basename(filepath)
+            return response
+    else:
+        return HttpResponse("Failed to Download")
 
 
 class UserProjectViewSet(viewsets.ModelViewSet):
@@ -270,6 +306,7 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.save()
         prev_user.update_disk_space()
         return Response({})
+    
 
     @action(detail=True, methods=["delete"])
     def delete_demo(self, request, pk=None):
@@ -723,7 +760,7 @@ def create_raster_index(request, uuid):
     project.update_disk_space()
     project.user.update_disk_space()
     
-    layer = Layer.objects.get(title=request.POST["title"])      
+    layer = Layer.objects.get(name=request.POST["layer"])      
     layer.artifacts.create(
         name=file_name, type=ArtifactType.INDEX.name,source= source, style=request.POST["index"], legend=legend_path, title=file_title, camera=Camera.NONE.name
     )

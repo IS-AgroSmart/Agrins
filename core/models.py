@@ -574,7 +574,17 @@ def delete_on_disk_layer(sender, instance: Layer, **kwargs):
         pass  # no need to do anything, carry on
     instance.project.user.update_disk_space()
 
+def delete_on_disk_resource(sender, instance: Resource, **kwargs):
+    print('capa layer: '+instance.get_disk_path())
+    try:
+        #shutil.rmtree(instance.get_disk_path())
+        os.remove(instance.get_disk_path()+instance.name+'.'+instance.extension)
+    except FileNotFoundError:
+        pass  # no need to do anything, carry on
+    instance.project.user.update_disk_space()
 
+
+post_delete.connect(delete_on_disk_resource, sender=Resource)
 post_delete.connect(delete_geoserver_datastore, sender=Artifact)
 post_delete.connect(delete_on_disk_artifact, sender=Artifact)
 post_delete.connect(delete_on_disk_layer, sender=Layer)
