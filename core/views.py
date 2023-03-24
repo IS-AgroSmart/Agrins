@@ -306,6 +306,12 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.save()
         prev_user.update_disk_space()
         return Response({})
+
+    def retrieve(self, request, pk=None):
+        instance = self.get_object()
+        # query = request.GET.get('query', None)  # read extra data
+        return Response(self.serializer_class(instance).data,
+                        status=status.HTTP_200_OK)
     
 
     @action(detail=True, methods=["delete"])

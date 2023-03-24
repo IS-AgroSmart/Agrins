@@ -91,7 +91,7 @@ const router = new VueRouter({
     { path: '/projects/new', name: 'newProject', component: NewProject },
     { path: '/dashboard', name: 'dasboard', component: Dashboard },
     { path: '/users', name: 'users', component: Users },
-    { path: '/projectDetail/:uuid', name: 'projectDetail', component: ProjectDetail, props: true},
+    { path: '/projectDetail/:uuid', name: 'projectDetail', component: ProjectDetail},
     { path: '/login', component: Login },
     { path: '/logout', component: Logout },
     { path: '/signup', name: 'signUp', component: SignUp },

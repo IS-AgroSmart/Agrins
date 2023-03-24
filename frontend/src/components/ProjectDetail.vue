@@ -92,7 +92,7 @@
                                 <b-button  v-b-tooltip.hover title="Hacer DEMO" v-if="!project.is_demo && isAdmin" @click="onProjectClick" variant="warning" size="sm"><b-icon-briefcase-fill/> Demo</b-button>
                                 <b-button  v-b-tooltip.hover title="Deshacer DEMO" v-if="project.is_demo && isAdmin" @click="onDemoProjectClick" variant="warning" size="sm"> <b-icon-briefcase-fill/> Demo</b-button> 
                                 <div v-if="!project.is_demo" class="">
-                                        <add-new-resource />
+                                        <add-new-resource  v-on:loadResources="loadResources"/>
                                 </div>    
                             </b-button-group >                            
                             <b-button-group size="sm" >
@@ -141,6 +141,7 @@ export default {
             artifacts: [],
             layers: [],
             loading: true,
+            project: []
 
         };
     },
@@ -182,7 +183,7 @@ export default {
             var dicc= {'IMAGE':'Imagen','VECTOR':'Para descargar capa vector ingrese al geoportal', 'MULTIESPECTRAL':'Imagen multiespectral', 'INDEX':'Índice de vegetación', 'MODEL':'Modelo deeplearning', 'SHAPEFILE':"Shapefile", 'KML': 'Kml' }
             return dicc[value];
         },
-        getImage(img){    
+        getImage(img){                
             return img+'.png'
         },  
         downloadResource(pk,extension,file){    
@@ -294,20 +295,30 @@ export default {
             
         },
         loadResources() {
-            for (let res of this.project.resources){
-                axios.get('api/resources/' + res , {
+            this.resources = []
+            this.layers = []            
+            axios.get('api/projects/' + this.$route.params.uuid , {
                     headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
                 })
-                .then(response => this.resources.push(response.data))
-                .catch(error => this.error = error);
-            }            
-            for (let res of this.project.layers){
-                axios.get('api/layers/' + res , {
-                    headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
+                .then(response => {
+                    this.project = response.data                    
+                    for (let res of this.project.resources){
+                        axios.get('api/resources/' + res , {
+                            headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
+                        })
+                        .then(response => this.resources.push(response.data))
+                        .catch(error => this.error = error);
+                    }            
+                    for (let res of this.project.layers){
+                        axios.get('api/layers/' + res , {
+                            headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
+                        })
+                        .then(response => this.layers.push(response.data))
+                        .catch(error => this.error = error);
+                    }
+                
                 })
-                .then(response => this.layers.push(response.data))
-                .catch(error => this.error = error);
-            }            
+                        
         },
         deleteResources(pk) {
             this.$bvModal.msgBoxConfirm('Eliminar Documento es un proceso irreversible, ¿Desea continuar?.', {
@@ -322,7 +333,7 @@ export default {
                             headers: Object.assign({ "Authorization": "Token " + this.storage.token }, this.storage.otherUserPk ? { TARGETUSER: this.storage.otherUserPk.pk } : {}),
                         })
                         .then(() => this.$emit("delete-confirmed"))
-                        .then(() => this.$router.push("/projects"))                        
+                        .then(() => this.loadResources())
                         .catch(() => {
                             this.$bvToast.toast('Error al eliminar documento', {
                                 title: "Error",
@@ -340,8 +351,8 @@ export default {
         
     },
     props: {
-        project: { type: Object },
-        deleted: { type: Boolean, default: false }
+        //project: { type: Object },
+        //deleted: { type: Boolean, default: false }
     },
     components: { 
         AddNewResource,        

@@ -5,7 +5,7 @@
                 <div class="p-2 bd-highlight"><h5>Proyectos</h5>  </div>
                 
                 <div class="ml-auto p-2 bd-highlight">
-                    <add-new-project />
+                    <add-new-project   v-on:updateProjects="updateProjects" />
                 </div>
             </div>            
             
@@ -25,7 +25,7 @@
 
             <div v-if="error">Error!</div>
             <div class="row">
-                <project-partial v-for="project in projects" :project="project" :key="project.uuid" @delete-confirmed="deleted"></project-partial>
+                <project-partial v-on:updateProjects="updateProjects" v-for="project in projects" :project="project" :key="project.uuid" @delete-confirmed="deleted"></project-partial>
             </div>
             <b-alert v-if="noProjects" variant="info" show>Aún no ha creado ningún proyecto</b-alert>
         </b-skeleton-wrapper>

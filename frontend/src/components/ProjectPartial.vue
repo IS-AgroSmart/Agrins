@@ -62,7 +62,7 @@ export default {
     },
     methods: {
         viewProject(){
-             this.$router.push({ name: 'projectDetail', params: { uuid: this.project.uuid, project: this.project , deleted: this.deleted }})
+             this.$router.push({ name: 'projectDetail', params: { uuid: this.project.uuid,}}) //project: this.project , deleted: this.deleted }})
         },        
     },
     props: {
