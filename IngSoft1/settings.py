@@ -183,10 +183,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = config('STATIC_URL', cast=str)
-STATIC_ROOT = config('STATIC_ROOT', cast=str)
+STATIC_URL = os.path.join(BASE_DIR, config('STATIC_URL', cast=str))
+STATIC_ROOT = os.path.join(BASE_DIR, config('STATIC_ROOT', cast=str))  
 # STATICFILES_DIRS = (os.path.join(BASE_DIR, "staticfiles"),)
-
+DOMAIN_SITE = config('DOMAIN_SITE', cast=str)
 
 #Send Emails
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)

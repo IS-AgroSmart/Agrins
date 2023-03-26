@@ -5,6 +5,14 @@ from core.utils.block_verifier import user_verifier
 from core.models import *
 from django.core.mail import EmailMessage
 from .utils.token import  TokenGenerator
+from .utils.token import account_activation_token
+
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -37,35 +45,40 @@ class UserSerializer(serializers.ModelSerializer):
             city=validated_data['city'],
         )
         user.set_password(validated_data['password'])
-        user.is_active = True
+        user.is_active = False
+        
         user.save()
-       
+            
+        # send an e-mail to the user
+        context = {
+            'current_user': user.first_name,
+            'username': user.first_name,
+            'email': user.email,                    
+            'active_account_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))
+            #'reset_password_url': settings.DOMAIN_SITE+/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))
+        }
 
-        # when user is created, link him to all existing demo flights & projects
-        #for demo_flight in Flight.objects.filter(is_demo=True).all():
-        #    user.demo_flights.add(demo_flight)
+        # render email text
+        email_html_message = render_to_string('email/activate_account.html', context)
+        email_plaintext_message = render_to_string( 'email/activate_account.txt', context)
+        print('host: ',settings.EMAIL_HOST_USER)
+        msg = EmailMultiAlternatives(
+            "Agrins - Activar cuenta",
+            email_plaintext_message,
+            settings.EMAIL_HOST_USER,
+            [user.email]
+        )
+        msg.attach_alternative(email_html_message, "text/html")        
+        msg.send()
+
         for demo_project in UserProject.objects.filter(is_demo=True).all():
             user.demo_projects.add(demo_project)
-
         return user
 
     class Meta:
         model = User
         fields = ["pk", 'username', 'email', 'is_staff', 'password', 'type', 'organization', 'first_name','last_name',
                   'used_space','phone','city','profession', 'maximum_space', 'remaining_images']
-
-'''
-class FlightSerializer(serializers.ModelSerializer):
-    #nodeodm_info = serializers.SerializerMethodField()
-
-    @staticmethod
-    def get_nodeodm_info(flight):
-        return flight.get_nodeodm_info()
-
-    class Meta:
-        model = Flight
-        fields = ["uuid", "name", "user", "date", "is_demo", "deleted"]
-'''
 
 class ArtifactSerializer(serializers.ModelSerializer):
 

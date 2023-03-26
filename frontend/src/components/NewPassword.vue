@@ -1,6 +1,7 @@
 <template>
-    <div class=" pt-3" style="padding-left:15px; padding-right:15px;">
-        <h1>Nueva Contraseña</h1>
+    <div style="background-color: #fafafa; padding-top: 80px;">
+    <div class=" pt-3 text-center " style="background-color: white;  padding-left:10%; padding-right:10%;">
+        <h5>Reestablecer Contraseña</h5>
     
         <b-alert v-if="error" show variant="danger">
             <p>Error al recuperar contraseña</p>
@@ -17,16 +18,17 @@
             <b-container>
                 <b-row align-h="center">
                     <b-col cols="5" class="text-center">
-                        <b-button type="submit" variant="primary" :disabled="!everythingValid">Enviar</b-button>
+                        <b-button type="submit" size="sm" pill variant="success" :disabled="!everythingValid">Enviar</b-button>
                     </b-col>
                     <b-col cols="5" class="text-center">
-                        <b-button @click="goToLogin" variant="secondary">Cancelar</b-button>
+                        <b-button @click="goToLogin" size="sm" pill variant="danger">Cancelar</b-button>
                     </b-col>
                 </b-row>
             </b-container>
         </b-form>
     </div>
-</template>>
+    </div>
+</template>
 
 <script>
 import axios from "axios";

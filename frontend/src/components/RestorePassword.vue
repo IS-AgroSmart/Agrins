@@ -3,7 +3,7 @@
         <b-card class="text-center" style="max-width:80rem;" title="Recuperar Contraseña">
             <p>Recuerde usar el correo vinculado a su cuenta de Agrins.</p>            
             <b-alert v-if="error" show variant="danger">
-                Error! Verifique que el correo ingresado este vinculado con una cuenta de AgroSmart.
+                Error! Verifique que el correo ingresado este vinculado con una cuenta de Agrins.
             </b-alert>
             <b-form @submit="onSubmit">
                 <b-form-group id="input-group-2" label="Email:" label-for="input-2">

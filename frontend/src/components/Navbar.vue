@@ -32,13 +32,10 @@
                 <!-- Right aligned nav items -->
                 <b-navbar-nav class="ml-auto" style="margin-right: 4%;">
                     <div v-if="isLoggedIn" style="padding-bottom:25px;">
-                        <b-navbar-nav > 
-                            <b-nav-item v-if="isAdmin">
-                                <b-icon-chat-dots-fill variant="info"/>
-                            </b-nav-item> 
+                        <b-navbar-nav >                             
                             <b-nav-item >
-                                <b-button to="/logout" pill variant="outline-secondary" style="padding-top:0%; padding-bottom:0%">
-                                    <b-icon-x-circle-fill scale="0.8" />Salir
+                                <b-button to="/logout" class="mb-2" size="sm"  pill variant="outline-secondary" style="padding-top:0%; padding-bottom:0%">
+                                    <b-icon-power scale="0.8" />Salir 
                                 </b-button>
                             </b-nav-item>
                         </b-navbar-nav>
@@ -67,16 +64,14 @@
 <script>
 import { BIconFacebook } from 'bootstrap-vue';
 import { BIconTwitter } from 'bootstrap-vue';
-import { BIconChatDotsFill } from 'bootstrap-vue';
-import { BIconXCircleFill } from 'bootstrap-vue';
+import { BIconPower } from 'bootstrap-vue';
 
 
 export default {
     components: {
     BIconFacebook,
     BIconTwitter,
-    BIconChatDotsFill,
-    BIconXCircleFill
+    BIconPower,
 },
     data: function() {
         return {

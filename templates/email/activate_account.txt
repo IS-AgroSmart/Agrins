@@ -1,0 +1,5 @@
+Agris
+
+ {{email}}.
+
+{{reset_password_url}}

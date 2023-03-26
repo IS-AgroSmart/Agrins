@@ -1,7 +1,20 @@
 <template>
     <div class="custom-jumbotron">        
-            <b-container style=" padding-top:100px; ">                
-                <b-card class="text-center" style="max-width: 80em;" title="Registro">
+            <b-container style=" padding-top:100px; ">   
+                <b-alert v-if="this.success" show variant="success">
+                    <h4 class="alert-heading">Usuario registrado</h4>
+                    <p style="width: 100%;">
+                        Para iniciar sesión active su cuenta desde el link que ha sido enviado a su correo. Revise su
+                        bandeja de entrada, la carpeta spam o correo no deseado.
+                    <b-button @click="goToLogin" size="sm" pill variant="link" >Iniciar sesión.</b-button>
+                    </p>
+                    <hr>
+                    <p class="mb-0">
+                    Ir al portal Agrins 
+                    <b-button @click="goBack" size="sm" pill variant="link" > Inicio.</b-button>
+                    </p>
+                </b-alert>                  
+                <b-card v-if="!this.success" class="text-center" style="max-width: 80em;" title="Registro">
                     <p>Bienvenido, ingrese la información solicitada</p>
                     <div class="text-left" >
                         <b-alert v-if="error" show variant="danger">
@@ -155,6 +168,7 @@ export default {
                 institution: '',
                 city:''
             },
+            success:false,
             error: false,
             optionsInst:[
                 { value: 'Publico', text: 'Público' },
@@ -213,7 +227,7 @@ export default {
                 })
                 .then(response => {
                     if (response.status == 201)
-                        this.goBack();
+                        this.success = true;
                     else
                         this.error = this.errorToLines(response.body);
                 })
@@ -222,7 +236,10 @@ export default {
                 });
         },
         goBack() {
-            this.$router.go(-1);
+            this.$router.replace({ path: '/' });
+        },
+        goToLogin() {
+            this.$router.replace({ path: '/login' });
         },
         errorToLines(body) {
             var err = "";

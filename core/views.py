@@ -40,6 +40,8 @@ from push_notifications.models import APNSDevice, GCMDevice
 
 from django_rest_passwordreset.signals import reset_password_token_created
 from .utils.token import  TokenGenerator
+from .utils.token import  account_activation_token
+
 from .utils.legend import  *
 from .utils.deep_model import  *
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -49,7 +51,6 @@ from datetime import datetime
 from django.http import FileResponse
 import mimetypes
 import shutil
-#import pycrs
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -82,81 +83,6 @@ class UserViewSet(viewsets.ModelViewSet):
                 instance.type = UserType.DELETED.name
                 instance.is_active = False
                 instance.save()
-'''
-class FlightViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = FlightSerializer
-
-    @action(detail=False)
-    def deleted(self, request):
-        if self.request.user.type == UserType.ADMIN.name and "HTTP_TARGETUSER" in self.request.META:
-            user = User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
-        else:
-            user = self.request.user
-        serializer = self.get_serializer(Flight.objects.filter(user=user, deleted=True), many=True)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=["post"])
-    def make_demo(self, request, pk=None):
-        if not request.user.type == UserType.ADMIN.name:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        flight: Flight = self.get_object()
-        prev_user: User = flight.user
-        flight.make_demo()
-        prev_user.update_disk_space()
-        return Response({})
-
-    @action(detail=True, methods=["delete"])
-    def delete_demo(self, request, pk=None):
-        if not request.user.type == UserType.ADMIN.name:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        flight: Flight = self.get_object()
-        flight.unmake_demo(request.user)
-        request.user.update_disk_space()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(
-            self.get_queryset().filter(deleted=False))
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def get_queryset(self):
-        if self.request.user.type == UserType.ADMIN.name and "HTTP_TARGETUSER" in self.request.META:
-            user = User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
-        else:
-            user = self.request.user
-        return Flight.objects.filter(user=user) | user.demo_flights.all()
-
-    @staticmethod
-    def _get_effective_user(request):
-        if request.user.type == UserType.ADMIN.name and "HTTP_TARGETUSER" in request.META:
-            return User.objects.get(pk=request.META["HTTP_TARGETUSER"])
-        else:
-            return request.user
-
-    def create(self, request, *args, **kwargs):
-        if request.user.type in (UserType.DEMO_USER.name, UserType.DELETED.name):
-            return Response(status=403)
-        user = self._get_effective_user(request)
-        if user.used_space >= user.maximum_space:
-            return Response(status=402)
-        return super(FlightViewSet, self).create(request, *args, **kwargs)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self._get_effective_user(self.request))
-
-    def perform_destroy(self, instance: Flight):
-        if instance.is_demo:
-            # Remove demo flight ONLY FOR USER!
-            self.request.user.demo_flights.remove(instance)
-        elif self.request.user.type == UserType.ADMIN.name or instance.user == self.request.user:
-            if instance.deleted:
-                instance.delete()
-            else:
-                instance.deleted = True
-                instance.save()
-'''
 
 class ArtifactViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -914,34 +840,44 @@ def mapper_agrins(request, path):
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
     # send an e-mail to the user
+    
     context = {
         'current_user': reset_password_token.user,
         'username': reset_password_token.user.username,
-        'email': reset_password_token.user.email,
-        'reset_password_url': "http://localhost/#/restorePassword/reset?token={}".format(reset_password_token.key)
-        #'reset_password_url': "http://flysensorec.com/#/restorePassword/reset?token={}".format(
-        #    reset_password_token.key)
+        'email': reset_password_token.user.email,        
+        'reset_password_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/restorePassword/reset?token={}".format(reset_password_token.key)
+        #'reset_password_url': settings.DOMAIN_SITE+/#/restorePassword/reset?token={}".format(reset_password_token.key)
     }
-
     # render email text
-    email_html_message = render_to_string(
-        'email/user_reset_password.html', context)
-    email_plaintext_message = render_to_string(
-        'email/user_reset_password.txt', context)
-
+    email_html_message = render_to_string('email/user_reset_password.html', context)
+    email_plaintext_message = render_to_string( 'email/user_reset_password.txt', context)
+    print('host: ',settings.EMAIL_HOST_USER)
     msg = EmailMultiAlternatives(
-        # title:
         "Agrins - Recuperación de contraseña",
-        # message:
         email_plaintext_message,
-        # from:
         settings.EMAIL_HOST_USER,
-        # to:
         [reset_password_token.user.email]
     )
     msg.attach_alternative(email_html_message, "text/html")
     msg.send()
 
+@csrf_exempt
+def activate(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return JsonResponse({'state':True, 'msg':'Su cuenta ha sido activada correctamente'})
+    else:
+        print( 'Activation link is invalid!')
+        return JsonResponse({'state':False, 'msg':'El link ya no es válido.'})
+    
+    
 
 @csrf_exempt
 def save_push_device(request, device):

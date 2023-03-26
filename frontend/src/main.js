@@ -47,6 +47,7 @@ import blockCriteria from "./components/BlockCriteria"
 import DeletedProjects from "./components/DeletedProjects"
 import Dashboard from "./components/Dashboard"
 import Users from "./components/Users"
+import NewAccount from "./components/NewAccount"
 import ProjectDetail from "./components/ProjectDetail"
 
 Vue.use(VueRouter);
@@ -97,6 +98,7 @@ const router = new VueRouter({
     { path: '/signup', name: 'signUp', component: SignUp },
     { path: '/restorePassword', name: 'restorePassword', component: RestorePassword},
     { path: '/restorePassword/reset', name: 'newPassword', component: NewPassword},
+    { path: '/activeAccount/active', name: 'newAccount', component: NewAccount},
     { path: '/admin', name: 'adminHome', component: AdminHomepage },
     { path: '/profile', name: 'profile',component: Profile },
     { path: '/changePassword', name: 'changePassword', component:ChangePassword},
