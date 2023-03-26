@@ -50,6 +50,7 @@ import Users from "./components/Users"
 import NewAccount from "./components/NewAccount"
 import ProjectDetail from "./components/ProjectDetail"
 
+
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueIcons);
