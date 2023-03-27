@@ -98,7 +98,7 @@
                             <b-button-group size="sm" >
                                 
                                 <b-button  v-b-tooltip.hover title="Eliminar proyecto" size="sm" v-if="this.project.user == this.storage.loggedInUser.pk" @click="finalDeleteProject" variant="danger"><b-icon-trash-fill/></b-button>
-                                <b-button  v-b-tooltip.hover title="Editar proyecto" size="sm" v-if="this.project.user == this.storage.loggedInUser.pk" ><b-icon-pencil-fill/> </b-button>   
+                                <!--<b-button  v-b-tooltip.hover title="Editar proyecto" size="sm" v-if="this.project.user == this.storage.loggedInUser.pk" ><b-icon-pencil-fill/> </b-button>   -->
                             </b-button-group>
                         </b-button-toolbar>
                     </div>                
@@ -127,7 +127,7 @@ import forceLogin from './mixins/force_login';
 import axios from 'axios';
 import AddNewResource from './AddNewResource';
 import { BIconTrashFill } from 'bootstrap-vue';
-import { BIconPencilFill } from 'bootstrap-vue';
+//import { BIconPencilFill } from 'bootstrap-vue';
 import { BIconMapFill } from 'bootstrap-vue';
 import { BIconBriefcaseFill } from 'bootstrap-vue';
 import { BIconCloudDownloadFill } from 'bootstrap-vue';
@@ -357,7 +357,7 @@ export default {
     components: { 
         AddNewResource,        
         BIconTrashFill,
-        BIconPencilFill,
+        //BIconPencilFill,
         BIconMapFill,
         BIconBriefcaseFill,
         BIconCloudDownloadFill,

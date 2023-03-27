@@ -553,7 +553,7 @@ function createTree(){
                                 handler: function() {
                                     windowDownloadImage(record); }},                            
                             { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', hidden : isDemo,
-                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
+                                    handler: function() {deleteItem(record.data.text, record.data.N.id)} },  
                             { text: 'Información', iconCls:'fa-solid fa-circle-info', 
                                     handler: function() {
                                         Ext.Msg.alert(record.data.text,
@@ -577,7 +577,7 @@ function createTree(){
                                 handler: function() {
                                     windowDownloadImage(record);} },
                                 { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', hidden : isDemo,
-                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
+                                    handler: function() {deleteItem(record.data.text, record.data.N.id)} },  
                                 { text: 'Información', iconCls:'fa-solid fa-circle-info', 
                                         handler: function() {
                                             Ext.Msg.alert(record.data.text,
@@ -595,7 +595,7 @@ function createTree(){
                                 handler: function() { 
                                     windowDownloadVector(record)}},
                                 { text: 'Eliminar', iconCls:'fa-solid fa-trash-can', hidden : isDemo,
-                                    handler: function() {deleteItem(record.data.text, 'delete_artifact', record.data.N.id)} },  
+                                    handler: function() {deleteItem(record.data.text, record.data.N.id)} },  
                                 { text: 'Información', iconCls:'fa-solid fa-circle-info', 
                                         handler: function() {
                                             Ext.Msg.alert(record.data.text,
@@ -1321,7 +1321,7 @@ function createViewPort(){
    
 }
 
-function deleteItem(layer, url, pk){   
+function deleteItem(layer, pk){   
     Ext.Msg.show({
         title:'Eliminar',
         message: 'Desea eliminar la capa '+layer+'?',
@@ -1333,14 +1333,14 @@ function deleteItem(layer, url, pk){
         //iconCls: "fa-solid fa-triangle-exclamation",
         fn: function(btn) {
             if (btn === 'yes') {
-                fetch(window.location.protocol + "//" + window.location.host + "/api/"+url+"/" + pk, {
+                fetch(window.location.protocol + "//" + window.location.host + "/api/artifacts/"+pk, {
                     method: "DELETE",
                     headers: {
                         Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
                     },
                     //waitMsg:'Eliminando capa, espere por favor...',
                 }).then(function (response) {
-                    if (response.status === 200) {
+                    if (response.status === 204) {
                         Ext.Msg.alert('Detalle', 'capa eliminada.');
                         initLayers();
                     } else throw response.text();

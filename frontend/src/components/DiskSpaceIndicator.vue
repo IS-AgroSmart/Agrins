@@ -7,7 +7,7 @@
             <h6>Detalles</h6>
             <p><strong>Espacio usado:</strong> {{ used }} GB</p>
             <p><strong>Espacio disponible:</strong> {{ maximum }} GB</p>
-            <p><strong>Cuota de imágenes:</strong> {{ images }}</p>
+            
         </b-tooltip>
     </div>
 </template>

@@ -98,9 +98,13 @@ class  ResourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Resource
-        fields = ["pk","project","title", "name", "description", "extension"]
+        fields = ["pk","project","title", "name", "description", "extension",'date']
 
+class ContactSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Contact
+        fields = ['pk','name','message','email','phone','view','meta', 'date']
 
 class UserProjectSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())    

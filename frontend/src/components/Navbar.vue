@@ -13,7 +13,8 @@
                 <div v-if="isLoggedIn" class="ml-auto" style="padding-top:25px ; ">
                     <b-navbar-nav>
                         <!--<b-nav-item v-if="isAdmin" to="/flights" data-cy="navbar-flights">Vuelos</b-nav-item>-->
-                        <b-nav-item to="/dashboard" data-cy="navbar-dashboard"><p class="text-info">Dashboard</p></b-nav-item>
+                        <b-nav-item v-if="!isAdmin" to="/dashboard" data-cy="navbar-dashboard"><p class="text-info">Dashboard</p></b-nav-item>
+                        <b-nav-item v-if="isAdmin" to="/admin" data-cy="navbar-dashboard"><p class="text-info">Dashboard</p></b-nav-item>
                         <b-nav-item to="/projects"><p class="text-info">Proyectos</p></b-nav-item>
                         <!--<b-nav-item v-if="isAdmin" data-cy="navbar-grupos"><p class="text-info">Grupos</p></b-nav-item>-->
                         <b-nav-item v-if="isAdmin" to="/users" data-cy="navbar-usuarios" ><p class="text-info">Usuarios</p></b-nav-item>

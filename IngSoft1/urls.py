@@ -26,6 +26,7 @@ router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename="users")
 #router.register(r'flights', FlightViewSet, basename="flights")
 router.register(r'projects', UserProjectViewSet, basename="projects")
+router.register(r'contacts', ContactViewSet, basename="contacts")
 router.register(r'layers', LayerViewSet, basename="layers")
 router.register(r'resources', ResourceViewSet, basename="resources")
 router.register(r'artifacts', ArtifactViewSet, basename="artifacts")
@@ -38,7 +39,8 @@ urlpatterns = [
     path(r'metrics/', include("prometheus_metrics.urls")),
     path('api/api-auth', obtain_auth_token, name='api_auth'),
     path('api/upload-files/<uuid:uuid>', upload_images, name='upload_files'),
-    path('api/delete_artifact/<int:pk>', delete_artifact, name="delete_artifacts"),
+    path('api/post/contact', postContact, name='postContact'),
+    #path('api/delete_artifact/<int:pk>', delete_artifact, name="delete_artifacts"),
     #path('api/delete_layer/<int:pk>', delete_layer, name="delete_layer"),
 #    path('api/webhook-processing-complete', webhook_processing_complete, name='webhook'),
 #    path('api/downloads/<uuid:uuid>/<artifact>', download_artifact, name="download_artifact"),

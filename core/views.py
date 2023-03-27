@@ -84,6 +84,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 instance.is_active = False
                 instance.save()
 
+
 class ArtifactViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ArtifactSerializer
@@ -91,22 +92,40 @@ class ArtifactViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Artifact.objects.all()
 
-@xframe_options_exempt 
+    @xframe_options_exempt 
+    @csrf_exempt
+    @action(detail=True, methods=["delete"])
+    def perform_destroy(self, instance: Artifact):        
+        instance: Artifact= self.get_object()
+        print('usuario: ',instance.name)
+        layer = instance.layer
+        instance.delete()     
+        if(layer.artifacts.all().count() == 0):                
+            layer.delete()
+        return HttpResponse(status=200)
+
+
+class ContactViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated)
+    serializer_class = ContactSerializer
+
+    def get_queryset(self):
+        return Contact.objects.all()
+
 @csrf_exempt
-@action(detail=True, methods=["delete"])
-def delete_artifact(request, pk=None):
-    user = Token.objects.get(key=request.headers["Authorization"][6:]).user
-    print('usuario: ',user)
-    #if not request.user.type == UserType.ADMIN.name:
-     #   return Response(status=status.HTTP_403_FORBIDDEN)
-    instance = Artifact.objects.get(pk=pk)
-    layer = instance.layer
-    instance.delete()     
-    if(layer.artifacts.all().count() == 0):
-        layer.delete()
-    user.update_disk_space()
-    return HttpResponse(status=200)
-    #return JsonResponse({'success':True, "msg":"Archivo cargado"})
+def postContact(request):
+    print ('post request: ',request.POST["message"])
+    print ('post request: ',request.POST["name"])
+    Contact.objects.create(
+        name = request.POST["name"], 
+        message = request.POST["message"],
+        email = request.POST["email"],  
+        phone = request.POST["phone"],  
+        meta = request.META  )
+    return HttpResponse(status=201)
+
+
+
 
 class LayerViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -143,6 +162,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 def upload_resource(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
+    UserProject.objects.filter(pk=uuid).update(date_update = datetime.now())
     project = UserProject.objects.get(pk=uuid)
 
     if project.user.used_space >= project.user.maximum_space:
@@ -292,11 +312,23 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         serializer.save(user=target_user)#, flights=[f for f in all_flights if f.user == target_user])
 
     def perform_destroy(self, instance: UserProject):
+        print('delete model')
         if instance.is_demo:
             # Remove demo flight ONLY FOR USER!
             self.request.user.demo_projects.remove(instance)
         elif self.request.user.type == UserType.ADMIN.name or instance.user == self.request.user:
+            
             if instance.deleted:
+                print('delete model')
+                for r in instance.resources:
+                    r.delete()
+                    print('delete model: recuros')
+                for l in instance.layers:
+                    for a in l.artifacts:
+                        print('delete model: artefacto')
+                        a.delete()
+                    l.delete()
+                    print('delete model: layer')
                 instance.delete()
             else:
                 instance.deleted = True

@@ -475,11 +475,21 @@ class Resource(models.Model):
     name = models.CharField(max_length=256)
     description = models.TextField()
     title = models.CharField(max_length=256)    
-    extension = models.CharField(max_length=10)        
+    extension = models.CharField(max_length=10) 
+    date = models.DateTimeField(auto_now_add=True)       
     project = models.ForeignKey(UserProject, on_delete=models.CASCADE, related_name="resources", null=True)
 
     def get_disk_path(self):
         return self.project.get_disk_path() + "/Resourses/"
+
+class Contact(models.Model):
+    name = models.CharField(max_length=256)
+    message = models.TextField()
+    email = models.CharField(max_length=256)    
+    phone = models.CharField(max_length=15, blank=True)
+    view = models.BooleanField(default=False)
+    date = models.DateTimeField(auto_now_add=True) 
+    meta = models.TextField()
 
 
 class ArtifactType(Enum):
