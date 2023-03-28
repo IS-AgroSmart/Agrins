@@ -46,7 +46,6 @@ import userDeleted from "./components/UserDeleted"
 import blockCriteria from "./components/BlockCriteria"
 import DeletedProjects from "./components/DeletedProjects"
 import Dashboard from "./components/Dashboard"
-import Users from "./components/Users"
 import NewAccount from "./components/NewAccount"
 import ProjectDetail from "./components/ProjectDetail"
 
@@ -92,7 +91,6 @@ const router = new VueRouter({
     { path: '/projects/:uuid/upload/index', name: "createIndex", component: CreateIndex },
     { path: '/projects/new', name: 'newProject', component: NewProject },
     { path: '/dashboard', name: 'dasboard', component: Dashboard },
-    { path: '/users', name: 'users', component: Users },
     { path: '/projectDetail/:uuid', name: 'projectDetail', component: ProjectDetail},
     { path: '/login', component: Login },
     { path: '/logout', component: Logout },

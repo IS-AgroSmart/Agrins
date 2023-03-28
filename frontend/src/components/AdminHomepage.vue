@@ -1,5 +1,43 @@
 <template>
-    <div class="pt-3" style="padding-left:15px; padding-right:15px;">
+    <div style="height:100%; padding-top: 90px; background-color: #fafafa;">
+        <div style="height: 100%; margin-left: 5%;border-radius: 10px;margin-right: 5%; background-color:white;">
+            <b-card style="height: 100%; width: 100%; padding: 1%;" no-body class="border-0">
+                <b-tabs  pills card >
+            <b-tab  disabled>
+                <template #title>
+                    <h5 >Administración</h5>
+                </template>
+                <p class="p-3">Tab contents 1</p>
+                </b-tab>
+                <b-tab active >
+                    <template #title>
+                    <h6 ><b-icon-briefcase-fill/> Proyectos</h6>
+                </template>
+                <p class="p-3">proyectos</p>
+                </b-tab>
+            <b-tab class="border-0" >
+                <template #title>
+                    <h6 ><b-icon-people/> Usuarios</h6>
+                </template>
+                <users/>
+                </b-tab>
+                <b-tab active >
+                    <template #title>
+                    <h6 ><b-icon-layers-fill/> Capas</h6>
+                </template>
+                <p class="p-3">Capas</p>
+                </b-tab>                
+                <b-tab active >
+                    <template #title>
+                    <h6 ><b-icon-file-earmark/> Documentos</h6>
+                </template>
+                <p class="p-3">Recursos</p>
+                </b-tab>
+            <b-tab class="border-0 md">
+                <template #title>
+                    <h6 ><b-icon-chat-dots/> Contacto</h6>
+                </template>
+                <div class="pt-3 md" style="padding-left:15px; padding-right:15px;">
         <h1>Administración</h1>
         <b-row class="my-4">
             <b-col align="center">
@@ -58,13 +96,39 @@
             </b-col>
         </b-row>
     </div>
+                </b-tab>    
+            </b-tabs>
+            </b-card>
+        </div>
+
+    
+
+
+    
+</div>
 </template>
 
 <script>
 import axios from "axios";
-import AdminElementListPartial from './AdminElementListPartial.vue'
+import AdminElementListPartial from './AdminElementListPartial.vue';
+import Users from './Users'
+import { BIconBriefcaseFill } from 'bootstrap-vue';
+import { BIconChatDots } from 'bootstrap-vue';
+import { BIconPeople } from 'bootstrap-vue';
+import { BIconLayersFill } from 'bootstrap-vue';
+import { BIconFileEarmark } from 'bootstrap-vue';
+
 
 export default {
+    components: {         
+        AdminElementListPartial,
+        Users,
+        BIconLayersFill,
+        BIconFileEarmark,
+        BIconBriefcaseFill,
+        BIconChatDots,
+        BIconPeople
+    },
     data() {
         return {
             users: [],
@@ -194,6 +258,6 @@ export default {
         this.loadFlights();
         this.loadProjects();
     },
-    components: { AdminElementListPartial }
+    
 }
 </script>

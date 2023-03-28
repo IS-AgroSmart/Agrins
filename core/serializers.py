@@ -78,7 +78,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["pk", 'username', 'email', 'is_staff', 'password', 'type', 'organization', 'first_name','last_name',
-                  'used_space','phone','city','profession', 'maximum_space', 'remaining_images']
+                  'used_space','phone','city','profession', 'is_active' , 'maximum_space', 'remaining_images']
 
 class ArtifactSerializer(serializers.ModelSerializer):
 

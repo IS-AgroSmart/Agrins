@@ -33,6 +33,7 @@ from core.utils.working_dir import cd
 class UserType(Enum):
     DEMO_USER = "DemoUser"
     ACTIVE = "Active"
+    ADVANCED = "Advanced"
     DELETED = "Deleted"
     ADMIN = "Admin"
 
@@ -46,7 +47,7 @@ class User(DiskRelationTrackerMixin, AbstractUser):
     #demo_flights = models.ManyToManyField('Flight', related_name='demo_users')
     demo_projects = models.ManyToManyField('UserProject', related_name='demo_users')    
     used_space = models.PositiveIntegerField(default=0)
-    maximum_space = models.PositiveIntegerField(default=45 * 1024 * 1024)
+    maximum_space = models.PositiveIntegerField(default=10 * 1024 * 1024)
     remaining_images = models.PositiveIntegerField(default=0)
     image_month_quota = models.PositiveIntegerField(default=3000)
 

@@ -116,6 +116,7 @@ class ContactViewSet(viewsets.ModelViewSet):
 def postContact(request):
     print ('post request: ',request.POST["message"])
     print ('post request: ',request.POST["name"])
+    print ('post request_headers: ',request.headers)
     Contact.objects.create(
         name = request.POST["name"], 
         message = request.POST["message"],
