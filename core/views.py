@@ -879,7 +879,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,        
         #'reset_password_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/restorePassword/reset?token={}".format(reset_password_token.key)
-        'reset_password_url': settings.DOMAIN_SITE+/#/restorePassword/reset?token={}".format(reset_password_token.key)
+        'reset_password_url': settings.DOMAIN_SITE+"/#/restorePassword/reset?token={}".format(reset_password_token.key)
     }
     # render email text
     email_html_message = render_to_string('email/user_reset_password.html', context)
