@@ -54,8 +54,8 @@ class UserSerializer(serializers.ModelSerializer):
             'current_user': user.first_name,
             'username': user.first_name,
             'email': user.email,                    
-            #'active_account_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))
-            'active_account_url': settings.DOMAIN_SITE+"/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))            
+            'active_account_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))
+            #'reset_password_url': settings.DOMAIN_SITE+/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))
         }
 
         # render email text
