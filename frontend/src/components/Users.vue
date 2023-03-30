@@ -118,7 +118,7 @@
                     </div>    
                 </b-row>
                 <b-row>
-                    <div id="chart" class="border" style="margin-left: 5%; border-radius: 10px;background-color: white; ">
+                    <div id="chart" class="border" style="margin-left: 5%; margin-top: 2%; border-radius: 10px;background-color: white; ">
                         <div class=" p-2 " style=" ">                
                             <apexcharts type="bar" height="160" :options="chartOptions1" :series="series1"></apexcharts>
                         </div>

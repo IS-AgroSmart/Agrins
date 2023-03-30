@@ -335,6 +335,53 @@ class UserProjectViewSet(viewsets.ModelViewSet):
                 instance.deleted = True
                 instance.save()
 
+@csrf_exempt
+def dashboardUser(request):
+    permission_classes = (IsAuthenticated,)
+    user = Token.objects.get(key=request.headers["Authorization"][6:]).user
+    projects = UserProject.objects.filter(user=user)    
+    layerSize = 0
+    resourceSize = 0
+    projectSize = 0
+    proyectos={'name': 'Proyectos', 'data':[]}
+    capas = {'name': 'Capas', 'data':[]}
+    documentos = {'name': 'Documentos', 'data':[]}
+    for project in projects:   
+        if not project.is_demo and not project.deleted:
+            projectSize += 1
+            resource = project.resources.all()
+            proj = {'x':project.name, 'y':[project.date_create.timestamp() * 1000, project.date_update.timestamp() * 1000]}
+            proyectos['data'].append(proj)
+            layers = project.layers.all()         
+            for c in layers:                        
+                layerSize += len(c.artifacts.all())
+                capas['data'].append({
+                    'x': project.name,
+                    'goals':[{
+                        'name': c.title,
+                        'value': c.date.timestamp() * 1000,
+                        'strokeWidth': 10,
+                        'strokeDashArray': 0,
+                        'strokeColor': 'orange'
+                    }]
+                })
+            docs = project.resources.all()
+            for d in docs:
+                resourceSize += 1
+                documentos['data'].append({
+                    'x': project.name,
+                    'goals': [{
+                        'name': d.name,
+                        'value': d.date.timestamp() * 1000,
+                        'strokeWidth': 10,
+                        'strokeDashArray': 0,
+                        'strokeColor': 'green'
+                    }]
+                })
+    series = [proyectos,capas,documentos]
+    jsonResponse ={'project':projectSize, 'layer':layerSize, 'resource': resourceSize , 'series':series}
+    print(jsonResponse)
+    return JsonResponse(jsonResponse)
 
 @csrf_exempt
 def upload_images(request, uuid):
@@ -878,8 +925,8 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'current_user': reset_password_token.user,
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,        
-        'reset_password_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/restorePassword/reset?token={}".format(reset_password_token.key)
-        #'reset_password_url': settings.DOMAIN_SITE+/#/restorePassword/reset?token={}".format(reset_password_token.key)
+        #'reset_password_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/restorePassword/reset?token={}".format(reset_password_token.key)
+        'reset_password_url': settings.DOMAIN_SITE+"/#/restorePassword/reset?token={}".format(reset_password_token.key)
     }
     # render email text
     email_html_message = render_to_string('email/user_reset_password.html', context)
