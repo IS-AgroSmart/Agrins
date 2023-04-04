@@ -5,7 +5,7 @@
                 </div>
                 <div class=" p-2 ">
                     <b-form-select variant="primary" class="" size = "sm" id="input-select"
-                        v-model="selectGroup" :options="['Todos', 'Demo', 'Propietario']" :value="null"
+                        v-model="selectGroup" :options="['Todos', 'Demo', 'Propietario','Papelera']" :value="null"
                     ></b-form-select>                    
                 </div>
                 <div class=" p-2 " style="padding-left: 0%; margin-left: 0%;">
@@ -35,7 +35,7 @@
 
                 <div v-if="error">Error!</div>
                 <div v-if="block" class="row">
-                    <project-partial v-on:updateProjects="updateProjects" v-for="project in projects.filter(filtreProject)" :project="project" :key="project.uuid" @delete-confirmed="deleted"></project-partial>
+                    <project-partial v-on:updateProjects="updateProjects" v-for="project in projects.filter(filtreProject)" :project="project" :key="project.uuid" @delete-confirmed="deleted"  ></project-partial>
                 </div>
                 <div v-else class="row">
                     <div style="width: 100%;">
@@ -95,8 +95,15 @@ export default {
                     res = value.is_demo
                     break
                 case 'Propietario':
-                    res = !value.is_demo
+                    res = !value.is_demo && !value.deleted
                     break
+                case 'Papelera':
+                    res = value.deleted
+                    break
+                //case 'Todos':
+                  //  res = !value.deleted
+                   // break
+
             }
             return res
         },

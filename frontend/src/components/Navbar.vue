@@ -17,8 +17,8 @@
                         <b-nav-item v-if="isAdmin" to="/admin" data-cy="navbar-dashboard"><p class="text-info">Dashboard</p></b-nav-item>
                         <b-nav-item to="/projects"><p class="text-info">Proyectos</p></b-nav-item>
                         <!--<b-nav-item v-if="isAdmin" data-cy="navbar-grupos"><p class="text-info">Grupos</p></b-nav-item>-->
-                        <!--<b-nav-item v-if="isAdmin" to="/users" data-cy="navbar-usuarios" ><p class="text-info">Usuarios</p></b-nav-item>
-                         <b-nav-item to="/admin">Administracións</b-nav-item>-->
+                        <b-nav-item v-if="isAdmin" to="/users" data-cy="navbar-usuarios" ><p class="text-info">Usuarios</p></b-nav-item>
+                        <!--<b-nav-item to="/admin">Administracións</b-nav-item>-->
                         <b-nav-item to="/profile"><p class="text-info">Perfil</p></b-nav-item>
                     </b-navbar-nav>
                 </div>

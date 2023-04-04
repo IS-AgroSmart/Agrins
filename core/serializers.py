@@ -25,7 +25,6 @@ class UserSerializer(serializers.ModelSerializer):
     city = serializers.CharField()
     profession = serializers.CharField()
     used_space = serializers.ReadOnlyField()
-    maximum_space = serializers.ReadOnlyField()
     remaining_images = serializers.ReadOnlyField()
 
     def create(self, validated_data):

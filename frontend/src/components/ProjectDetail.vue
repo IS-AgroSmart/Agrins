@@ -84,9 +84,10 @@
                     <b-row>
                     </b-row>
                 </b-col>
-                <b-col cols="12" md="7">    
+
+                <b-col  cols="12" md="7">    
                     <div style="padding-top: 2%; align-items: center; justify-content: center; display: flex;" class="text-center;">
-                        <b-button-toolbar >                            
+                        <b-button-toolbar  v-if="canCreateProjects" >                            
                             <b-button-group size="sm" class="mr-1">
                                 <b-button  v-b-tooltip.hover title="Abrir en Geoportal" size="sm" :to="{name: 'projectMap', params: {uuid: project.uuid}}" variant="success"><b-icon-map-fill/>  Ver Mapa</b-button>
                                 <b-button  v-b-tooltip.hover title="Hacer DEMO" v-if="!project.is_demo && isAdmin" @click="onProjectClick" variant="warning" size="sm"><b-icon-briefcase-fill/> Demo</b-button>
@@ -97,19 +98,16 @@
                             </b-button-group >                            
                             <b-button-group size="sm" >
                                 
-                                <b-button  v-b-tooltip.hover title="Eliminar proyecto" size="sm" v-if="this.project.user == this.storage.loggedInUser.pk" @click="finalDeleteProject" variant="danger"><b-icon-trash-fill/></b-button>
+                                <b-button  v-b-tooltip.hover title="Enviar a papelera" size="sm" v-if="this.project.user == this.storage.loggedInUser.pk" @click="finalDeleteProject" variant="danger"><b-icon-trash2/></b-button>
                                 <!--<b-button  v-b-tooltip.hover title="Editar proyecto" size="sm" v-if="this.project.user == this.storage.loggedInUser.pk" ><b-icon-pencil-fill/> </b-button>   -->
                             </b-button-group>
                         </b-button-toolbar>
+                        <b-card-text v-else>
+                            <small class="text-muted">{{ unableReason }}</small>
+                        </b-card-text>  
                     </div>                
                     <div style="padding-top: 2%; padding-left: 10%; padding-right: 18%; padding-bottom: 10%;">
-                        
                         <b-card style="padding-left: 5%; border: none; padding-right: 5%;" img.left v-bind:img-src="project.wallpaper" img-alt="Card Image" class="text-center" >
-                            
-                            
-                            
-                            
-                            
                         </b-card>
                     </div>                    
                 </b-col>
@@ -126,7 +124,7 @@
 import forceLogin from './mixins/force_login';
 import axios from 'axios';
 import AddNewResource from './AddNewResource';
-import { BIconTrashFill } from 'bootstrap-vue';
+import { BIconTrash2 } from 'bootstrap-vue';
 //import { BIconPencilFill } from 'bootstrap-vue';
 import { BIconMapFill } from 'bootstrap-vue';
 import { BIconBriefcaseFill } from 'bootstrap-vue';
@@ -173,6 +171,18 @@ export default {
                 layers.push(dataf);
             }
             return layers
+        },
+        targetUser: function() {
+            // returns this.storage.otherUserPk. If it's null, it falls back to this.storage.loggedInUser
+            return this.storage.otherUserPk || this.storage.loggedInUser;
+        },
+        canCreateProjects: function() { return this.unableReason == "" },
+        unableReason: function() {
+            if (this.targetUser.used_space >= this.targetUser.maximum_space)
+                return "Su almacenamiento está lleno.";
+            else if (!(["ACTIVE","ADVANCED", "ADMIN"].includes(this.targetUser.type)))
+                return "Póngase en contacto con Agrins para activar su cuenta.";
+            return "";
         }
         
         
@@ -221,8 +231,8 @@ export default {
 
         },   
         finalDeleteProject() {
-            this.$bvModal.msgBoxConfirm('Este proyecto NO podrá ser recuperado.', {
-                    title: '¿Realmente desea eliminar el proyecto?',
+            this.$bvModal.msgBoxConfirm('El proyecto ya no estará diponible y para eliminar definitivamente o recuperar lo puede hacer desde la sección proyectos eliminados.', {
+                    title: '¿Desea enviar el proyecto  a la papelera?',
                     okVariant: 'danger',
                     okTitle: 'Sí',
                     cancelTitle: 'No',
@@ -356,7 +366,7 @@ export default {
     },
     components: { 
         AddNewResource,        
-        BIconTrashFill,
+        BIconTrash2,
         //BIconPencilFill,
         BIconMapFill,
         BIconBriefcaseFill,

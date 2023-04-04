@@ -43,7 +43,7 @@ from .utils.token import  TokenGenerator
 from .utils.token import  account_activation_token
 
 from .utils.legend import  *
-from .utils.deep_model import  *
+#from .utils.deep_model import  *
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 import geopandas as gpd
@@ -78,6 +78,20 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance: User):
         if self.request.user.type == UserType.ADMIN.name or instance == self.request.user:
             if instance.type == UserType.DELETED.name:
+                for p in instance.user_projects.all():
+                    print('delete model xxxxxxxxxxxxx: ',p.is_demo, p.deleted)
+                    for r in p.resources.all():
+                        print('delete-------: ', r)
+                        r.delete()
+                        print('delete model: recuros')
+                    for l in p.layers.all():
+                        print('delete-------: ', l)
+                        for a in l.artifacts.all():
+                            print('delete model: artefacto')
+                            a.delete()
+                        l.delete()
+                        print('delete model: layer')
+                    p.delete()
                 instance.delete()
             else:
                 instance.type = UserType.DELETED.name
@@ -277,7 +291,7 @@ class UserProjectViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(
-            self.get_queryset().filter(deleted=False))
+            self.get_queryset().filter())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -311,6 +325,17 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         #    uuid=uuid) for uuid in self.request.POST.getlist("flights")]
         target_user = self._get_effective_user(self.request)
         serializer.save(user=target_user)#, flights=[f for f in all_flights if f.user == target_user])
+    
+    #def perform_destroy(self, instance: UserProject):
+     #   if instance.is_demo:
+     #       # Remove demo flight ONLY FOR USER!
+     #       self.request.user.demo_projects.remove(instance)
+     #   elif self.request.user.type == UserType.ADMIN.name or instance.user == self.request.user:
+     #       if instance.deleted:
+     #           instance.delete()
+     #       else:
+     #           instance.deleted = True
+     #           instance.save()
 
     def perform_destroy(self, instance: UserProject):
         print('delete model')
@@ -320,12 +345,14 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         elif self.request.user.type == UserType.ADMIN.name or instance.user == self.request.user:
             
             if instance.deleted:
-                print('delete model')
-                for r in instance.resources:
+                print('delete model xxxxxxxxxxxxx: ',instance.is_demo, instance.deleted)
+                for r in instance.resources.all():
+                    print('delete-------: ', r)
                     r.delete()
                     print('delete model: recuros')
-                for l in instance.layers:
-                    for a in l.artifacts:
+                for l in instance.layers.all():
+                    print('delete-------: ', l)
+                    for a in l.artifacts.all():
                         print('delete model: artefacto')
                         a.delete()
                     l.delete()
@@ -342,10 +369,12 @@ def dashboardUser(request):
     projects = UserProject.objects.filter(user=user)    
     layerSize = 0
     resourceSize = 0
+    deleteSize = 0
     projectSize = 0
     proyectos={'name': 'Proyectos', 'data':[]}
     capas = {'name': 'Capas', 'data':[]}
     documentos = {'name': 'Documentos', 'data':[]}
+    deleted = []
     for project in projects:   
         if not project.is_demo and not project.deleted:
             projectSize += 1
@@ -378,8 +407,11 @@ def dashboardUser(request):
                         'strokeColor': 'green'
                     }]
                 })
+        if project.deleted:
+            deleteSize +=1
+            deleted.append(project.uuid)
     series = [proyectos,capas,documentos]
-    jsonResponse ={'project':projectSize, 'layer':layerSize, 'resource': resourceSize , 'series':series}
+    jsonResponse ={'project':projectSize, 'layer':layerSize, 'resource': resourceSize ,'delete': deleteSize, 'deleted':deleted, 'series':series}
     print(jsonResponse)
     return JsonResponse(jsonResponse)
 
@@ -792,7 +824,7 @@ def create_raster_model(request, uuid):
     file_title = request.POST["title"]+'-'+request.POST["model"]
     file_name = request.POST["layer"]+'-'+request.POST["model"]    
  
-    if(generateModel(inputpath,layerfile,file_name,request.POST["model"],bands)):            
+    if(False):#(generateModel(inputpath,layerfile,file_name,request.POST["model"],bands)):            
         project._create_index_datastore(request.POST["layer"],file_name)
         project.update_disk_space()
         project.user.update_disk_space()

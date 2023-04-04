@@ -187,14 +187,14 @@ USE_TZ = True
 STATIC_URL = os.path.join(BASE_DIR, config('STATIC_URL', cast=str))
 STATIC_ROOT = os.path.join(BASE_DIR, config('STATIC_ROOT', cast=str))  
 # STATICFILES_DIRS = (os.path.join(BASE_DIR, "staticfiles"),)
-DOMAIN_SITE = 'www.agrins.cedia.org.ec'#DOMAIN_SITE = config('DOMAIN_SITE', cast=str)
+DOMAIN_SITE = DOMAIN_SITE = config('DOMAIN_SITE', cast=str)#'www.agrins.cedia.org.ec'
 
 #Send Emails
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 EMAIL_HOST = config('EMAIL_HOST', cast=str)
 EMAIL_PORT = config('EMAIL_PORT')
-EMAIL_HOST_USER='agrins2022@gmail.com'#EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str)
-EMAIL_HOST_PASSWORD='ryxneyvsphdrycqx'#EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', cast=str)
+EMAIL_HOST_USER=EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str)#'agrins2022@gmail.com'
+EMAIL_HOST_PASSWORD=EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', cast=str)#'ryxneyvsphdrycqx'
 EMAIL_BACKEND = config('EMAIL_BACKEND',cast=str)
 
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

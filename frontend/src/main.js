@@ -48,6 +48,7 @@ import DeletedProjects from "./components/DeletedProjects"
 import Dashboard from "./components/Dashboard"
 import NewAccount from "./components/NewAccount"
 import ProjectDetail from "./components/ProjectDetail"
+import Users from "./components/Users"
 
 
 Vue.use(VueRouter);
@@ -93,6 +94,7 @@ const router = new VueRouter({
     { path: '/dashboard', name: 'dasboard', component: Dashboard },
     { path: '/projectDetail/:uuid', name: 'projectDetail', component: ProjectDetail},
     { path: '/login', component: Login },
+    { path: '/users', component: Users },
     { path: '/logout', component: Logout },
     { path: '/signup', name: 'signUp', component: SignUp },
     { path: '/restorePassword', name: 'restorePassword', component: RestorePassword},

@@ -27,12 +27,12 @@
                         <b-card-text >{{this.layers}}</b-card-text>
                     </b-card>
                 </b-col>            
-                <b-col >
+                <b-col>
                     <b-card style=" height: 80%; color:#009d95;" class="border">  
                         <b-card-text ><b-icon-file-earmark-fill style="width: 20px; height: 20px; "/> Documentos</b-card-text>  
                         <b-card-text >{{this.resources}}</b-card-text>
                     </b-card>
-                </b-col>            
+                </b-col>                                    
             <b-col md>                       
                 <div style="background-color: #f8f8f8; height: 80%;">
                     <h6 class="text-secondary" style="padding-top: 3%;"><b-icon-archive-fill style="width: 20px; height: 20px; "/> Almacenamiento</h6>
@@ -53,7 +53,7 @@
   
 <script>
 
-
+import forceLogin from './mixins/force_login'
 import { BIconFileEarmarkFill } from 'bootstrap-vue';
 import { BIconLayersFill} from 'bootstrap-vue';
 import { BIconArchiveFill} from 'bootstrap-vue';
@@ -66,6 +66,7 @@ import axios from 'axios';
         components: {        
         apexcharts: VueApexCharts,      
         BIconFileEarmarkFill,
+        
         BIconLayersFill,
         BIconArchiveFill,
         BIconBriefcaseFill,
@@ -75,7 +76,9 @@ import axios from 'axios';
         return {            
             projects:0,
             layers : 0,
-            resources : 0,            
+            resources : 0,   
+            delete: 0,
+            deleteProject:[],         
             loading: true,
 
             series: [],
@@ -128,6 +131,8 @@ import axios from 'axios';
                     this.layers = response.data.layer
                     this.resources = response.data.resource
                     this.series = response.data.series
+                    this.deleteProject = response.data.deleted
+                    this.delete = response.data.delete         
                 })
                 .catch(error => this.error = error);
         },
@@ -136,6 +141,7 @@ import axios from 'axios';
     created() {
         this.getDashboard().then(() => this.loading = false);
     },
+    mixins: [forceLogin]
 
     }
   </script>

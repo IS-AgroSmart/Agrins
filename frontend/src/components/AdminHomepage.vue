@@ -2,7 +2,7 @@
     <div style="height:100%; padding-top: 90px; background-color: #fafafa;">
         <div style="height: 100%; margin-left: 5%;border-radius: 10px;margin-right: 5%; background-color:white;">
             <b-card style="height: 100%; width: 100%; padding: 1%;" no-body class="border-0">
-                <b-tabs  pills card >
+                <b-tabs  vertical pills card >
             <b-tab  disabled>
                 <template #title>
                     <h5 >Administración</h5>
@@ -15,19 +15,19 @@
                 </template>
                 <p class="p-3">proyectos</p>
                 </b-tab>
-            <b-tab class="border-0" >
+            <b-tab active class="border-0" >
                 <template #title>
                     <h6 ><b-icon-people/> Usuarios</h6>
                 </template>
-                <users/>
+                <user-dashboard />
                 </b-tab>
-                <b-tab active >
+                <b-tab >
                     <template #title>
                     <h6 ><b-icon-layers-fill/> Capas</h6>
                 </template>
                 <p class="p-3">Capas</p>
                 </b-tab>                
-                <b-tab active >
+                <b-tab  >
                     <template #title>
                     <h6 ><b-icon-file-earmark/> Documentos</h6>
                 </template>
@@ -111,7 +111,7 @@
 <script>
 import axios from "axios";
 import AdminElementListPartial from './AdminElementListPartial.vue';
-import Users from './Users'
+import UserDashboard from './UserDashboard'
 import { BIconBriefcaseFill } from 'bootstrap-vue';
 import { BIconChatDots } from 'bootstrap-vue';
 import { BIconPeople } from 'bootstrap-vue';
@@ -122,7 +122,7 @@ import { BIconFileEarmark } from 'bootstrap-vue';
 export default {
     components: {         
         AdminElementListPartial,
-        Users,
+        UserDashboard,
         BIconLayersFill,
         BIconFileEarmark,
         BIconBriefcaseFill,
