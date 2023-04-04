@@ -43,7 +43,7 @@ from .utils.token import  TokenGenerator
 from .utils.token import  account_activation_token
 
 from .utils.legend import  *
-#from .utils.deep_model import  *
+from .utils.deep_model import  *
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 import geopandas as gpd
@@ -824,7 +824,7 @@ def create_raster_model(request, uuid):
     file_title = request.POST["title"]+'-'+request.POST["model"]
     file_name = request.POST["layer"]+'-'+request.POST["model"]    
  
-    if(False):#(generateModel(inputpath,layerfile,file_name,request.POST["model"],bands)):            
+    if(generateModel(inputpath,layerfile,file_name,request.POST["model"],bands)):            
         project._create_index_datastore(request.POST["layer"],file_name)
         project.update_disk_space()
         project.user.update_disk_space()
