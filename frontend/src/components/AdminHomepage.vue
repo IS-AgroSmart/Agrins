@@ -1,105 +1,15 @@
 <template>
     <div style="height:100%; padding-top: 90px; background-color: #fafafa;">
-        <div style="height: 100%; margin-left: 5%;border-radius: 10px;margin-right: 5%; background-color:white;">
-            <b-card style="height: 100%; width: 100%; padding: 1%;" no-body class="border-0">
-                <b-tabs  vertical pills card >
-            <b-tab  disabled>
-                <template #title>
-                    <h5 >Administración</h5>
-                </template>
-                <p class="p-3">Tab contents 1</p>
-                </b-tab>
-                <b-tab active >
-                    <template #title>
-                    <h6 ><b-icon-briefcase-fill/> Proyectos</h6>
-                </template>
-                <p class="p-3">proyectos</p>
-                </b-tab>
-            <b-tab active class="border-0" >
-                <template #title>
-                    <h6 ><b-icon-people/> Usuarios</h6>
-                </template>
-                <user-dashboard />
-                </b-tab>
-                <b-tab >
-                    <template #title>
-                    <h6 ><b-icon-layers-fill/> Capas</h6>
-                </template>
-                <p class="p-3">Capas</p>
-                </b-tab>                
-                <b-tab  >
-                    <template #title>
-                    <h6 ><b-icon-file-earmark/> Documentos</h6>
-                </template>
-                <p class="p-3">Recursos</p>
-                </b-tab>
-            <b-tab class="border-0 md">
-                <template #title>
-                    <h6 ><b-icon-chat-dots/> Contacto</h6>
-                </template>
-                <div class="pt-3 md" style="padding-left:15px; padding-right:15px;">
-        <h1>Administración</h1>
-        <b-row class="my-4">
-            <b-col align="center">
-                <h4 class="my-2">Administración de usuarios</h4>
-                <b-row class="mt-1 mb-5">
-                    <b-col>
-                        <b-dropdown id="dropdown" text="Solicitudes de cuenta" class="m-2">
-                            <b-dropdown-item @click="onAdminClick()">Pendientes</b-dropdown-item>
-                            <b-dropdown-item @click="onAdminClickRequestDeleted"> Eliminadas </b-dropdown-item>
-                        </b-dropdown>
-                    </b-col>
-                </b-row>
-                <b-row class="mt-1 mb-5 pt-3">
-                    <b-col>
-                        <b-dropdown id="dropdown" text="Usuarios" class="m-2">
-                            <b-dropdown-item @click="onAdminClickRequestActive">Activos</b-dropdown-item>
-                            <b-dropdown-item @click="onAdminClickUserDeleted()"> Eliminados </b-dropdown-item>
-                            <b-dropdown-item @click="onAdminClickUserBloqueados()"> Bloqueados </b-dropdown-item>
-                        </b-dropdown>
-                    </b-col>
-                </b-row>
-                <b-row class="mt-1 mb-5 pt-3">
-                    <b-col>
-                        <admin-element-list-partial :elements="users" title="Emular usuario" placeholder="Buscar usuarios..." :nameFunc="userNameFunc" :filterCriteria="userFilterCriteria" keyField="pk" emptyMessage="no hay usuarios disponibles" @element-clicked="onUserClick">
-                        </admin-element-list-partial>
-                    </b-col>
-                </b-row>
-            </b-col>
-            <b-col align="center">
-                <h4 class="my-2">Administración de vuelos</h4>
-                <b-row class="my-1">
-                    <b-col>
-                        <admin-element-list-partial :elements="candidateDemoFlights" title="Convertir vuelo a demo" placeholder="Buscar vuelos..." :nameFunc="flightNameFunc" :filterCriteria="flightFilterCriteria" keyField="uuid" emptyMessage="No hay vuelos disponibles" @element-clicked="onFlightClick">
-                        </admin-element-list-partial>
-                    </b-col>
-                </b-row>
-                <b-row class="my-1">
-                    <b-col>
-                        <admin-element-list-partial :elements="demoFlights" title="Restaurar demo a vuelo" placeholder="Buscar vuelos demo..." :nameFunc="flightNameFunc" :filterCriteria="flightFilterCriteria" keyField="uuid" emptyMessage="No hay vuelos disponibles" @element-clicked="onDemoFlightClick">
-                        </admin-element-list-partial>
-                    </b-col>
-                </b-row>
-                <h4 class="my-2">Administración de proyectos</h4>
-                <b-row class="my-1">
-                    <b-col>
-                        <admin-element-list-partial :elements="candidateDemoProjects" title="Convertir proyecto a demo" placeholder="Buscar proyectos..." :nameFunc="projectNameFunc" :filterCriteria="projectFilterCriteria" keyField="uuid" emptyMessage="No hay proyectos disponibles" @element-clicked="onProjectClick">
-                        </admin-element-list-partial>
-                    </b-col>
-                </b-row>
-                <b-row class="my-1">
-                    <b-col>
-                        <admin-element-list-partial :elements="demoProjects" title="Restaurar demo a proyecto" placeholder="Buscar proyectos demo..." :nameFunc="projectNameFunc" :filterCriteria="projectFilterCriteria" keyField="uuid" emptyMessage="No hay proyectos disponibles" @element-clicked="onDemoProjectClick">
-                        </admin-element-list-partial>
-                    </b-col>
-                </b-row>
-            </b-col>
-        </b-row>
-    </div>
-                </b-tab>    
-            </b-tabs>
-            </b-card>
-        </div>
+            <div >
+                <b-card style=" margin-left: 5%; margin-right: 5%; padding: 1%; border-radius: 10px; background-color: #e9f2f2;" no-body class="border" >
+                    <user-dashboard />
+                </b-card>
+            </div>
+            <div style="margin-top:1% ">
+                <b-card style=" margin-left: 5%; margin-right: 5%; padding: 1%; border-radius: 10px; background-color: #e9f2f2 ;" no-body class="border" >
+                    <project-dashboard />
+                </b-card>
+            </div>
 
     
 
@@ -110,24 +20,14 @@
 
 <script>
 import axios from "axios";
-import AdminElementListPartial from './AdminElementListPartial.vue';
 import UserDashboard from './UserDashboard'
-import { BIconBriefcaseFill } from 'bootstrap-vue';
-import { BIconChatDots } from 'bootstrap-vue';
-import { BIconPeople } from 'bootstrap-vue';
-import { BIconLayersFill } from 'bootstrap-vue';
-import { BIconFileEarmark } from 'bootstrap-vue';
+import ProjectDashboard from "./ProjectDashboard";
 
 
 export default {
     components: {         
-        AdminElementListPartial,
         UserDashboard,
-        BIconLayersFill,
-        BIconFileEarmark,
-        BIconBriefcaseFill,
-        BIconChatDots,
-        BIconPeople
+        ProjectDashboard
     },
     data() {
         return {

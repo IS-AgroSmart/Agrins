@@ -47,7 +47,7 @@ from .utils.deep_model import  *
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 import geopandas as gpd
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from django.http import FileResponse
 import mimetypes
 import shutil
@@ -414,6 +414,56 @@ def dashboardUser(request):
     jsonResponse ={'project':projectSize, 'layer':layerSize, 'resource': resourceSize ,'delete': deleteSize, 'deleted':deleted, 'series':series}
     print(jsonResponse)
     return JsonResponse(jsonResponse)
+
+@csrf_exempt
+def dashboardProject(request):
+    permission_classes = (IsAuthenticated,)
+    start_date = datetime(2022, 12, 1, 00,00,00)
+    new_date = datetime(2022, 12, 1, 00,00,00)
+    end_date = datetime.now()
+    print('fecha: ', end_date)
+    delta = timedelta(days=1)
+    last_value_project = 0
+    last_value_layers = 0
+    last_value_resource = 0
+    projects = []
+    layers = []
+    resources = []
+    while new_date <= end_date+delta:
+        value_project = UserProject.objects.filter(date_create__range=[start_date, new_date]).count()
+        if value_project > last_value_project: 
+            last_value_project = value_project
+            projects.append([int(new_date.timestamp()) * 1000, last_value_project])
+        elif value_project < last_value_project: 
+            last_value_project = value_project
+            projects.append([int(new_date.timestamp()) * 1000, last_value_project])
+        
+        value_layer = Layer.objects.filter(date__range=[start_date, new_date]).count()
+        if value_layer > last_value_layers: 
+            last_value_layers = value_layer
+            layers.append([int(new_date.timestamp()) * 1000, last_value_layers])
+        elif value_layer < last_value_layers: 
+            last_value_layers = value_layer
+            layers.append([int(new_date.timestamp()) * 1000, last_value_layers])
+
+        value_resource = Resource.objects.filter(date__range=[start_date, new_date]).count()
+        if value_resource > last_value_resource: 
+            last_value_resource = value_resource
+            resources.append([int(new_date.timestamp()) * 1000, last_value_resource])
+        elif value_resource < last_value_resource: 
+            last_value_resource = value_resource
+            resources.append([int(new_date.timestamp()) * 1000, last_value_resource])
+        new_date += delta
+    idxModel = ['GCI','GRRI','MGRVI','NDRE','NDVI','NGRDI','ALTURA','CLOROFILA']
+    result = []
+    for i in idxModel:
+        result.append(Artifact.objects.filter(title__endswith='-'+i).count())
+        
+
+    jsonResponse ={'index':{'data': result}, 'data':[{'name':'Proyectos', 'data':projects},{'name':'Capas principales', 'data':layers},{'name':'Documentos', 'data':resources}]}
+    print(jsonResponse)
+    return JsonResponse(jsonResponse)
+
 
 @csrf_exempt
 def upload_images(request, uuid):

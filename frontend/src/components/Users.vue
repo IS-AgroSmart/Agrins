@@ -68,7 +68,7 @@
                         :tbody-tr-class="rowClass"
                         >
                         <template #cell(space)="row">
-                            <b-progress variant="success" :value="row.item['GB_utilizado']" :max="row.item['Gb_maximo']" :precision="2" show-progress class="mb-2"></b-progress>
+                            <b-progress variant="success" :value="row.item['GB_utilizado']" :max="row.item['GB_maximo']" :precision="2" show-progress class="mb-2"></b-progress>
                         </template>
 
                         <template #cell(actions)="row">      
@@ -76,16 +76,16 @@
                             <b-button v-b-tooltip.hover title="Ver detalles" class="mr-1" variant="info" size="sm" @click="row.toggleDetails">
                                 <b-icon-three-dots font-scale="1"/>
                             </b-button>                    
-                            <b-button v-if="row.item.Estado !='Eliminado'" v-b-tooltip.hover title="Enviar a papelera" class="mr-1" variant="danger" size="sm" @click="accionRequest(row.item,'enviar a papelera','DELETED')" >
+                            <b-button v-if="row.item.Estado !='Eliminado' && row.item.Tipo != 'Administrador'" v-b-tooltip.hover title="Enviar a papelera" class="mr-1" variant="danger" size="sm" @click="accionRequest(row.item,'enviar a papelera','DELETED')" >
                               <b-icon-person-x/>
                             </b-button>
-                            <b-button v-if="row.item.Tipo ==='Eliminado'" v-b-tooltip.hover title="Eliminar" class="mr-1" size="sm" variant="danger" @click="accionRequest(row.item,'eliminar','DELETED')">
+                            <b-button v-if="row.item.Tipo ==='Eliminado' && row.item.Tipo != 'Administrador'" v-b-tooltip.hover title="Eliminar" class="mr-1" size="sm" variant="danger" @click="accionRequest(row.item,'eliminar','DELETED')">
                                 <b-icon-trash-fill font-scale="1"/>
                             </b-button>
                             <b-button v-if="row.item.Tipo ==='Eliminado'" v-b-tooltip.hover title="Restaurar" class="mr-1" size="sm" variant="success" @click="accionRequest(row.item,'restaurar',getType(row.item.GB_maximo))">
                                 <b-icon-person-check-fill font-scale="1"/>
                             </b-button>
-                            <b-dropdown v-if="row.item.Estado !='Eliminado'" size="sm" text="Cambiar tipo" >
+                            <b-dropdown v-if="row.item.Estado !='Eliminado' && row.item.Tipo != 'Administrador'" size="sm" text="Cambiar tipo" >
                               
                               <b-dropdown-item v-if="row.item.Tipo !='Administrador'" @click="accionRequest(row.item,'convertir'), 'ADMIN'">Administrador</b-dropdown-item>
                               <b-dropdown-item v-if="row.item.Tipo !='Avanzado'" @click="accionRequest(row.item,'convertir', 'ADVANCED')">Avanzado</b-dropdown-item>
@@ -239,7 +239,7 @@ export default {
             var typeUser = {'ADMIN':'Administrador','ADVANCED':'Avanzado', 'ACTIVE':'Activo', 'DELETED': 'Eliminado'}
             var typeM_size = {'ADMIN':47185920,'ADVANCED':47185920, 'ACTIVE':10485760}
             if (accion == "enviar a papelera") {
-                acciong='eviado a papelera.'
+                acciong='enviado a papelera.'
                 M_size = user.GB_maximo
               }
             else if (accion =='convertir'){

@@ -4,7 +4,7 @@
         <p>Error</p>
         <span style="white-space: pre;">{{ error }}</span>
       </b-alert>
-      <b-row style="padding-left: 2%;" ><h6>Usuarios</h6></b-row>
+      <b-row style="margin-left: 2%;" ><h6>Usuarios</h6></b-row>
         <b-row>
           <b-col cols="12" md="4" class="text-center">
             <div id="chart" class="border" style="border-radius: 10px;background-color: white; ">
@@ -23,7 +23,7 @@
           <b-col cols="12" md="4" class="text-center">
             <div id="chart" class="border" style=" border-radius: 10px;background-color: white; ">
               <div >                
-                <apexcharts type="treemap" height="160" :options="chartOptions2" :series="series2"></apexcharts>
+                <apexcharts style="padding-left: 2%;" type="treemap" height="160" :options="chartOptions2" :series="series2"></apexcharts>
               </div>
             </div>    
           </b-col>
@@ -140,7 +140,7 @@
               },
               title: {
                 text: 'Almacenamiento ',
-                align: 'center'
+                align: 'left'
               }
             },            
         }
@@ -155,25 +155,25 @@
                       headers: { "Authorization": "Token " + this.storage.token }
                   })
                   .then(response => {                    
-                      var ty = {'ADMIN':0,'ADVANCED':0, 'ACTIVE':0}    
+                      var ty = {'ADMIN':0,'ADVANCED':0, 'ACTIVE':0, 'DELETED':0}    
                       var bloq = {'ADMIN':{name: 'Administrador', data: []},
                                   'ADVANCED': {name: 'Avanzado', data: []},
-                                  'ACTIVE': {name: 'Activo', data: []}
+                                  'ACTIVE': {name: 'Activo', data: []},
+                                  'DELETED':{name: 'Eliminado', data: []}
                                 }
                       var org = {'Publico':0,'Privado':0, 'Otro':0}
                       for(let u of response.data){
                           ty[u.type] +=1;
                           org[u.organization] +=1                          
                           this.totalStore += ((u.used_space/1024)/1024).toFixed(2)
-                          var store = {'x':u.first_name+' '+u.last_name,
-                                      'y':((u.used_space/1024)/1024).toFixed(2)
-                                        }
-                          bloq[u.type].data.push(store)
+                          var store = {'x':u.first_name+' '+u.last_name, 'y':((u.used_space/1024)/1024).toFixed(2)}
                           
-              
-                      }
-                                          
-                      this.series2 = [bloq['ADMIN'],bloq['ADVANCED'],bloq['ACTIVE']]
+
+                          bloq[u.type].data.push(store)
+                      }                      
+                      if (ty['ADMIN']>0) this.series2.push(bloq['ADMIN'])
+                      if (ty['ADVANCED']>0) this.series2.push(bloq['ADVANCED'])
+                      if (ty['ACTIVE']>0) this.series2.push(bloq['ACTIVE'])
                       this.series = [org['Publico'],org['Privado'],org['Otro']]
                       this.series1 = [{
                           name: 'Administador',

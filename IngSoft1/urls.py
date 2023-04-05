@@ -49,6 +49,7 @@ urlpatterns = [
     path('api/uploads/<uuid:uuid>/measure', upload_measure, name="upload_vector"),
     path('api/uploads/<uuid:uuid>/geotiff', upload_geotiff, name="upload_geotiff"),
     path('api/dashboard/user', dashboardUser, name="dashboardUser"),
+    path('api/dashboard/project', dashboardProject, name="dashboardProject"),
     path('api/uploads/<uuid:uuid>/resource', upload_resource, name="upload_resource"),
     path('api/download/<int:pk>/resource', download_resource, name="download_resource"),
     path('api/download/<int:pk>/layer', download_layer, name="download_layer"),
