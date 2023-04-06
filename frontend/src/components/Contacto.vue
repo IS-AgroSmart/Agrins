@@ -120,7 +120,7 @@ export default {
         },
         messageState() {
             if (this.form.mensaje.length <10) return null;
-            return this.form.mensaje.length <= 200;
+            return this.form.mensaje.length <= 300;
         },
         everythingValid() {
             return this.messageState &&  this.phoneState && this.nameState;

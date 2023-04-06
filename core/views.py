@@ -120,11 +120,22 @@ class ArtifactViewSet(viewsets.ModelViewSet):
 
 
 class ContactViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ContactSerializer
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(
+            self.get_queryset().filter())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def get_queryset(self):
+        if self.request.user.type == UserType.ADMIN.name and "HTTP_TARGETUSER" in self.request.META:
+            user = User.objects.get(pk=self.request.META["HTTP_TARGETUSER"])
+        else:
+            user = self.request.user
         return Contact.objects.all()
+
 
 @csrf_exempt
 def postContact(request):

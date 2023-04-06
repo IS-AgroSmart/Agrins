@@ -125,6 +125,7 @@ import forceLogin from './mixins/force_login';
 import axios from 'axios';
 import AddNewResource from './AddNewResource';
 import { BIconTrash2 } from 'bootstrap-vue';
+import { BIconTrashFill } from 'bootstrap-vue';
 //import { BIconPencilFill } from 'bootstrap-vue';
 import { BIconMapFill } from 'bootstrap-vue';
 import { BIconBriefcaseFill } from 'bootstrap-vue';
@@ -371,6 +372,7 @@ export default {
         BIconMapFill,
         BIconBriefcaseFill,
         BIconCloudDownloadFill,
+        BIconTrashFill,
         BIconLayersFill,
         BIconLayersHalf
     },

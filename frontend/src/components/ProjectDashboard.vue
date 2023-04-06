@@ -93,7 +93,7 @@
             xaxis: {
               type: 'datetime',
               tickAmount: 8,
-              min: new Date("01/01/2023").getTime(),
+              min: new Date("03/20/2023").getTime(),
               max: Date.now(),
               labels: {
                   rotate: -15,

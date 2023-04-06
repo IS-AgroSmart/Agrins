@@ -5,7 +5,7 @@
                 <b-card-text v-else>
                     <small class="text-muted">No puede agregar recursos. {{ unableReason }}</small>
                 </b-card-text>  
-                <b-modal ref="my-modal" id="modal-center" button-size="sm" ok-only ok-variant="secondary" ok-title="Cancel"  centered title="Agregar documento">
+                <b-modal ref="my-modal" id="modal-center" button-size="sm" ok-only ok-variant="secondary" ok-title="Cancelar"  centered title="Agregar documento">
                     <div  style="height:100%; ">        
                         <p>Para agregar un recurso ingrese la información solicitada.</p>
                         <b-alert v-if="error" variant="danger" show>{{error}}</b-alert>
