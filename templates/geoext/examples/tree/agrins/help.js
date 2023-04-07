@@ -9,7 +9,6 @@ function createhelpPanel(){
         width:'100%',
         autoScroll: true,
         border:0,
-        //height: '100%',        
         layout: 'card',
         bodyStyle: 'padding:5px',        
         autoScroll: true,
@@ -17,7 +16,6 @@ function createhelpPanel(){
             {
                 id: 'move-prev',
                 xtype:'button',
-                //text: 'Anterior',
                 iconCls:'fa-regular fa-circle-left',
                 handler: function(btn) {
                     navigate(btn.up("panel"), "prev");
@@ -28,14 +26,12 @@ function createhelpPanel(){
             {
                 id: 'move-next',
                 xtype:'button',
-                //text: 'Siguiente',
                 iconCls:'fa-regular fa-circle-right',
                 handler: function(btn) {
                     navigate(btn.up("panel"), "next");
                 }
             }
         ],
-        // the panels (or "cards") within the layout
         items: [{
             id: 'card-0',
             border:0,

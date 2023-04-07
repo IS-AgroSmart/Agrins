@@ -78,7 +78,6 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
-#admin.site.register(Flight, FlightAdmin)
 admin.site.register(Layer)
 admin.site.register(Artifact)
 admin.site.register(Resource)

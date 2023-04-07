@@ -17,18 +17,7 @@ import 'vuelayers/lib/style.css' // needs css-loader
 
 import App from './App'
 import Home from './components/Home'
-import Flight from './components/Flight'
-import DeletedFlights from './components/DeletedFlights'
-import FlightDetails from './components/FlightDetails'
-import FlightResults from './components/FlightResults'
-import FlightReport from './components/FlightReport.vue'
-import FlightOrthoPreview2 from './components/FlightOrthoPreview2'
-import UploadImages from './components/UploadImages'
 import ProjectMap from './components/ProjectMap'
-import UploadShapefile from './components/UploadShapefile'
-import UploadGeotiff from './components/UploadGeotiff'
-import CreateIndex from './components/CreateIndex'
-import NewFlight from './components/NewFlight'
 import Project from './components/Project'
 import NewProject from './components/NewProject'
 import Login from './components/Login'
@@ -76,20 +65,9 @@ Vue.use(vueDebounce);
 const router = new VueRouter({
   routes: [
     { path: '/', component: Home },
-    { path: '/flights', component: Flight },
-    { path: '/flights/deleted', component: DeletedFlights },
-    { path: '/flights/:uuid', name: "flightDetails", component: FlightDetails },
-    { path: '/flights/:uuid/upload', name: "uploadImages", component: UploadImages },
-    { path: '/flights/:uuid/results', name: "flightResults", component: FlightResults },
-    { path: '/flights/:uuid/report', name:"flightReport", component:FlightReport },
-    { path: '/flights/:uuid/preview', name: "flightOrthoPreview", component: FlightOrthoPreview2 },
-    { path: '/flights/new', name: "newFlight", component: NewFlight },
     { path: '/projects', name: "listProjects" ,component: Project },
     { path: '/projects/deleted', component: DeletedProjects },
     { path: '/projects/:uuid', name: "projectMap", component: ProjectMap },
-    { path: '/projects/:uuid/upload/shapefile', name: "uploadShapefile", component: UploadShapefile },
-    { path: '/projects/:uuid/upload/geotiff', name: "uploadGeotiff", component: UploadGeotiff },
-    { path: '/projects/:uuid/upload/index', name: "createIndex", component: CreateIndex },
     { path: '/projects/new', name: 'newProject', component: NewProject },
     { path: '/dashboard', name: 'dasboard', component: Dashboard },
     { path: '/projectDetail/:uuid', name: 'projectDetail', component: ProjectDetail},

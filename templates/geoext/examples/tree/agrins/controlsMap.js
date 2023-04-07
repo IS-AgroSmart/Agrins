@@ -77,7 +77,6 @@ function addControlsMap(){
 
     // Select feature when click on the reference index
     search.on('select', function(e) {
-        // console.log(e);
         sLayer.getSource().clear();
         // Check if we get a geojson to describe the search
         if (e.search.geojson) {
@@ -151,76 +150,7 @@ function addControlsMap(){
     var btprint = document.createElement("button");
     btprint.className = "btn btn-small icon-print";
     btprint.setAttribute("title","Imprimir capa");
-
-/*
-    const container = document.createElement('div');
-    container.setAttribute("id","popup");
-    const content = document.createElement('div');
-    content.setAttribute("id","popup-content");
-    const closer = document.createElement('a');
-    closer.className = "ol-popup-closer";
-    container.appendChild(closer);
-    container.appendChild(content);
-
-    /**
-     * Create an overlay to anchor the popup to the map.
-     
-    const overlay = new ol.Overlay({
-        element: container,
-    });
-
-    /**
-     * Add a click handler to hide the popup.
-     * @return {boolean} Don't follow the href.
-     ---
-    closer.onclick = function () {
-    overlay.setPosition(undefined);
-    closer.blur();
-    return false;
-    };
-    olMap.addOverlay(overlay);
-
-    olMap.on('singleclick', function (evt) {
-        console.log('clickmap');
-        console.log('centerx: '+olMap.getView().getCenter()[0]);
-        console.log('centery: '+olMap.getView().getCenter()[1]);
-        console.log('resolucon: '+olMap.getView().getResolution());
-        console.log('size: '+olMap.getSize()[0]+'  -  '+olMap.getSize()[1]);
-        console.log('multiplicacion: '+olMap.getView().getCenter()[0]*olMap.getView().getResolution())
-        
-        const coordinate = evt.coordinate;
-        const hdms = ol.coordinate.toStringHDMS(ol.proj.toLonLat(coordinate));
-        console.log('coordenada: '+evt.coordinate);
-        overlay.setPosition(olMap.getView().getCenter());
-        let popover = bootstrap.Popover.getInstance(container);
-        if (popover) {
-            popover.dispose();
-        }
-        popover = new bootstrap.Popover(container, {
-            animation: false,
-            container: container,
-            content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
-            html: true,
-            placement: 'top',
-            title: closer
-        });
-        popover.show();
-      });
-
-      
-    var btcolorleg = document.createElement("button");
-    btcolorleg.className = "btn btn-small icon-bar-chart";
-    btcolorleg.setAttribute("title","Ver leyenda");    
-    var handleleg = function(e) {          
-        container.style.visibility = 'hidden';
-    }
-    btcolorleg.addEventListener("click", handleleg);   
-      */  
-
-
-    
-
-    
+   
     var bterase = document.createElement("button");
     bterase.className = "btn btn-small icon-eraser";
     bterase.setAttribute("title","Borrar anotaciones");
@@ -260,7 +190,6 @@ function addControlsMap(){
     elementGroup.appendChild(bterase);
     elementGroup.appendChild(btsave);
     elementGroup.appendChild(btswiper);
-    //elementGroup.appendChild(btcolorleg);
     var groupControl = new ol.control.Control({
         element: elementGroup
     });
@@ -282,14 +211,12 @@ function addControlsMap(){
     olMap.addControl(switcher);
 
     legend = new ol.legend.Legend({ 
-        //title: 'Leyenda',
         margin: 5,
         maxWidth: 480,
         maxHeight: 100
       });
       var legendCtrl = new ol.control.Legend({
         legend: legend,
-        //collapsed: false
       });
     olMap.addControl(legendCtrl);
 
@@ -303,7 +230,6 @@ function addControlsMap(){
         hitTolerance: 10,
     });
     selectClick.on('select', function (e) {
-        console.log("Select layer");
         if (delete_handler)
             document.removeEventListener("keydown", delete_handler);
 
@@ -420,7 +346,6 @@ function saveMeasurementsListener() {
         dataProjection: 'EPSG:4326',
         featureProjection: olMap.getView().getProjection()
     });
-    console.log(geojson);
     
     var formaddgeo = Ext.create('Ext.form.Panel', {                
         id: 'formIdAddgeo',
@@ -485,7 +410,6 @@ function saveMeasurementsListener() {
             }
         }],        
     });
-    console.log('items')
     Ext.create('Ext.window.Window', {
         title: 'Crear nueva capa',
         id: 'wndowupload',
@@ -506,52 +430,6 @@ function saveMeasurementsListener() {
             ]
         }
     }).show();
-
-
-/*
-
-
-    let geojsonFormat = new ol.format.GeoJSON();
-    let featArray2 = geojsonFormat.readFeatures(geojson, {
-        dataProjection: 'EPSG:4326',
-        featureProjection: 'EPSG:3857'
-    });
-    console.log(geojsonFormat);
-    let redStyle = new ol.style.Style({
-        image: new ol.style.Circle({
-            radius: 6,
-            fill: new ol.style.Fill({
-                color: '#8B0000'
-            }),
-            stroke: new ol.style.Stroke({
-                color: '#fff',
-                width: 2
-            })
-        })
-    });
-    let featColl2 = new ol.Collection(featArray2);
-    let vectorLayer = new ol.layer.Vector({
-        source: new ol.source.Vector({
-            features: featColl2
-        }),
-        style: redStyle
-    });
-    layers.push(vectorLayer);
-    olMap.addLayer(vectorLayer);
-    treePanel.layer.add(vectorLayer);
-
-
-
-    let link = document.createElement('a');
-    let filename = prompt("Escriba un nombre para el archivo (opcional)", "Mediciones " + project_name);
-    if (filename !== null && filename.trim() !== "") link.download = filename + ".geojson";
-    else link.download = "measurements.geojson";
-    let blob = new Blob([geojson], {type: "application/geo+json;charset=utf-8"});
-    console.log(blob); 
-
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    URL.revokeObjectURL(link.href);*/
 }
 
 function clearMeasurementsListener() {

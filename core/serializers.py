@@ -53,15 +53,12 @@ class UserSerializer(serializers.ModelSerializer):
             'current_user': user.first_name,
             'username': user.first_name,
             'email': user.email,                    
-            #'active_account_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))
-            #'reset_password_url': settings.DOMAIN_SITE+/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))
             'active_account_url': settings.DOMAIN_SITE+"/#/activeAccount/active?token={0}&uidb64={1}".format(account_activation_token.make_token(user),urlsafe_base64_encode(force_bytes(user.pk)))
         }
 
         # render email text
         email_html_message = render_to_string('email/activate_account.html', context)
         email_plaintext_message = render_to_string( 'email/activate_account.txt', context)
-        print('host: ',settings.EMAIL_HOST_USER)
         msg = EmailMultiAlternatives(
             "Agrins - Activar cuenta",
             email_plaintext_message,
@@ -88,7 +85,6 @@ class ArtifactSerializer(serializers.ModelSerializer):
 
 class LayerSerializer(serializers.ModelSerializer):
     artifacts = ArtifactSerializer(many=True, read_only=True)
-    #date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
 
     class Meta:
         model = Layer
@@ -109,20 +105,13 @@ class ContactSerializer(serializers.ModelSerializer):
 class UserProjectSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),default=serializers.CurrentUserDefault())    
     resources = serializers.PrimaryKeyRelatedField(many=True,queryset=Resource.objects.all())#ResourceSerializer(many=True)
-    #print('capas1: ',task_extendeds)
     layers = serializers.PrimaryKeyRelatedField(many=True,queryset=Layer.objects.all())
-    #resources = serializers.PrimaryKeyRelatedField(many=True,queryset=Resource.objects.all())
-    #print('resursos1: ',resources)
-    #print('layers1: ',layers)
 
     def create(self, validated_data):
-        print('eser spac serializar')
-        #flights = validated_data.pop("flights")
         layers = validated_data.pop("layers")
         resources = validated_data.pop("resources")
         proj = UserProject.objects.create(**validated_data)
         proj.resources.set(resources)
-        #proj.flights.set(flights)
         proj.layers.set(layers)
         proj._create_geoserver_proj_workspace()
         proj.update_disk_space()
@@ -131,7 +120,6 @@ class UserProjectSerializer(serializers.ModelSerializer):
 
     class Meta:        
         model = UserProject
-        print('resursos2: ',model.resources)
         fields = ['uuid', 'user', "resources", "layers", "date_create","date_update", "name", "wallpaper","description", "is_demo", "used_space", "deleted"]
 
 

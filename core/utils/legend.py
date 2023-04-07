@@ -40,8 +40,6 @@ XTICKS = {
     #color = COLORTXT.get(request.POST["index"])
 
 def create_legend_image(path, filename, index):    
-    print('ruta archivo: ',path, ' index: ',index)
-    
     img = cv2.imread(path+filename+'.tiff')
     bounds = BOUNDS.get(index)
     style_color = STYLE_COLOR.get(index)
@@ -49,7 +47,7 @@ def create_legend_image(path, filename, index):
     for color in style_color:
         rgb = [float(value)/255 for value in color]
         color_arr.append(rgb)
-    print(bounds)
+    
     norm = mpl.colors.Normalize(vmin=min(bounds), vmax=max(bounds))
     normed_vals = norm(bounds)
     cmap = LinearSegmentedColormap.from_list('color',list(zip(normed_vals, color_arr[:-1])),N=256)

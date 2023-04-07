@@ -23,32 +23,21 @@ SIZE_MODEL ={
     'CLOROFILA':{'MAX':980.993,'MIN':0.0}
 }
 
-def estandarizar_bandas(img, bands):
-    print('parametros: ',img)
-    print('parametros: ',bands)
+def estandarizar_bandas(img, bands):    
     img = np.moveaxis(img, 2, 0)
-    print('aftermoveaxis')
-
-    print('band green')
     verde = img[bands['G']-1]
-    print('band Red')
     rojo = img[bands['R']-1]
-    print('band redEdge')
     rededge = img[bands['RDG']-1]
-    print('band NIR')
     nir = img[bands['NIR']-1]
-    print('after asign bands')
-
     bandas = [verde, rojo, rededge, nir]
 
     bandas_norm = []
-    print('bands')
     for banda in bandas:
         mean = banda.mean()
         std = banda.std()
         banda = (banda-mean)/std
         bandas_norm.append(banda)
-    print('bands normalzed')
+
     img_norm = np.array(bandas_norm)
     img_norm = np.moveaxis(bandas_norm, 0, 2)
     return img_norm
@@ -87,41 +76,25 @@ def generateModel(path,filename, outputPath, model, bands):
     try:
         v_max = SIZE_MODEL.get(model)['MAX']
         v_min = SIZE_MODEL.get(model)['MIN']
-        print('Parametros: ',model, bands,path, filename, outputPath )
-        print('V_max -min:',v_max, v_min)
         tif = tifffile.imread(path+filename+'.tiff')
-        #tif = cv2.imread(inputPath)#tifffile.imread(inputPath)
-        print('afeter Read------------')
-        print('cv2_read_file: ',tif)
         resized_tif = resize(tif, (2240, 2240))
-        print('Resized------------')
         norm_tif = estandarizar_bandas(resized_tif, bands)
-        print('Normalized------------')
         cropped_tif = recortar(norm_tif, 10, 10)
-        print('Cropped------------')
         X = np.array(cropped_tif)
-        print('Modelo: ',MODELOS.get(model))
         model_path = os.path.abspath(MODELOS.get(model))
-
         modelo = load_model(model_path)
-        print('Model load------------')
         y_pred = modelo.predict(X)
-        print('Predict------------')
-
         resultados = []
-
         for i in range(100):
             img = y_pred[i]
             img = np.argmax(img, axis=-1)
             resultados.append(img)
-        print('Arg-MAX------------')
         fragments = []
         for i in range(10):
             initial = i*10
             final = (i+1)*10
             fragment = np.concatenate(resultados[initial:final], axis=1)
             fragments.append(fragment)
-        print('preWrite')
         img = np.concatenate(fragments)
         inputPath = path+filename+'.tiff'
         ds = gdal.Open(inputPath)
@@ -131,9 +104,7 @@ def generateModel(path,filename, outputPath, model, bands):
         scaled_img = resized_img*(v_max-v_min) + v_min
         out = path+outputPath+'.tiff'
         write_geotiff(out, scaled_img, ds)
-
         return True
 
     except:
-        print(exception)
         return False

@@ -79,18 +79,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.request.user.type == UserType.ADMIN.name or instance == self.request.user:
             if instance.type == UserType.DELETED.name:
                 for p in instance.user_projects.all():
-                    print('delete model xxxxxxxxxxxxx: ',p.is_demo, p.deleted)
                     for r in p.resources.all():
-                        print('delete-------: ', r)
                         r.delete()
-                        print('delete model: recuros')
                     for l in p.layers.all():
-                        print('delete-------: ', l)
                         for a in l.artifacts.all():
-                            print('delete model: artefacto')
                             a.delete()
                         l.delete()
-                        print('delete model: layer')
                     p.delete()
                 instance.delete()
             else:
@@ -111,7 +105,7 @@ class ArtifactViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["delete"])
     def perform_destroy(self, instance: Artifact):        
         instance: Artifact= self.get_object()
-        print('usuario: ',instance.name)
+        
         layer = instance.layer
         instance.delete()     
         if(layer.artifacts.all().count() == 0):                
@@ -139,9 +133,6 @@ class ContactViewSet(viewsets.ModelViewSet):
 
 @csrf_exempt
 def postContact(request):
-    print ('post request: ',request.POST["message"])
-    print ('post request: ',request.POST["name"])
-    print ('post request_headers: ',request.headers)
     Contact.objects.create(
         name = request.POST["name"], 
         message = request.POST["message"],
@@ -149,8 +140,6 @@ def postContact(request):
         phone = request.POST["phone"],  
         meta = request.META  )
     return HttpResponse(status=201)
-
-
 
 
 class LayerViewSet(viewsets.ModelViewSet):
@@ -162,7 +151,6 @@ class LayerViewSet(viewsets.ModelViewSet):
     
     def retrieve(self, request, pk=None):
         instance = self.get_object()
-        # query = request.GET.get('query', None)  # read extra data
         return Response(self.serializer_class(instance).data,
                         status=status.HTTP_200_OK)
 
@@ -175,7 +163,6 @@ class ResourceViewSet(viewsets.ModelViewSet):
     
     def retrieve(self, request, pk=None):
         instance = self.get_object()
-        # query = request.GET.get('query', None)  # read extra data
         return Response(self.serializer_class(instance).data,
                         status=status.HTTP_200_OK)
     
@@ -195,13 +182,10 @@ def upload_resource(request, uuid):
         return HttpResponse(status=402)
     
     file: UploadedFile = request.FILES.get("file")  # file is called X.tiff
-    
     file_name = file.name.split('.')[0]
     extension = file.name.split('.')[1]
-        
     project.resources.create(
         name=file_name, description=request.POST["description"], extension = extension, title=request.POST["name"])
-
     # Write file to disk on project folder
     os.makedirs(project.get_disk_path() + "/Resourses", exist_ok=True)
     with open(project.get_disk_path() + "/Resourses/" + file.name, "wb") as f:
@@ -234,7 +218,7 @@ def download_layer(request, pk):
     permission_classes = (IsAuthenticated,)
     resource = Artifact.objects.get(pk=pk)    
     filepath = os.path.abspath(resource.get_disk_path())
-    print('filepath: ',filepath)
+    
     mime_type, _ = mimetypes.guess_type(filepath)    
     if os.path.exists(filepath):
         with open(filepath, 'rb') as doc:
@@ -273,18 +257,14 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.user = None
         for user in User.objects.all():
             user.demo_projects.add(project)
-        #for flight in project.flights.all():
-        #    flight.make_demo()
         project.save()
         prev_user.update_disk_space()
         return Response({})
 
     def retrieve(self, request, pk=None):
         instance = self.get_object()
-        # query = request.GET.get('query', None)  # read extra data
         return Response(self.serializer_class(instance).data,
                         status=status.HTTP_200_OK)
-    
 
     @action(detail=True, methods=["delete"])
     def delete_demo(self, request, pk=None):
@@ -294,8 +274,6 @@ class UserProjectViewSet(viewsets.ModelViewSet):
         project.is_demo = False
         project.user = request.user
         project.demo_users.clear()
-        #for flight in project.flights.all():
-        #    flight.unmake_demo(request.user)
         project.save()
         request.user.update_disk_space()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -313,7 +291,6 @@ class UserProjectViewSet(viewsets.ModelViewSet):
             user = self.request.user
         return UserProject.objects.filter(user=user) | user.demo_projects.all()
 
-
     @staticmethod
     def _get_effective_user(request):
         if request.user.type == UserType.ADMIN.name and "HTTP_TARGETUSER" in request.META:
@@ -326,48 +303,25 @@ class UserProjectViewSet(viewsets.ModelViewSet):
             return Response(status=403)
         user = self._get_effective_user(request)
         if user.used_space >= user.maximum_space:
-            return Response(status=402)
-        print('eser spac',request.META)
-        print('eser spac',request.POST)
+            return Response(status=402)       
         return super(UserProjectViewSet, self).create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        #all_flights = [Flight.objects.get(
-        #    uuid=uuid) for uuid in self.request.POST.getlist("flights")]
         target_user = self._get_effective_user(self.request)
-        serializer.save(user=target_user)#, flights=[f for f in all_flights if f.user == target_user])
-    
-    #def perform_destroy(self, instance: UserProject):
-     #   if instance.is_demo:
-     #       # Remove demo flight ONLY FOR USER!
-     #       self.request.user.demo_projects.remove(instance)
-     #   elif self.request.user.type == UserType.ADMIN.name or instance.user == self.request.user:
-     #       if instance.deleted:
-     #           instance.delete()
-     #       else:
-     #           instance.deleted = True
-     #           instance.save()
+        serializer.save(user=target_user)
 
     def perform_destroy(self, instance: UserProject):
-        print('delete model')
         if instance.is_demo:
             # Remove demo flight ONLY FOR USER!
             self.request.user.demo_projects.remove(instance)
         elif self.request.user.type == UserType.ADMIN.name or instance.user == self.request.user:
-            
             if instance.deleted:
-                print('delete model xxxxxxxxxxxxx: ',instance.is_demo, instance.deleted)
                 for r in instance.resources.all():
-                    print('delete-------: ', r)
                     r.delete()
-                    print('delete model: recuros')
                 for l in instance.layers.all():
-                    print('delete-------: ', l)
                     for a in l.artifacts.all():
-                        print('delete model: artefacto')
                         a.delete()
                     l.delete()
-                    print('delete model: layer')
                 instance.delete()
             else:
                 instance.deleted = True
@@ -388,8 +342,7 @@ def dashboardUser(request):
     deleted = []
     for project in projects:   
         if not project.is_demo and not project.deleted:
-            projectSize += 1
-            resource = project.resources.all()
+            projectSize += 1            
             proj = {'x':project.name, 'y':[project.date_create.timestamp() * 1000, project.date_update.timestamp() * 1000]}
             proyectos['data'].append(proj)
             layers = project.layers.all()         
@@ -423,7 +376,6 @@ def dashboardUser(request):
             deleted.append(project.uuid)
     series = [proyectos,capas,documentos]
     jsonResponse ={'project':projectSize, 'layer':layerSize, 'resource': resourceSize ,'delete': deleteSize, 'deleted':deleted, 'series':series}
-    print(jsonResponse)
     return JsonResponse(jsonResponse)
 
 @csrf_exempt
@@ -432,7 +384,6 @@ def dashboardProject(request):
     start_date = datetime(2022, 12, 1, 00,00,00)
     new_date = datetime(2022, 12, 1, 00,00,00)
     end_date = datetime.now()
-    print('fecha: ', end_date)
     delta = timedelta(days=1)
     last_value_project = 0
     last_value_layers = 0
@@ -448,7 +399,6 @@ def dashboardProject(request):
         elif value_project < last_value_project: 
             last_value_project = value_project
             projects.append([int(new_date.timestamp()) * 1000, last_value_project])
-        
         value_layer = Layer.objects.filter(date__range=[start_date, new_date]).count()
         if value_layer > last_value_layers: 
             last_value_layers = value_layer
@@ -469,171 +419,19 @@ def dashboardProject(request):
     result = []
     for i in idxModel:
         result.append(Artifact.objects.filter(title__endswith='-'+i).count())
-        
-
     jsonResponse ={'index':{'data': result}, 'data':[{'name':'Proyectos', 'data':projects},{'name':'Capas principales', 'data':layers},{'name':'Documentos', 'data':resources}]}
-    print(jsonResponse)
     return JsonResponse(jsonResponse)
-
-
-@csrf_exempt
-def upload_images(request, uuid):
-    #flight = get_object_or_404(Flight, uuid=uuid)
-    user = Token.objects.get(key=request.headers["Authorization"][6:]).user
-    #if not user.type == UserType.ADMIN.name and not flight.user == user:
-    #    return HttpResponse(status=403)
-    #if flight.user.used_space >= flight.user.maximum_space:
-    #    return HttpResponse("Subida fallida. Su almacenamiento está lleno.",
-    #                        status=402)  # HTTP 402 Payment Required
-    #if len(request.FILES.getlist("images")) > flight.user.remaining_images:
-    #    return HttpResponse(f"Subida fallida. Tiene un límite de {flight.user.remaining_images} imágenes.",
-    #                        status=402)
-    # Deduct the images ON THE FLIGHT OWNER! (not on the poor admin that is impersonating the User)
-    #flight.user.remaining_images -= len(request.FILES.getlist("images"))
-    #flight.user.save()
-
-    files = []
-    filenames = []
-    # save temp files to disk before uploading
-    for f in request.FILES.getlist("images"):
-        path = default_storage.save('tmp/' + f.name, ContentFile(f.read()))
-        tmp_file = os.path.join(settings.MEDIA_ROOT, path)
-        filenames.append(tmp_file)
-        files.append(('images', open(tmp_file, "rb")))
-    '''# upload files to NodeODM server
-    r = requests.post(
-        f"{settings.NODEODM_SERVER_URL}/task/new/upload/{str(flight.uuid)}?token={settings.NODEODM_SERVER_TOKEN}",
-        files=files)
-    if r.status_code != 200:
-        return HttpResponse(status=500)
-    for f in filenames:  # delete temp files from disk
-        os.remove(f)
-
-    # start processing Flight on NodeODM
-    r = requests.post(
-        f"{settings.NODEODM_SERVER_URL}/task/new/commit/{str(flight.uuid)}?token={settings.NODEODM_SERVER_TOKEN}")
-    if r.status_code != 200:
-        return HttpResponse(status=500)'''
-
-    #flight.state = FlightState.COMPLETE.name
-    #flight.save()  # change Flight state to PROCESSING
-
-    return HttpResponse()
-
-'''
-@csrf_exempt
-def webhook_processing_complete(request):
-    data = json.loads(request.body.decode("utf-8"))
-    #flight = Flight.objects.get(uuid=data["uuid"])
-    username = flight.user.username
-
-    # BUGFIX 117: get the real data from a trusted source
-    from nodeodm_proxy import api
-    #data = api.get_info(settings.NODEODM_SERVER_URL, flight.uuid, settings.NODEODM_SERVER_TOKEN).json()
-
-    #flight.processing_time = data.get("processingTime", 0)
-    num_images = data.get("imagesCount", 0)
-    #flight.num_images = num_images
-    if data["status"]["code"] == 30:
-        flight.state = FlightState.ERROR.name
-        flight.user.remaining_images += num_images  # give the images back if task failed
-    elif data["status"]["code"] == 40:
-        success_message = "El procesamiento de su vuelo ha terminado. Entre a la aplicación para ver los resultados."
-        flight.state = FlightState.COMPLETE.name
-        send_notification_by_user(username, success_message)
-    elif data["status"]["code"] == 50:
-        flight.state = FlightState.CANCELED.name
-    flight.save()
-    flight.user.save()
-
-    if flight.state == FlightState.COMPLETE.name:
-        flight.download_and_decompress_results()
-        flight.create_rgb_tiff()
-        flight.try_create_png_ortho()
-        flight.try_create_thumbnail()
-        flight.create_colored_dsm()
-        flight.try_create_png_dsm()
-        flight.try_create_dsm_colorbar()
-        flight.try_create_annotated_png_ortho()
-        # _try_create_thumbnail must have been invoked here!
-        flight.create_geoserver_workspace_and_upload_geotiff()
-
-        flight.update_disk_space()
-        flight.user.update_disk_space()
-    return HttpResponse()
-
-
-def download_artifact(request, uuid, artifact):
-    flight = get_object_or_404(Flight, uuid=uuid)
-
-    filepath = flight.get_disk_path()
-    if artifact == "orthomosaic.png":
-        filepath += "/odm_orthophoto/odm_orthophoto.png"
-    elif artifact == "orthomosaic.annotated.png":
-        filepath += "/odm_orthophoto/odm_orthophoto_annotated.png"
-    elif artifact == "orthomosaic.tiff":
-        filepath += "/odm_orthophoto/odm_orthophoto.tif"
-    elif artifact == "dsm.png":
-        filepath += "/odm_dem/dsm_colored_hillshade.png"
-    elif artifact == "dsm_colorbar.png":
-        filepath += "/odm_dem/colorbar.png"
-    elif artifact == "3dmodel":
-        filepath += "/odm_meshing/odm_mesh.ply"
-    elif artifact == "3dmodel_texture":
-        filepath += "/odm_texturing/odm_textured_model.obj"
-    elif artifact == "thumbnail":
-        filepath = "./tmp/" + str(uuid) + "_thumbnail.png"
-    elif artifact == "pointcloud.ply":
-        filepath += "/odm_filterpoints/point_cloud.ply"
-    elif artifact == "dsm.tif":
-        filepath += "/odm_dem/dsm.tif"
-    elif artifact == "dtm.tif":
-        filepath += "/odm_dem/dtm.tif"
-    elif artifact == "report.pdf":
-        filepath = flight.create_report(request.GET)
-    else:
-        raise Http404
-    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
-
-
-def download_artifact_movil(request, uuid, options, artifact):
-    #flight = get_object_or_404(Flight, uuid=uuid)
-    content = {}
-    option_values = {
-        "c": 'pointcloud',
-        "m": 'orthomosaic',
-        "g": 'generaldata',
-        "n": 'ndviortho',
-        "3": '3dmodel'
-    }
-
-    for i in options:
-        content[option_values[i]] = True
-
-    dict_content = QueryDict('', mutable=True)
-    dict_content.update(content)
-
-    filepath = flight.get_disk_path()
-    if artifact == "report.pdf":
-        filepath = flight.create_report_movil(dict_content)
-    else:
-        raise Http404
-    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
-'''
 
 @xframe_options_exempt 
 @csrf_exempt
 def upload_vectorfile(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
-
     datatype = request.POST.get("datatype", "shp")
     UserProject.objects.filter(pk=uuid).update(date_update = datetime.now())
     project = UserProject.objects.get(pk=uuid)
-    
-    
+        
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
-
     # shapefile is an array with files [X.shp, X.shx, X.dbf], in some order
     if datatype == "shp":
         file: UploadedFile = request.FILES.getlist(
@@ -669,7 +467,6 @@ def upload_vectorfile(request, uuid):
     if datatype == "kml":
         with cd(project.get_disk_path() + "/" + file_name):
             os.system('ogr2ogr -f "ESRI Shapefile" "{0}.shp" "{0}.kml"'.format(file_name))
-
 
     GEOSERVER_BASE_URL = "http://container-geoserver:8080/geoserver/rest/workspaces/"
 
@@ -745,8 +542,6 @@ def upload_geotiff(request, uuid):
     from django.core.files.uploadedfile import UploadedFile
     UserProject.objects.filter(pk=uuid).update(date_update = datetime.now())
     project = UserProject.objects.get(pk=uuid)
-    
-    
     if project.user.used_space >= project.user.maximum_space:
         return HttpResponse(status=402)
     
@@ -788,35 +583,11 @@ def upload_geotiff(request, uuid):
                 '"dimensionInfo": { "enabled": true, "presentation": "LIST", "units": "ISO8601", ' +
                 '"defaultValue": "" }} ] }, "parameters": { "entry": [ { "string": [ ' +
                 '"OutputTransparentColor", "#000000" ] } ] } }} ',        
-
-        #data='{"coverage": {"name": "odm_orthophoto", "title": "odm_orthophoto", "enabled": true, ' +
-         #            '"parameters": { "entry": [ { "string": [ "InputTransparentColor", "#000000" ] }, ' +
-          #           '{ "string": [ "SUGGESTED_TILE_SIZE", "512,512" ] } ] }}} ',
         auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD))
     project.update_disk_space()
     project.user.update_disk_space()
-    #return HttpResponse(status=200)
+
     return JsonResponse({'success':True, "msg":"Archivo cargado"})
-
-
-
-'''
-def preview_flight_url(request, uuid):
-    flight = get_object_or_404(Flight, uuid=uuid)
-
-    ans = requests.get(
-        "http://container-geoserver:8080/geoserver/rest/workspaces/" + flight._get_geoserver_ws_name() +
-        "/coveragestores/ortho/coverages/odm_orthophoto.json",
-        auth=HTTPBasicAuth(settings.GEOSERVER_USER , settings.GEOSERVER_PASSWORD)).json()
-    bbox = ans["coverage"]["nativeBoundingBox"]
-    base = "/geoserver/geoserver/" + flight._get_geoserver_ws_name() + \
-           "/wms?service=WMS&version=1.1.0&request=GetMap&layers=" + flight._get_geoserver_ws_name() + \
-           ":odm_orthophoto&styles=&bbox=" + \
-           ','.join(map(str, (bbox["minx"], bbox["miny"], bbox["maxx"], bbox["maxy"]))) + \
-           "&width=1000&height=1000&srs=EPSG:32617&format=application/openlayers"
-
-    return JsonResponse({"url": base, "bbox": bbox, "srs": ans["coverage"]["srs"]})
-'''
 
 @csrf_exempt
 def check_formula(request):
@@ -837,12 +608,8 @@ def create_raster_index(request, uuid):
     if project.user.used_space >= project.user.maximum_space:
         return JsonResponse({'success':False, "msg":"Espacio de almacenamiento agotado, Consulte al administrador"})
     bands = BANDS_CAMERA.get(request.POST["camera"])
-    
     source = "/geoserver/geoserver/ows?version=1.3.0"
-    print(bands)
-    
     path = project.get_disk_path()+'/'+request.POST["layer"]+'/'
-
     file_title = request.POST["title"]+'-'+request.POST["index"]
     file_name = request.POST["layer"]+'-'+request.POST["index"]
     
@@ -855,7 +622,6 @@ def create_raster_index(request, uuid):
         'NGRDI':'gdal_calc.py -A '+request.POST["layer"]+'.tiff --A_band='+str(bands['G'])+' -B '+request.POST["layer"]+'.tiff --B_band='+str(bands['R'])+' --calc="((asarray(A,dtype=float32)-asarray(B, dtype=float32))/(asarray(A, dtype=float32)+asarray(B, dtype=float32)) + 1.) * 127." --outfile='+file_name+'.tiff --type=Byte --co="TILED=YES" --overwrite --NoDataValue=-999',
     }
     
-    
     with cd(path):    
         command = COMMANDS.get(request.POST["index"])
         os.system(command)  
@@ -864,7 +630,6 @@ def create_raster_index(request, uuid):
     project._create_index_datastore(request.POST["layer"],file_name)
     project.update_disk_space()
     project.user.update_disk_space()
-    
     layer = Layer.objects.get(name=request.POST["layer"])      
     layer.artifacts.create(
         name=file_name, type=ArtifactType.INDEX.name,source= source, style=request.POST["index"], legend=legend_path, title=file_title, camera=Camera.NONE.name
@@ -901,10 +666,8 @@ def create_raster_model(request, uuid):
 @csrf_exempt
 def create_wallpaper(request, uuid):
     data = json.loads(request.body.decode('utf-8'))
-    print('wallpaper: ',data)
     url = data.get("url")
     UserProject.objects.filter(uuid=uuid).update(wallpaper=url)
-    #MyModel.objects.filter(pk=some_value).update(field1='some value')    
     return HttpResponse(status=200)
 
 
@@ -912,7 +675,6 @@ def create_wallpaper(request, uuid):
 @xframe_options_exempt
 def mapper(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
-
     return render(request, "geoext/examples/tree/panel.html",
                   {"project_name": project.name,
                    "project_notes": project.description,
@@ -924,7 +686,6 @@ def mapper(request, uuid):
                    "is_demo": project.is_demo,
                    "uuid": project.uuid,     
                    "wallpaper": project.wallpaper              
-                   #"flights": project.flights.all().order_by("date")
                    })
 
 
@@ -936,14 +697,12 @@ def mapper_bbox(request, uuid, pk):
             "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
             "/coveragestores/"+art.layer.name+"/coverages/"+art.layer.name+".json",
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()  
-        print("valores: ", ans)        
         return JsonResponse({"bbox": ans["coverage"]["nativeBoundingBox"], "srs": ans["coverage"]["srs"], "size":ans["coverage"]["grid"]["range"]["high"]})
     elif (art.layer.type == 'VECTOR'):
         ans = requests.get(
             "http://container-geoserver:8080/geoserver/rest/workspaces/" + project._get_geoserver_ws_name() +
             "/datastores/"+art.layer.name+"/featuretypes/"+art.layer.name+".json",
             auth=HTTPBasicAuth(settings.GEOSERVER_USER, settings.GEOSERVER_PASSWORD)).json()
-        print('valores: ',ans)
         return JsonResponse({"bbox": ans["featureType"]["nativeBoundingBox"], "srs": ans["featureType"]["srs"]})
     return JsonResponse({"data":"not found"})
 
@@ -980,7 +739,6 @@ def mapper_layers(request, uuid):
 
 def mapper_indices(request, uuid):
     project = UserProject.objects.get(uuid=uuid)
-
     return JsonResponse({"indices": [
         {"name": art.name, "title": art.title,
          "layer": project._get_geoserver_ws_name() + ":" + art.name}
@@ -1013,18 +771,15 @@ def mapper_agrins(request, path):
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
     # send an e-mail to the user
-    
     context = {
         'current_user': reset_password_token.user,
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,        
-        #'reset_password_url': "https://5aac-45-236-151-33.sa.ngrok.io/#/restorePassword/reset?token={}".format(reset_password_token.key)
         'reset_password_url': settings.DOMAIN_SITE+"/#/restorePassword/reset?token={}".format(reset_password_token.key)
     }
     # render email text
     email_html_message = render_to_string('email/user_reset_password.html', context)
     email_plaintext_message = render_to_string( 'email/user_reset_password.txt', context)
-    print('host: ',settings.EMAIL_HOST_USER)
     msg = EmailMultiAlternatives(
         "Agrins - Recuperación de contraseña",
         email_plaintext_message,
@@ -1046,8 +801,7 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.save()
         return JsonResponse({'state':True, 'msg':'Su cuenta ha sido activada correctamente'})
-    else:
-        print( 'Activation link is invalid!')
+    else:        
         return JsonResponse({'state':False, 'msg':'El link ya no es válido.'})
     
     
@@ -1079,7 +833,6 @@ def save_push_device(request, device):
     if device == "android":
         fcm_device = GCMDevice.objects.create(
             registration_id=token, cloud_message_type="FCM", user=the_user)
-
     return HttpResponse(status=200)
 
 

@@ -100,7 +100,6 @@ function createaddPanel(){
         valueField: 'name',
         value:'1',
         labelAlign: 'top'
-        //renderTo: Ext.getBody()
     });
     var typeImage = Ext.create('Ext.form.ComboBox', {
         fieldLabel: 'Tipo de imagen',
@@ -116,8 +115,6 @@ function createaddPanel(){
         displayField: 'name',
         valueField: 'name',
         labelAlign: 'top'
-        //value:'1'
-        //renderTo: Ext.getBody()
     });
     var formaddTiff = Ext.create('Ext.form.Panel', {                
         id: 'formIdAdd',
@@ -229,15 +226,12 @@ function createaddPanel(){
         {
             xtype: 'filefield',
             name: 'file',
-            //buttonOnly: true,
             fieldLabel: 'Shapefile (dbf,shp, shx, prj)',                                   
             labelAlign: 'top',            
             allowBlank: false,
             blankText: 'Seleccione el conjunto de archivos shapefile',
             anchor: '100%',        
             buttonText: 'Abrir',
-            //regex     : (/.(cpg|dbf|prj|shp|shx)$/i),
-            //regexText : 'Solo se acepta archivos shapefile',
             msgTarget : 'under',  
             buttonConfig:{
                 iconCls:'icon-folder-open',
@@ -245,8 +239,6 @@ function createaddPanel(){
             },
             listeners: {
                 change: function(fld, value) {
-                    //var newValue = value.replace(/C:\\fakepath\\/g, '');
-                    //fld.setRawValue(newValue);
                     var extension = ['shp', 'dbf', 'shx', 'prj'];
                     var upload = fld.fileInputEl.dom;
                     var files = upload.files;
@@ -425,14 +417,9 @@ function createaddPanel(){
         tabBar: {
             defaults: {
             flex: 1, // if you want them to stretch all the way
-            //height: 20, // set the height
-            //padding: 6 // set the padding
             },
             dock: 'top'
         },
-
-
-
         items: [{
             title: 'GeoTiff',            
             
@@ -459,10 +446,6 @@ function createaddPanel(){
         height: '100%',         
         border:false,
         cls:'myWhiteCls',
-        //padding:'5 5 5 5',
-        /*tbar:[
-            {xtype: 'tbtext', html: 'Agregar Capa'},'->',
-        ],*/
         items:[
             tabMenu
         ],
@@ -489,7 +472,6 @@ function onConfig(){
 function createTree(){    
     tablbar  = Ext.create('Ext.toolbar.Toolbar', {   
         border: false,    
-        //cls: 'tbar-menu',          
         items: [ 
             {
                 xtype: 'button',
@@ -503,8 +485,6 @@ function createTree(){
                     var lcamera= dataLayers.findRecord('title', record.data.text).get('camera');
                     var ltype= dataLayers.findRecord('title', record.data.text).get('type');
                     var ldate =  new Date(dataLayers.findRecord('title', record.data.text).get('date'));                  
-                    
-
                     Ext.Msg.alert(lname,
                      'Cámara: '+lcamera+
                      '<br/>Tipo:   '+ltype+
@@ -524,11 +504,7 @@ function createTree(){
         flex: 1,
         layout: 'fit',
         border: false,               
-        //padding:6,
         height:'100%',
-        /*tbar: [
-            tablbar,
-        ],*/
         style: {
             backgroundColor: 'white',
         },                
@@ -538,14 +514,6 @@ function createTree(){
             },
             itemcontextmenu: function(tree, record, item, index, e, eOpts ) {
                 var m_item = [];
-                console.log("record id parent: "+record.data.parentId);
-                console.log("record data: "+record.data);
-                console.log("record value: "+record.data.N);
-                console.log("item : "+item);
-                console.log("item : "+e);
-                console.log("item : "+tree);
-                
-                console.log('parentid: '+record.data.parentId);
                 if(record.data.leaf){                                        
                     if (record.data.N.type == 'MULTIESPECTRAL' || record.data.N.type == 'RGB'){                                             
                         m_item = [
@@ -642,17 +610,9 @@ function createTree(){
             
             itemclick: {
                 fn: function(view, record, item, index, event) {  
-                    console.log('datavalue: ', record.data);                   
                     ctrlSwiper.removeLayers();
                     if(record.data.leaf){
                         isLayerSelect = true;
-                        console.log('datavalue: ', record.data);                     
-                        console.log('id: ',record.data.N.id);
-                        console.log('title: ',record.data.N.title);
-                        console.log('name: ',record.data.N.name);
-                        console.log('date: ',record.data.N.date);
-                        console.log('camara: ',record.data.N.camara);
-                        console.log('tipo: ',record.data.N.type);
                         fitMap(record.data.N.id);
                         ctrlSwiper.removeLayers();        
                         if (isswipervisible)
@@ -669,24 +629,13 @@ function createTree(){
                         }
                         layerLegend.addItem(new ol.legend.Image({
                             title: record.data.text,
-                            //src: window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=40&HEIGHT=20&STYLE='+record.data.N.stylelayer+'&LAYER=project_'+uuid+':'+record.data.N.title+'&format_options=layout:legend&LEGEND_OPTIONS=countMatched:true;fontAntiAliasing:true'
-                            //src:  window.location.protocol + "//" + window.location.host + '/static/'+record.data.N.legend
                             src: src
                         }))                            
-                        //layerLegend.addItem(new ol.legend.Image({
-                        //  src: 'agrins/lndvi.png'
-                        //}));
                         legend.addItem(layerLegend)
-                        
-                        
-                                                
                     }
                     else{
                         isLayerSelect = false;
-                        //isswipervisible = false
                         ctrlSwiper.removeLayers();
-                        //ctrlSwiper.set('position', -0.5);                
-                        
                     }
                     
                 }
@@ -696,7 +645,6 @@ function createTree(){
 }
 
 function windowIndex(layer){
-    console.log('camara: '+layer.data.N.camara);
     var index=[];
     if(layer.data.N.camara === 'RGB'){
         index=["GRRI","MGRVI","NGRDI"];
@@ -738,7 +686,6 @@ function windowIndex(layer){
             valueField: 'name',
             value:'1',
             labelAlign: 'top'
-            //renderTo: Ext.getBody()
         });
 
         Ext.create('Ext.window.Window', {
@@ -776,10 +723,6 @@ function windowIndex(layer){
                     iconCls: 'icon-save',
                     cls:'btnform',
                     handler: function() {
-                        console.log('layer'+ layer.data.N.name+
-                        'title'+ layer.data.N.title+
-                        'camera'+ layer.data.N.camara+
-                        'type'+ layer.data.N.type)
                         var form = Ext.getCmp('formIdIndex').getForm();                
                         if (form.isValid()) {
                             form.submit({
@@ -857,7 +800,6 @@ function windowModel(layer){
             valueField: 'name',
             value:'1',
             labelAlign: 'top'
-            //renderTo: Ext.getBody()
         });
 
         Ext.create('Ext.window.Window', {
@@ -943,7 +885,6 @@ function windowDownloadVector(layer){
                 xtype: 'panel',
                 height: '100%',
                 width: '100%',
-                
                 items:[                    
                     {
                         padding:5,
@@ -998,16 +939,10 @@ function windowDownloadVector(layer){
 }
 
 function windowDownloadImage(layer){
-    console.log('consulta: '+ layer.data.N.id);
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ layer.data.N.id+"/bbox",
         {headers: noCacheHeaders,})
         .then(response => response.json())
         .then(data => {
-            console.log('\nminx:'+data.bbox.minx +'\nminy:'+ data.bbox.miny+'\nmaxx:'+data.bbox.maxx +'\nmaxy:'+data.bbox.maxy);
-            console.log('srs: '+data.srs);
-            console.log('size: '+data.size);
-            console.log('width ='+ data.size.split(' ')[0])
-            console.log('height ='+ data.size.split(' ')[1])
             Ext.create('Ext.window.Window', {
                 title: layer.data.text,
                 height: 180,
@@ -1020,7 +955,6 @@ function windowDownloadImage(layer){
                         xtype: 'panel',
                         height: '100%',
                         width: '100%',
-                        
                         items:[                    
                             {
                                 padding:5,
@@ -1055,7 +989,6 @@ function windowDownloadImage(layer){
                             },
                             {
                                 margin: '8%',      
-                                
                                 xtype:'button',
                                 width:'95%',
                                 buttonAlign: 'center',
@@ -1065,30 +998,23 @@ function windowDownloadImage(layer){
                                     if(Ext.getCmp('radio1').getValue())formartDW='jpeg';
                                     if(Ext.getCmp('radio2').getValue())formartDW='png';
                                     if(Ext.getCmp('radio3').getValue())formartDW='tiff';                            
-                                      //                                                              http://172.20.0.4:8080/geoserver/project_ uuid   /wms?service=WMS&version=1.1.0&request=GetMap&layers=project_ uuid   :       layer          &styles=NDVI                       &bbox=615203.4487868685,9763508.19454065,615320.2983669966,9763577.069293164        &width=1476                       &height=870                        &srs=EPSG:32717  &format=image%2Fjpeg
-                                    //window.location = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/wms?service=WMS&version=1.1.0&request=GetMap&layers=project_'+uuid+':'+layer.data.N.title+'&styles='+layer.data.N.stylelayer+'&bbox='+data.bbox.minx +','+ data.bbox.miny+','+data.bbox.maxx +','+data.bbox.maxy+'&width='+data.size.split(' ')[0]+'&height='+data.size.split(' ')[1]+'&srs='+data.srs+'&format=image%2F'+formartDW;
                                     let url = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/wms?service=WMS&version=1.1.0&request=GetMap&layers=project_'+uuid+':'+layer.data.N.title+'&styles='+layer.data.N.stylelayer+'&bbox='+data.bbox.minx +','+ data.bbox.miny+','+data.bbox.maxx +','+data.bbox.maxy+'&width='+data.size.split(' ')[0]+'&height='+data.size.split(' ')[1]+'&srs='+data.srs+'&format=image%2F'+formartDW;
                                     window.open(url, '_blank');
                                     this.up('window').close();
                                 }
                             }
                         ],
-                       
             }}).show();
 
         });
-
     
 }
 
 function portadaImage(layer){
-    console.log('consulta: '+ layer.data.N.id);
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ layer.data.N.id+"/bbox",
         {headers: noCacheHeaders,})
         .then(response => response.json())
         .then(data => {
-            console.log('\nminx:'+data.bbox.minx +'\nminy:'+ data.bbox.miny+'\nmaxx:'+data.bbox.maxx +'\nmaxy:'+data.bbox.maxy);
-            console.log('srs: '+data.srs);
             var heightSize = 0
             var widthSize = 0
             var styleLayer = ''
@@ -1104,9 +1030,6 @@ function portadaImage(layer){
                     widthSize = Math.trunc(widthSize /10);
                 }
                 styleLayer = layer.data.N.stylelayer;
-                console.log('size: '+data.size);
-                console.log('width ='+ data.size.split(' ')[0])
-                console.log('height ='+ data.size.split(' ')[1])
             }
             let url = window.location.protocol + "//" + window.location.host + '/geoserver/geoserver/project_'+uuid+'/wms?service=WMS&version=1.1.0&request=GetMap&layers=project_'+uuid+':'+layer.data.N.title+'&styles='+styleLayer+'&bbox='+data.bbox.minx +','+ data.bbox.miny+','+data.bbox.maxx +','+data.bbox.maxy+'&width='+widthSize+'&height='+heightSize+'&srs='+data.srs+'&format=image%2Fpng';
             
@@ -1135,19 +1058,15 @@ function portadaImage(layer){
                             } else throw response.text();
                         }).catch((msg) => alert(msg));                           
                     } else {
-                        console.log('Cancel pressed');
                     } 
                 }
             });           
 
 
         });
-
-    
 }
 
 function createconfigPanel(){
-    console.log
     var badge = '<span class="badge btn-success">PROPIETARIO</span>';
     if (isDemo){
         badge = '<span class="badge btn-warning">DEMO</span>';
@@ -1156,7 +1075,6 @@ function createconfigPanel(){
         width:'100%',
         autoScroll: true,
         border:0,
-        //height: '100%',        
         layout: 'vbox',        
         bodyStyle: 'padding:5px',        
         autoScroll: true,
@@ -1185,21 +1103,6 @@ function createViewPort(){
     createhelpPanel();
     createTree();    
     initLayers();             
-    
-
-    let btModelo  = Ext.create('Ext.Button', {
-        //text: 'Modelo',
-        iconCls: 'fa-kaaba',
-        cls: 'fa-solid',
-        tooltip: 'Modelos deep learning',
-        handler: function(){
-            createmodelPanel();
-            var p = Ext.getCmp('viewportPanelId');
-            p.removeAll();
-            p.updateLayout();
-            p.add(modelPanel);
-        }
-    });
 
     Ext.create('Ext.Viewport', {                
         id: 'mainWin',
@@ -1208,7 +1111,6 @@ function createViewPort(){
             mapPanel,       
             {                   
                 xtype: 'panel',
-                //id: 'viewportPanelId',
                 id:'viewpanel',
                 region: 'west',
                 autoScroll: true,
@@ -1240,11 +1142,8 @@ function createViewPort(){
                                     icon: Ext.Msg.QUESTION,
                                     fn: function(btn) {
                                         if (btn === 'yes') {
-                                            //top.window.location.href='/#/projects/'                            
-                                            console.log('regresar')
                                             history.back()
                                         } else {
-                                            console.log('Cancel pressed');
                                         } 
                                     }
                                 });                    
@@ -1268,15 +1167,9 @@ function createViewPort(){
                     tabBar: {
                             defaults: {
                                 flex: 1, // if you want them to stretch all the way
-                                //height: 50, // set the height
-                                //padding: 6 // set the padding
                             },
-                            //dock: 'top'
-                            //items:[{text:'datos'}]
-                            
                         },
                     items: [{
-                            //title:'Capas',
                             tooltip:'Capas',
                             layout : 'fit',
                             iconCls: "fa-solid fa-layer-group btn-white-back",
@@ -1284,7 +1177,6 @@ function createViewPort(){
                             items: [treePanel]
                         }, 
                         {
-                            //title: 'Agregar',
                             layout : 'fit',
                             tooltip: 'Agregar',
                             hidden: isDemo,
@@ -1294,7 +1186,6 @@ function createViewPort(){
                             items: [addPanel]
                         },
                         {
-                            //title: 'Configuración',
                             layout : 'fit',
                             tooltip: 'Proyecto',
                             iconCls: 'fa-solid fa-briefcase',                                                  
@@ -1303,7 +1194,6 @@ function createViewPort(){
                         }
                         ,
                         {
-                            //title: 'Ayuda',
                             layout : 'fit',
                             tooltip: 'Ayuda',
                             iconCls: 'fa-solid fa-circle-question btn-white-back',                                                  
@@ -1330,7 +1220,6 @@ function deleteItem(layer, pk){
             no: 'No'
         },
         buttons: Ext.Msg.YESNO,
-        //iconCls: "fa-solid fa-triangle-exclamation",
         fn: function(btn) {
             if (btn === 'yes') {
                 fetch(window.location.protocol + "//" + window.location.host + "/api/artifacts/"+pk, {
@@ -1338,7 +1227,6 @@ function deleteItem(layer, pk){
                     headers: {
                         Authorization: "Token " + JSON.parse(localStorage.getItem('vrs_')).token,
                     },
-                    //waitMsg:'Eliminando capa, espere por favor...',
                 }).then(function (response) {
                     if (response.status === 204) {
                         Ext.Msg.alert('Detalle', 'capa eliminada.');
@@ -1346,7 +1234,6 @@ function deleteItem(layer, pk){
                     } else throw response.text();
                 }).catch((msg) => Ext.Msg.alert('Error', 'Error al eliminar la capa.'));
             } else {
-                console.log('Cancel pressed');
             } 
         }
     });                    
@@ -1360,9 +1247,7 @@ function initLayers() {
         {headers: noCacheHeaders})
         .then(response => response.json())
         .then(value => {                           
-            console.log('values: '+value.layers);
             for (let lyr of value.layers){                
-                console.log('codigo capa: '+ lyr.pk)
                 fetch(window.location.protocol + "//" + window.location.host + "/mapper/"+lyr.pk+"/artifacts",
                     {headers: noCacheHeaders})
                     .then(respons => respons.json())
@@ -1371,7 +1256,6 @@ function initLayers() {
                         let indices=[];     
                         let modelos=[];   
                         for (let art of data.artifacts) {                                                           
-                            console.log('vector consult' +lyr.type);
                             if (art.type === 'INDEX'){
                                 let valor = art.name.split('-').slice(-1)[0];
                                 indices.push(valor)
@@ -1402,7 +1286,6 @@ function initLayers() {
                                 }));
                             }
                             else if(lyr.type === "VECTOR"){
-                                console.log('vector consult: '+window.location.protocol + "//" + window.location.host + art.source+ art.layer);
                                 layerfiles.push(new ol.layer.Vector({
                                     id: art.pk,
                                     title: art.name,
@@ -1420,7 +1303,6 @@ function initLayers() {
                                 }));
                             }                            
                         }                        
-                        //console.log('capa geo '+art.layer)                     
                         let layerGroup = new ol.layer.Group({
                             id: lyr.pk,
                             name: lyr.title,                            
@@ -1432,9 +1314,7 @@ function initLayers() {
                             layers: layerfiles,
                         });                        
                         layers.push(layerGroup); 
-                        console.log("layers valores: " +layers.length);
                     }).finally(() => { 
-                        
                         layersGroup = new ol.layer.Group({                
                             layers: layers
                         });
@@ -1443,7 +1323,6 @@ function initLayers() {
                         if(layers.length > 0){                        
                             let layerg = layersGroup.getLayers().getArray().slice(-1); 
                             let namelayer = layerg[0].getLayers().getArray()[0].get('id');
-                            console.log('data: '+namelayer)
                             fitMap(namelayer);                            
                             treeStore = Ext.create('GeoExt.data.store.LayersTree', {
                                 layerGroup: layersGroup,
@@ -1456,7 +1335,6 @@ function initLayers() {
                         }else{
                         
                             treeStore = Ext.create('GeoExt.data.store.LayersTree', {                               
-                                //layerGroup: [],
                                 root: {
                                     expanded: true,
                                     text: project_name,
@@ -1465,34 +1343,26 @@ function initLayers() {
                             });
                         }                        
                         Ext.getCmp('treePanelId').setStore(treeStore);                                               
-                        console.log("layers: " +layers.length);                
-            
                     });
             }
             }            
         ).finally(() => { 
             if(layers.length == 0){
-                console.log('Sin capas disponibles');
                 var emptyStore =  Ext.create('Ext.data.TreeStore',{
                     root: {
                         text: project_name
                     }
                 })
                 Ext.getCmp('treePanelId').setStore(emptyStore);
-                console.log("layers: " +layers.length);                
             }                        
-            
-
         });
 }
 
 function fitMap(pk) {
-    console.log('consulta: '+ pk);
     fetch(window.location.protocol + "//" + window.location.host + "/mapper/" + uuid +"/"+ pk+"/bbox",
         {headers: noCacheHeaders,})
         .then(response => response.json())
         .then(data => {
-            console.log('\nminx:'+data.bbox.minx +'\nminy:'+ data.bbox.miny+'\nmaxx:'+data.bbox.maxx +'\nmaxy:'+data.bbox.maxy);
             const minCoords = ol.proj.transform([data.bbox.minx, data.bbox.miny], data.srs, "EPSG:3857");
             const maxCoords = ol.proj.transform([data.bbox.maxx, data.bbox.maxy], data.srs, "EPSG:3857");
             olMap.getView().fit(minCoords.concat(maxCoords), olMap.getSize());
