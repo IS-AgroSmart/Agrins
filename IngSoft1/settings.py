@@ -187,15 +187,15 @@ USE_TZ = True
 STATIC_URL = os.path.join(BASE_DIR, config('STATIC_URL', cast=str))
 STATIC_ROOT = os.path.join(BASE_DIR, config('STATIC_ROOT', cast=str))  
 # STATICFILES_DIRS = (os.path.join(BASE_DIR, "staticfiles"),)
-DOMAIN_SITE = 'www.agrins.cedia.org.ec' #config('DOMAIN_SITE', cast=str)
+DOMAIN_SITE = config('DOMAIN_SITE', cast=str) #'www.agrins.cedia.org.ec'
 
 #Send Emails
-EMAIL_USE_TLS = True #config('EMAIL_USE_TLS', cast=bool)
-EMAIL_HOST = 'smtp.gmail.com' #config('EMAIL_HOST', cast=str)
-EMAIL_PORT = 587 #config('EMAIL_PORT')
-EMAIL_HOST_USER=EMAIL_HOST_USER = 'agrins2022@gmail.com' #config('EMAIL_HOST_USER', cast=str)
-EMAIL_HOST_PASSWORD=EMAIL_HOST_PASSWORD = 'ryxneyvsphdrycqx' #config('EMAIL_HOST_PASSWORD', cast=str)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # config('EMAIL_BACKEND',cast=str)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST = config('EMAIL_HOST', cast=str)
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER= config('EMAIL_HOST_USER', cast=str)
+EMAIL_HOST_PASSWORD= config('EMAIL_HOST_PASSWORD', cast=str)
+EMAIL_BACKEND = config('EMAIL_BACKEND',cast=str)
 
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
