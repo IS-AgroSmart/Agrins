@@ -57,6 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
         # render email text
+        print('-----correo: ',settings.EMAIL_HOST_USER)
         email_html_message = render_to_string('email/activate_account.html', context)
         email_plaintext_message = render_to_string( 'email/activate_account.txt', context)
         msg = EmailMultiAlternatives(
