@@ -187,7 +187,7 @@ USE_TZ = True
 STATIC_URL = os.path.join(BASE_DIR, config('STATIC_URL', cast=str))
 STATIC_ROOT = os.path.join(BASE_DIR, config('STATIC_ROOT', cast=str))  
 # STATICFILES_DIRS = (os.path.join(BASE_DIR, "staticfiles"),)
-DOMAIN_SITE = DOMAIN_SITE = config('DOMAIN_SITE', cast=str)#'www.agrins.cedia.org.ec'
+DOMAIN_SITE = 'www.agrins.cedia.org.ec' #config('DOMAIN_SITE', cast=str)
 
 #Send Emails
 EMAIL_USE_TLS = True #config('EMAIL_USE_TLS', cast=bool)
